@@ -5,3 +5,5 @@ Literature/
 Misc/
 ppt/
 rds/
+*.RData
+*.pdf
