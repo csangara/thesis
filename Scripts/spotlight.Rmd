@@ -1,0 +1,139 @@
+---
+title: "spotlight"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+#Sys.setenv(R_REMOTES_NO_ERRORS_FROM_WARNINGS="true")
+#install.packages("Seurat")
+#install.packages("scatterpie")
+library(SPOTlight)
+library(Seurat)
+library(dplyr)
+#devtools::install_github('satijalab/seurat-data')
+library(SeuratData)
+```
+
+# Mouse brain Dataset
+
+For the purpose of this tutorial we are going to use adult mouse brain data.
+
+## scRNA-seq data
+
+```{r}
+# This file loads single cell experiment objects
+cortex_sc <- readRDS("../rds/allen_cortex_dwn.rds")
+```
+
+```{r}
+cortex_sc <- Seurat::SCTransform(cortex_sc, verbose = FALSE)
+cortex_sc <- Seurat::RunPCA(cortex_sc, verbose = FALSE)
+cortex_sc <- Seurat::RunUMAP(cortex_sc, dims = 1:30, verbose = FALSE, umap.method = 'uwot')
+cortex_sc <- Seurat::FindNeighbors(cortex_sc, dims = 1:30, verbose = FALSE)
+cortex_sc <- Seurat::FindClusters(cortex_sc, verbose = FALSE)
+```
+
+## Spatial Data
+
+```{r}
+# InstallData("stxBrain")
+anterior <- LoadData("stxBrain", type = "anterior1")
+```
+
+```{r}
+anterior <- Seurat::SCTransform(anterior, assay = "Spatial", verbose = FALSE)
+
+anterior <- Seurat::RunPCA(anterior, verbose = FALSE)
+anterior <- Seurat::RunUMAP(anterior, dims = 1:30, verbose = FALSE, umap.method = 'uwot')
+
+anterior <- Seurat::FindNeighbors(anterior, dims = 1:30, verbose = FALSE)
+anterior <- Seurat::FindClusters(anterior, verbose = FALSE)
+```
+
+## Visualization
+
+```{r}
+Seurat::DimPlot(cortex_sc, group.by = "subclass")
+Seurat::SpatialPlot(anterior)
+```
+
+## Deconvolution
+
+### Get marker genes
+
+Get marker genes
+If the dataset is very large we want to downsample it, both in of number of cells and number of genes, to train the model. To do this downsampling we want to keep a representative amount of cells per cluster and the most important genes. We show that this downsampling doesn’t affect the performance of the model and greatly speeds up the model training.
+
+To determine the most important genes we can use the function Seurat::FindAllMarkers which will return the markers for each cluster.
+
+We can set the following parameters for more specific markers:
+
+assay = “SCT” + slot = “data” - we want to select the markers out of ALL the possible genes no only from the most highly variable ones.
+
+only.pos = TRUE - we are only interested in those genes specifically expressed in that cluster.
+
+min.pct = 0.9 - we are interested in genes present in all the cells from that cell type.
+
+```{r}
+cluster_markers_all <- readRDS("../rds/markers_anterior.RDS")
+```
+
+### Run deconvolution
+
+Run deconvolution
+To run the deconvolution, one just needs to run the following function.
+
+For the sake of speed we will 10 cells per cell-type, we found the optimal number to be ~100
+
+```{r}
+set.seed(123)
+spotlight_ls <- spotlight_deconvolution(se_sc = cortex_sc,
+                                        counts_spatial = anterior@assays$Spatial@counts,
+                                        clust_vr = "subclass",
+                                        cluster_markers = cluster_markers_all,
+                                        cl_n = 50,
+                                        hvg = 3000,
+                                        ntop = NULL,
+                                        transf = "uv",
+                                        method = "nsNMF",
+                                        min_cont = 0.09)
+
+# saveRDS(object = spotlight_ls,
+```
+
+Load deconvolution matrix directly
+
+```{r}
+# spotlight_ls <- readRDS(file = "sample_data/spotlight_ls_anterior.RDS")
+decon_mtrx <- spotlight_ls[[2]]
+cell_types_all <- colnames(decon_mtrx)[which(colnames(decon_mtrx) != "res_ss")]
+```
+
+## Visualization
+### Spatial scatterpie plot
+We can visualize the composition of all the spots on the tissue. First, add the spot composition to the metadata matrix. Then, plot the spot composition of all the cell types. Finally, show only spots containing cell types of interest.
+
+```{r}
+anterior@meta.data <- cbind(anterior@meta.data, decon_mtrx)
+
+```
+
+```{r}
+spatial_scatterpie(se_obj = anterior,
+                              cell_types_all = cell_types_all,
+                              img_path = "../Misc/tissue_lowres_image.png",
+                              pie_scale = 0.4, col_df=NULL)
+spatial_scatterpie(se_obj = anterior,
+                              cell_types_all = cell_types_all,
+                              img_path = "../Misc/tissue_lowres_image.png",
+                              cell_types_interest = "L6b",
+                              pie_scale = 0.5)
+```
+
+
+
