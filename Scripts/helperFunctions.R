@@ -54,6 +54,26 @@ SeuratToExprSet <- function(seurat_object){
   return(sc.eset)
 }
 
+# Write file in a CIBERSORT-compatible format given a Seurat object, by default use SCT column
+# Other arguments are "raw" and "CPM"
+WriteFileCS(seurat_obj, output_file, assay="SCT"){
+  if (assay=="SCT"){
+    count_matrix <-  as.matrix(GetAssayData(seurat_obj)) # SCTransformed
+  } else if (assay=="CPM"){
+    count_matrix <- as.matrix(GetAssayData(seurat_obj[["RNA"]]))
+    count_matrix <- count_matrix/sum(count_matrix)*10^6
+  } else if (assay=="raw"){
+    count_matrix <- as.matrix(GetAssayData(seurat_obj[["RNA"]]))
+  } else {
+    return(NULL)
+  }
+  
+  colnames(count_matrix) <- seurat_obj@meta.data$subclass
+  
+  # Write to CIBERSORT-compatible format
+  write.table("Gene", file = output_file, sep = "\t",eol="\t", append = FALSE, quote = FALSE, row.names=FALSE, col.names = FALSE)
+  write.table(SCT_matrix, file = output_file, sep = "\t", append = TRUE, quote = FALSE, row.names = TRUE, col.names = TRUE)
+}
 
 ######## PLOT PROPS #########
 # library(ggplot2)
