@@ -81,8 +81,6 @@ for (dataset_type in possible_dataset_types){
 
 ######### MuSiC ######### 
 
-dataset_type = possible_dataset_types[1]
-
 # Load reference scRNA-seq data and convert to ExprSet
 seurat_obj_scRNA = readRDS(paste0(path, "rds/allen_cortex_dwn.rds"))
 eset_obj_scRNA <- SeuratToExprSet(seurat_obj_scRNA)

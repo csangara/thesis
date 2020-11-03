@@ -56,7 +56,7 @@ SeuratToExprSet <- function(seurat_object){
 
 # Write file in a CIBERSORT-compatible format given a Seurat object, by default use SCT column
 # Other arguments are "raw" and "CPM"
-WriteFileCS(seurat_obj, output_file, assay="SCT"){
+WriteFileCS <- function(seurat_obj, output_file, assay="SCT"){
   if (assay=="SCT"){
     count_matrix <-  as.matrix(GetAssayData(seurat_obj)) # SCTransformed
   } else if (assay=="CPM"){
@@ -73,6 +73,7 @@ WriteFileCS(seurat_obj, output_file, assay="SCT"){
   # Write to CIBERSORT-compatible format
   write.table("Gene", file = output_file, sep = "\t",eol="\t", append = FALSE, quote = FALSE, row.names=FALSE, col.names = FALSE)
   write.table(SCT_matrix, file = output_file, sep = "\t", append = TRUE, quote = FALSE, row.names = TRUE, col.names = TRUE)
+  print(paste0("Wrote file successfully at ", output_file))
 }
 
 ######## PLOT PROPS #########
