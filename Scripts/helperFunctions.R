@@ -5,6 +5,8 @@ library(synthvisium)
 library(dplyr)
 library(Biobase)
 library(stringr)
+library(loomR)
+# Sys.setenv(R_REMOTES_NO_ERRORS_FROM_WARNINGS="true")
 
 # Creates synthetic visium data given a reference scRNA-seq data and dataset type
 # Saves it to subfolder synthvisium_spatial
@@ -76,17 +78,23 @@ WriteFileCS <- function(seurat_obj, output_file, assay="SCT"){
   print(paste0("Wrote file successfully at ", output_file))
 }
 
-######## PLOT PROPS #########
-# library(ggplot2)
-# 
-# n = nrow(decon_mtrx)
-# knownP = synthetic_visium_data$relative_spot_composition[1:n,1:23]
-# predP = decon_mtrx[1:n,1:23]
-# new_pred = data.frame("pred" = c(t(predP)))
-# new_pred$known = as.numeric(c(t(knownP)))
-# new_pred$celltype = rep(colnames(knownP), n)
-# 
-# ggplot(new_pred, aes(x=known, y=pred, shape=celltype)) +
-#   geom_abline(slope=1, intercept=0, linetype=2, colour="gray20") +
-#   scale_shape_manual(values = 1:23) + geom_point(size=1) +
-#   labs(x="Known Proportions", y="Predicted Proportions")
+reduceSpotsCS <- function(input_path, no_spots){
+  input_file = read.table(input_path, sep="\t", row.names=1, header=TRUE)
+  # Randomly sample no_spots
+  reduced_cols <- sample(seq(1, ncol(input_file)), no_spots)
+  input_file <- input_file[,reduced_cols]
+  
+  file_name <- tools::file_path_sans_ext(input_path); file_ext <- tools::file_ext(input_path)
+  output_file <- paste0(file_name, "_", no_spots, ".", file_ext)
+  
+  write.table("GeneSymbol", file = output_file, sep = "\t",eol="\t", append = FALSE, quote = FALSE, row.names=FALSE, col.names = FALSE)
+  write.table(input_file, file = output_file, sep = "\t", append = TRUE, quote = FALSE, row.names = TRUE, col.names = TRUE)
+  print(paste0("Wrote file successfully at ", output_file))
+}
+
+convertSeuratRDSToLoom <- function(input_path, createSeuratFromRDS=FALSE){
+  seurat_obj =  readRDS(input_path)
+  if (createSeuratFromRDS){ seurat_obj <- createAndPPSeuratFromVisium(seurat_obj$counts) }
+  file_name <- tools::file_path_sans_ext(input_path)
+  as.loom(seurat_obj, filename = paste0(file_name, ".loom"))
+}

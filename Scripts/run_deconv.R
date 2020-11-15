@@ -33,8 +33,9 @@ possible_dataset_types = c("real", "real_top1","real_top1_uniform","real_top2_ov
 
 for (dataset_type in possible_dataset_types){
   print(dataset_type)
-  createSynthvisiumRDS(paste0(path,"rds/allen_cortex_dwn.rds"), dataset_type)
+  createSynthvisiumRDS(paste0(path, "rds/synthvisium_spatial/allen_cortex_dwn_", dataset_type, "_synthvisium.rds"))
 }
+DimPlot(seurat_obj_scRNA, reduction = "umap", label = TRUE, group.by = "celltype")
 
 # Explore synthetic visium data
 synthetic_visium_data$counts %>% as.matrix() %>% .[1:5,1:5] #  Gene counts for each spot
@@ -98,4 +99,4 @@ for (dataset_type in possible_dataset_types){
   saveRDS(music_deconv, paste0(path, "rds/synthvisium_spatial/allen_cortex_dwn_", dataset_type, "_music.rds"))
 }
 
-
+markerts <- readRDS(paste0(path, "rds/markers_anterior.RDS"))

@@ -15,7 +15,7 @@ possible_dataset_types = c("real", "real_top1","real_top1_uniform","real_top2_ov
                            "artificial_uniform_overlap", "artificial_diverse_overlap", "artificial_dominant_celltype_diverse",
                            "artificial_partially_dominant_celltype_diverse", "artificial_missing_celltypes_visium")
 
-## SAMPLE CODE FOR LOADING DATA ##
+#### SAMPLE CODE FOR LOADING DATA ####
 synthetic_visium_data <- readRDS(paste0(path, "rds/synthvisium_spatial/allen_cortex_dwn_", dataset_type, "_synthvisium.rds"))
 seurat_obj_visium <- createAndPPSeuratFromVisium(synthetic_visium_data$counts)
 spotlight_deconv = readRDS(paste0(path, "rds/synthvisium_spatial/allen_cortex_dwn_", dataset_type, "_spotlight.rds"))
@@ -145,3 +145,20 @@ for (dataset_type in possible_dataset_types){
   }
   all_results[[dataset_type]] <- metrics
 }
+
+#### PLOT EACH METRIC ####
+i <- 7
+metric <- "F1" 
+df <- data.frame(x = rep(names(all_results), length(deconv_methods)),
+                      index = rep(1:13, length(deconv_methods)),
+                      methods = rep(deconv_methods, each=13))
+df$y <- c(sapply(deconv_methods, function(u) sapply(possible_dataset_types, function(k) all_results[[k]][[u]][i])))
+ggplot(df, aes(x=factor(index), y=y, color=methods)) + geom_point(size=2) +
+ labs(title=paste0(metric, " of MuSiC and SPOTlight on all 13 dataset types")) + ylab(metric) + xlab("datasets")
+
+#### PLOT TIME OF CIBERSORT ####
+
+df <- data.frame(x = c(10, 25, 50, 75, 100),
+                 y = c(9.15, 31.4, 49.9, 81.1, 108.3))
+ggplot(df, aes(x=x, y=y)) + geom_line() + geom_point() + xlab("Number of spots") + ylab("Time (min)") +
+  labs(title="CIBERSORT runtime in function of spots")
