@@ -9,6 +9,7 @@ library(dplyr)
 source("helperFunctions.R")
 library(patchwork)
 library(ggplot2)
+library(stringr)
 
 possible_dataset_types = c("real", "real_top1","real_top1_uniform","real_top2_overlap","real_top2_overlap_uniform",
                            "real_missing_celltypes_visium", "artificial_uniform_distinct", "artificial_diverse_distinct",
@@ -20,6 +21,8 @@ synthetic_visium_data <- readRDS(paste0(path, "rds/synthvisium_spatial/allen_cor
 seurat_obj_visium <- createAndPPSeuratFromVisium(synthetic_visium_data$counts)
 spotlight_deconv = readRDS(paste0(path, "rds/synthvisium_spatial/allen_cortex_dwn_", dataset_type, "_spotlight.rds"))
 music_deconv = readRDS(paste0(path, "rds/synthvisium_spatial/allen_cortex_dwn_", dataset_type, "_music.rds"))
+c2l_deconv = read.csv(paste0(path, "Misc/cell2location/W_cell_density_q05.csv"), row.names=1)
+c2l_deconv = c2l_deconv/rowSums(c2l_deconv) # So everything sums to one
 
 res = cor(t(synthetic_visium_data$relative_spot_composition[,1:23]), t(spotlight_deconv[[2]][,1:23]))
 print(mean(diag(res), na.rm=TRUE))
@@ -33,24 +36,30 @@ for (dataset_type in possible_dataset_types){
   result_path <- paste0(path, "rds/synthvisium_spatial/allen_cortex_dwn_", dataset_type, "_")
   synthetic_visium_data <- readRDS(paste0(result_path, "synthvisium.rds"))
   seurat_obj_visium <- createAndPPSeuratFromVisium(synthetic_visium_data$counts)
-  known_props <- synthetic_visium_data$relative_spot_composition[,1:23]
   
   spotlight_deconv <- readRDS(paste0(result_path, "spotlight.rds"))
   music_deconv <- readRDS(paste0(result_path, "music.rds"))
-  
   # cibersort_deconv = read.table(paste0(path, "rds/synthvisium_spatial/allen_cortex_dwn_", dataset_type, "_cibersort.txt"),
   #                               sep="\t", row.names=1, header=TRUE)
+  c2l_deconv <- read.csv(paste0(path, "Misc/cell2location/W_cell_density_q05.csv"), row.names=1)
+  c2l_deconv <- c2l_deconv/rowSums(c2l_deconv) # So everything sums to one
+  colnames(c2l_deconv) <- str_replace(colnames(c2l_deconv), "q05_spot_factors", "")
   
   # Initialization of column names
   celltypes <- colnames(synthetic_visium_data$relative_spot_composition)[1:23]
-  colnames(spotlight_deconv[[2]])[1:23] = celltypes
-  colnames(music_deconv$Est.prop.weighted)[1:23] = celltypes
+  celltypes <- str_replace(celltypes, "/", ".")
+  colnames(synthetic_visium_data$relative_spot_composition)[1:23] <- celltypes
+  colnames(spotlight_deconv[[2]])[1:23] <- celltypes
+  colnames(music_deconv$Est.prop.weighted)[1:23] <- celltypes
   # colnames(cibersort_deconv)[1:23] = celltypes
+  c2l_deconv <- c2l_deconv[, match(celltypes, colnames(c2l_deconv))]
   
   # Correlation (by spots and by cell type)
+  known_props <- synthetic_visium_data$relative_spot_composition[,1:23]
   spotlight_corr_celltypes <- cor(known_props[,1:23], spotlight_deconv[[2]][,1:23], use="complete.obs")
   music_corr_celltypes <- cor(known_props[,1:23], music_deconv$Est.prop.weighted[,1:23], use="complete.obs")
   # cibersort_corr_celltypes <- cor(known_props[,1:23], cibersort_deconv[,1:23], use="complete.obs")
+  c2l_corr_celltypes <- cor(known_props[,1:23], c2l_deconv[,1:23], use="complete.obs")
   
   for (celltype in celltypes){
     # Add deconv result to visium metadata
@@ -58,22 +67,26 @@ for (dataset_type in possible_dataset_types){
     seurat_obj_visium@meta.data[paste0(celltype, "_spotlight")] = spotlight_deconv[[2]][,celltype]
     seurat_obj_visium@meta.data[paste0(celltype, "_music")] = music_deconv$Est.prop.weighted[,celltype]
     # seurat_obj_visium@meta.data[paste0(celltype, "_cibersort")] = cibersort_deconv[,celltype]
+    seurat_obj_visium@meta.data[paste0(celltype, "_c2l")] = c2l_deconv[,celltype]
     
     plot_dir <- paste0(path, "plots/allen_cortex_dwn/", dataset_type, "/")
     if (!dir.exists(plot_dir)){ dir.create(plot_dir) }
     
     plots <- FeaturePlot(seurat_obj_visium, c(celltype,
                                               paste0(celltype, "_spotlight"),
-                                              paste0(celltype, "_music")),
+                                              paste0(celltype, "_music"),
     #                                         paste0(celltype, "_cibersort")),
-                                              combine=FALSE)
+                                              paste0(celltype, "_c2l"),
+                                              combine=FALSE))
     
     plots[[2]] <- plots[[2]] + ggtitle("SPOTlight", paste0("Corr=", round(spotlight_corr_celltypes[celltype, celltype], 3)))
     plots[[3]] <- plots[[3]] + ggtitle("MuSiC", paste0("Corr=", round(music_corr_celltypes[celltype, celltype], 3)))
     # plots[[4]] <- plots[[4]] + ggtitle("CIBERSORT", paste0("Corr=", round(cibersort_corr_celltypes[celltype, celltype], 3)))
+    plots[[4]] <- plots[[4]] + ggtitle("Cell2Location", paste0("Corr=", round(c2l_corr_celltypes[celltype, celltype], 3)))
     
-    plots <- plots[[1]] + plot_spacer() + plots[[2]] + plots[[3]]
-    png(paste0(plot_dir, str_replace(celltype, "/", "."), ".png"), width=1000, height=500)
+    #plots <- plots[[1]] + plot_spacer() + plots[[2]] + plots[[3]]
+    plots <- plots[[1]] + plots[[2]] + plots[[3]] + plots[[4]]
+    png(paste0(plot_dir, celltype, "_c2l.png"), width=1000, height=500)
     print(plots)
     dev.off()
   }
