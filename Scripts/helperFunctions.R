@@ -6,6 +6,7 @@ library(dplyr)
 library(Biobase)
 library(stringr)
 library(loomR)
+library(SeuratDisk)
 # Sys.setenv(R_REMOTES_NO_ERRORS_FROM_WARNINGS="true")
 
 # Creates synthetic visium data given a reference scRNA-seq data and dataset type
@@ -97,4 +98,12 @@ convertSeuratRDSToLoom <- function(input_path, createSeuratFromRDS=FALSE){
   if (createSeuratFromRDS){ seurat_obj <- createAndPPSeuratFromVisium(seurat_obj$counts) }
   file_name <- tools::file_path_sans_ext(input_path)
   as.loom(seurat_obj, filename = paste0(file_name, ".loom"))
+}
+
+convertSeuratRDSToh5ad <- function(input_path,createSeuratFromRDS=FALSE){
+  seurat_obj =  readRDS(input_path)
+  file_name <- tools::file_path_sans_ext(input_path)
+  if (createSeuratFromRDS){ seurat_obj <- createAndPPSeuratFromVisium(seurat_obj$counts) }
+  SaveH5Seurat(seurat_obj, filename = paste0(file_name, ".h5Seurat"))
+  Convert(paste0(file_name, ".h5Seurat"), dest = "h5ad")
 }
