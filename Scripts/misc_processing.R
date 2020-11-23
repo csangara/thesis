@@ -16,11 +16,29 @@ reduceSpotsCS(input_path, 75)
 
 ### CONVERTING SEURAT OBJECT TO LOOM ###
 
-for (dataset_type in possible_dataset_types[8:13]){
+for (dataset_type in possible_dataset_types){
   print(dataset_type)
   convertSeuratRDSToLoom(paste0(path, "rds/synthvisium_spatial/allen_cortex_dwn_", dataset_type,
                                 "_synthvisium.rds"), TRUE)
 }
+
+## SAVING NON-NORMALIZED DATA AS H5AD ##
+# Reference file
+convertSeuratRDSToh5ad("D:/Work (Yr 2 Sem 1)/Thesis/allen_cortex_dwn_original.rds")
+
+# Synthvisium files
+for (dataset_type in possible_dataset_types[10:13]){
+  print(dataset_type)
+  input_path <- paste0(path, "rds/synthvisium_spatial/allen_cortex_dwn_", dataset_type, "_synthvisium.rds")
+  convertSeuratRDSToh5ad(input_path, createSeuratFromRDS = TRUE, PP=FALSE)
+}
+
+#### PLOT TIME OF CIBERSORT ####
+
+df <- data.frame(x = c(10, 25, 50, 75, 100),
+                 y = c(9.15, 31.4, 49.9, 81.1, 108.3))
+ggplot(df, aes(x=x, y=y)) + geom_line() + geom_point() + xlab("Number of spots") + ylab("Time (min)") +
+  labs(title="CIBERSORT runtime in function of spots")
 
 ######## PLOT PROPS #########
 # library(ggplot2)
