@@ -28,15 +28,16 @@ createSynthvisiumRDS <- function(inputscRNA_rds, dataset_type, output_folder="sy
 
 # Create seurat object from count data (meant to be used with synthetic visium data) and perform normalization,
 # dimensionality reduction, and clustering
-createAndPPSeuratFromVisium <- function(counts_data){
+createAndPPSeuratFromVisium <- function(counts_data, PP=TRUE){
   seurat_obj_visium = CreateSeuratObject(counts = counts_data, min.cells = 2, min.features = 200, assay = "Spatial")
-  seurat_obj_visium = SCTransform(seurat_obj_visium, assay = "Spatial", verbose = FALSE)
-  seurat_obj_visium = RunPCA(seurat_obj_visium, assay = "SCT", verbose = FALSE)
-  seurat_obj_visium = RunTSNE(seurat_obj_visium, reduction = "pca", dims = 1:30)
-  seurat_obj_visium = RunUMAP(seurat_obj_visium, reduction = "pca", dims = 1:30)
-  seurat_obj_visium = FindNeighbors(seurat_obj_visium, reduction = "pca", dims = 1:30)
-  seurat_obj_visium = FindClusters(seurat_obj_visium, verbose = FALSE, resolution = 0.5)
-  
+  if (PP){
+    seurat_obj_visium = SCTransform(seurat_obj_visium, assay = "Spatial", verbose = FALSE)
+    seurat_obj_visium = RunPCA(seurat_obj_visium, assay = "SCT", verbose = FALSE)
+    seurat_obj_visium = RunTSNE(seurat_obj_visium, reduction = "pca", dims = 1:30)
+    seurat_obj_visium = RunUMAP(seurat_obj_visium, reduction = "pca", dims = 1:30)
+    seurat_obj_visium = FindNeighbors(seurat_obj_visium, reduction = "pca", dims = 1:30)
+    seurat_obj_visium = FindClusters(seurat_obj_visium, verbose = FALSE, resolution = 0.5)
+  }
   return(seurat_obj_visium)
 }
 
@@ -56,6 +57,25 @@ SeuratToExprSet <- function(seurat_object){
   sc.eset <- ExpressionSet(assayData=sc.data, phenoData=sc.pdata)
   return(sc.eset)
 }
+
+# Convert Seurat object to Loom
+convertSeuratRDSToLoom <- function(input_path, createSeuratFromRDS=FALSE){
+  seurat_obj =  readRDS(input_path)
+  if (createSeuratFromRDS){ seurat_obj <- createAndPPSeuratFromVisium(seurat_obj$counts) }
+  file_name <- tools::file_path_sans_ext(input_path)
+  as.loom(seurat_obj, filename = paste0(file_name, ".loom"))
+}
+
+# Convert Seurat object to h5ad (pp = preprocess and sctransform, if FALSE, raw counts will be saved)
+convertSeuratRDSToh5ad <- function(input_path,createSeuratFromRDS=FALSE, PP=TRUE){
+  seurat_obj =  readRDS(input_path)
+  file_name <- tools::file_path_sans_ext(input_path)
+  if (createSeuratFromRDS){ seurat_obj <- createAndPPSeuratFromVisium(seurat_obj$counts, PP=PP) }
+  SaveH5Seurat(seurat_obj, filename = paste0(file_name, ".h5Seurat"))
+  Convert(paste0(file_name, ".h5Seurat"), dest = "h5ad")
+  file.remove(paste0(file_name, ".h5Seurat"))
+}
+
 
 # Write file in a CIBERSORT-compatible format given a Seurat object, by default use SCT column
 # Other arguments are "raw" and "CPM"
@@ -79,6 +99,7 @@ WriteFileCS <- function(seurat_obj, output_file, assay="SCT"){
   print(paste0("Wrote file successfully at ", output_file))
 }
 
+# Downsample mixture matrix to no_spots (new file written in CIBERSORT-compatible format)
 reduceSpotsCS <- function(input_path, no_spots){
   input_file = read.table(input_path, sep="\t", row.names=1, header=TRUE)
   # Randomly sample no_spots
@@ -93,17 +114,73 @@ reduceSpotsCS <- function(input_path, no_spots){
   print(paste0("Wrote file successfully at ", output_file))
 }
 
-convertSeuratRDSToLoom <- function(input_path, createSeuratFromRDS=FALSE){
-  seurat_obj =  readRDS(input_path)
-  if (createSeuratFromRDS){ seurat_obj <- createAndPPSeuratFromVisium(seurat_obj$counts) }
-  file_name <- tools::file_path_sans_ext(input_path)
-  as.loom(seurat_obj, filename = paste0(file_name, ".loom"))
+# Create a list with each element containing the proportion matrix returned from each method
+createDeconvResultList <- function(methods, celltypes, result_path="D:/Work (Yr 2 Sem 1)/Thesis/result_synthvisium/"){
+  results <- list()
+  
+  # Divide methods depending on their output file
+  rds_methods <- c("spotlight", "music", "RCTD")
+  csv_methods <- c("cell2location")
+  tsv_methods <- c("stereoscope", "cibersort")
+  
+  for (method in methods){
+    file_name <- paste0(result_path, method, "/allen_cortex_dwn_", dataset_type, "_", method)
+    
+    if (method %in% rds_methods){
+      temp_deconv <- readRDS(paste0(file_name, ".rds"))
+      
+      if (method == "spotlight"){temp_deconv <- temp_deconv[[2]]}
+      if (method == "music"){temp_deconv <- temp_deconv$Est.prop.weighted }
+      
+      colnames(temp_deconv)[1:23] <- celltypes
+      
+    } else if (method %in% csv_methods){
+      temp_deconv <- read.csv(paste0(file_name, ".csv"), row.names=1)
+      
+      if (method == "cell2location"){
+        temp_deconv <- temp_deconv/rowSums(temp_deconv) # So everything sums to one
+        colnames(temp_deconv) <- str_replace(colnames(temp_deconv), "q05_spot_factors", "")
+        temp_deconv <- temp_deconv[, match(celltypes, colnames(temp_deconv))]
+      } else {
+        colnames(temp_deconv)[1:23] <- celltypes
+      }
+      
+    } else if (method %in% tsv_methods){
+      temp_deconv = read.table(paste0(paste0(file_name, ".tsv")), sep="\t", row.names=1, header=TRUE)
+      
+      if (method == "stereoscope"){
+        temp_deconv <- temp_deconv[, match(celltypes, colnames(temp_deconv))]
+      } else {
+        colnames(temp_deconv)[1:23] <- celltypes
+      }
+    }
+    results[[method]] <- temp_deconv
+  }
+  return(results)
 }
 
-convertSeuratRDSToh5ad <- function(input_path,createSeuratFromRDS=FALSE){
-  seurat_obj =  readRDS(input_path)
-  file_name <- tools::file_path_sans_ext(input_path)
-  if (createSeuratFromRDS){ seurat_obj <- createAndPPSeuratFromVisium(seurat_obj$counts) }
-  SaveH5Seurat(seurat_obj, filename = paste0(file_name, ".h5Seurat"))
-  Convert(paste0(file_name, ".h5Seurat"), dest = "h5ad")
+# Get the confusion matrix given ground truth and deconvoluted result
+getConfusionMatrix <- function(known_props, test_props){
+  tp <- 0; tn <- 0; fp <- 0; fn <- 0
+  missing_rows <- which(rowSums(is.na(known_props)) > 0)
+  
+  if (length(missing_rows) > 0){
+    test_props <- test_props[-missing_rows,]
+    known_props <- known_props[-missing_rows,]
+  }
+  for (i in 1:nrow(known_props)){
+    for (j in 1:ncol(known_props)){
+      if (known_props[i, j] > 0 & test_props[i, j] > 0){
+        tp <- tp + 1
+      } else if (known_props[i, j] == 0 & test_props[i, j] == 0){
+        tn <- tn + 1
+      } else if (known_props[i, j] > 0 & test_props[i, j] == 0){
+        fn <- fn + 1
+      } else if (known_props[i, j] == 0 & test_props[i, j] > 0){
+        fp <- fp + 1
+      }
+    }
+  }
+  return(list(tp=tp, tn=tn, fn=fn, fp=fp))
 }
+
