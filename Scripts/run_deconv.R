@@ -1,6 +1,5 @@
 setwd("D:/Work (Yr 2 Sem 1)/Thesis/Scripts")
 path <- "D:/Work (Yr 2 Sem 1)/Thesis/"
-
 library(Seurat)
 library(synthvisium)
 library(dplyr)
@@ -9,7 +8,7 @@ source("helperFunctions.R")
 ######## GENERATING NEEDED DATA ############
 
 # Preprocess scRNA reference data (CAN SKIP THIS)
-seurat_obj_scRNA =  readRDS(paste0(path, "allen_cortex_dwn_original.rds"))
+seurat_obj_scRNA =  readRDS(paste0(path, "rds/allen_cortex_dwn_original.rds"))
 seurat_obj_scRNA <- SCTransform(seurat_obj_scRNA, assay="RNA", verbose = FALSE)
 seurat_obj_scRNA <- RunPCA(seurat_obj_scRNA, verbose = FALSE)
 seurat_obj_scRNA <- RunUMAP(seurat_obj_scRNA, dims = 1:30, verbose = FALSE)
@@ -21,6 +20,7 @@ seurat_obj_scRNA = seurat_obj_scRNA %>% SetIdent(value = "celltype")
 DimPlot(seurat_obj_scRNA, reduction = "umap",pt.size = 0.5, label = T)
 
 saveRDS(seurat_obj_scRNA, paste0(path,"rds/allen_cortex_dwn.rds"))
+seurat_obj_scRNA <- readRDS(paste0(path, "rds/allen_cortex_dwn.rds"))
 
 # Create synthetic data from scRNA data and save as RDS
 possible_dataset_types = c("real", "real_top1","real_top1_uniform","real_top2_overlap","real_top2_overlap_uniform",
@@ -75,7 +75,7 @@ for (dataset_type in possible_dataset_types){
   #res2 = cor(synthetic_visium_data$relative_spot_composition[,1:23], decon_mtrx[,1:23], use="complete.obs")
   #mean(diag(res2), na.rm=TRUE)
   
-  saveRDS(spotlight_deconv, paste0(path, "rds/synthvisium_spatial/allen_cortex_dwn_", dataset_type, "_spotlight.rds"))
+  saveRDS(spotlight_deconv, paste0(path, "result_synthvisium/spotlight/allen_cortex_dwn_", dataset_type, "_spotlight.rds"))
 }
 
 
@@ -98,7 +98,7 @@ for (dataset_type in possible_dataset_types){
   # Deconvolution
   music_deconv = music_prop(bulk.eset = eset_obj_visium, sc.eset = eset_obj_scRNA, clusters = 'celltype', samples='samples')
   res[dataset_type] = cor(t(synthetic_visium_data$relative_spot_composition[,1:23]), t(music_deconv$Est.prop.weighted[,1:23]))
-  saveRDS(music_deconv, paste0(path, "rds/synthvisium_spatial/allen_cortex_dwn_", dataset_type, "_music.rds"))
+  saveRDS(music_deconv, paste0(path, "result_synthvisium/music/allen_cortex_dwn_", dataset_type, "_music.rds"))
 }
 
 ######### RCTD ##########
@@ -119,5 +119,5 @@ for (dataset_type in possible_dataset_types[2:length(possible_dataset_types)]){
   RCTD_deconv <- run.RCTD(RCTD_deconv, doublet_mode = FALSE)
   res = as.matrix(sweep(RCTD_deconv@results$weights, 1, rowSums(RCTD_deconv@results$weights), '/'))
   
-  saveRDS(res, paste0(path, "rds/synthvisium_spatial/allen_cortex_dwn_", dataset_type, "_RCTD.rds"))
+  saveRDS(res, paste0(path, "result_synthvisium/RCTD/allen_cortex_dwn_", dataset_type, "_RCTD.rds"))
 }
