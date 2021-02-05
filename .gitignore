@@ -5,5 +5,8 @@ Literature/
 Misc/
 ppt/
 rds/
+result_synthvisium/
 *.RData
 *.pdf
+*.Rhistory
+*.mp4
