@@ -5,6 +5,11 @@ library(synthvisium)
 library(dplyr)
 source("helperFunctions.R")
 
+possible_dataset_types = c("real", "real_top1","real_top1_uniform","real_top2_overlap","real_top2_overlap_uniform",
+                           "real_missing_celltypes_visium", "artificial_uniform_distinct", "artificial_diverse_distinct",
+                           "artificial_uniform_overlap", "artificial_diverse_overlap", "artificial_dominant_celltype_diverse",
+                           "artificial_partially_dominant_celltype_diverse", "artificial_missing_celltypes_visium")
+
 ######## GENERATING NEEDED DATA ############
 
 # Preprocess scRNA reference data (CAN SKIP THIS)
@@ -21,18 +26,15 @@ DimPlot(seurat_obj_scRNA, reduction = "umap",pt.size = 0.5, label = T)
 
 saveRDS(seurat_obj_scRNA, paste0(path,"rds/allen_cortex_dwn.rds"))
 seurat_obj_scRNA <- readRDS(paste0(path, "rds/allen_cortex_dwn.rds"))
+DimPlot(seurat_obj_scRNA, reduction = "umap", label = TRUE, group.by = "celltype")
 
 # Create synthetic data from scRNA data and save as RDS
-possible_dataset_types = c("real", "real_top1","real_top1_uniform","real_top2_overlap","real_top2_overlap_uniform",
-                           "real_missing_celltypes_visium", "artificial_uniform_distinct", "artificial_diverse_distinct",
-                           "artificial_uniform_overlap", "artificial_diverse_overlap", "artificial_dominant_celltype_diverse",
-                           "artificial_partially_dominant_celltype_diverse", "artificial_missing_celltypes_visium")
-
 for (dataset_type in possible_dataset_types){
   print(dataset_type)
   createSynthvisiumRDS(paste0(path, "rds/synthvisium_spatial/allen_cortex_dwn_", dataset_type, "_synthvisium.rds"))
 }
-DimPlot(seurat_obj_scRNA, reduction = "umap", label = TRUE, group.by = "celltype")
+dataset_type <- "artificial_diverse_distinct"
+synthetic_visium_data <- readRDS(paste0(path, "rds/synthvisium_spatial/allen_cortex_dwn_", dataset_type, "_synthvisium.rds"))
 
 # Explore synthetic visium data
 synthetic_visium_data$counts %>% as.matrix() %>% .[1:5,1:5] #  Gene counts for each spot
@@ -63,10 +65,11 @@ for (dataset_type in possible_dataset_types){
   set.seed(123)
   synthetic_visium_data <- readRDS(paste0(path, "rds/synthvisium_spatial/allen_cortex_dwn_", dataset_type, "_synthvisium.rds"))
   seurat_obj_visium <- createAndPPSeuratFromVisium(synthetic_visium_data$counts)
+  start_time <- Sys.time()
   spotlight_deconv <- spotlight_deconvolution(se_sc = seurat_obj_scRNA, counts_spatial = seurat_obj_visium@assays$Spatial@counts,
                                           clust_vr = "subclass", cluster_markers = cluster_markers_all, cl_n = 50,
                                           hvg = 3000, ntop = NULL, transf = "uv", method = "nsNMF", min_cont = 0.09)
-  
+  end_time <- Sys.time()
   decon_mtrx <- spotlight_deconv[[2]]
   
   res = cor(t(synthetic_visium_data$relative_spot_composition[,1:23]), t(decon_mtrx[,1:23]))
@@ -85,14 +88,17 @@ library(MuSiC)
 library(xbioc)
 
 # Load reference scRNA-seq data and convert to ExprSet
-seurat_obj_scRNA = readRDS(paste0(path, "rds/allen_cortex_dwn.rds"))
+seurat_obj_scRNA = readRDS(paste0(path, "rds/allen_cortex_dwn_original.rds"))
+seurat_obj_scRNA@meta.data$celltype = seurat_obj_scRNA@meta.data$subclass
+seurat_obj_scRNA = seurat_obj_scRNA %>% SetIdent(value = "celltype")
 eset_obj_scRNA <- SeuratToExprSet(seurat_obj_scRNA)
 res = list()
 
 for (dataset_type in possible_dataset_types){
   # Load synthetic visium data and convert to Expreset
+  
   synthetic_visium_data <- readRDS(paste0(path, "rds/synthvisium_spatial/allen_cortex_dwn_", dataset_type, "_synthvisium.rds"))
-  seurat_obj_visium <- createAndPPSeuratFromVisium(synthetic_visium_data$counts)
+  seurat_obj_visium <- createAndPPSeuratFromVisium(synthetic_visium_data$counts, PP=FALSE)
   eset_obj_visium <- SeuratToExprSet(seurat_obj_visium)
   
   # Deconvolution
@@ -115,8 +121,10 @@ for (dataset_type in possible_dataset_types[2:length(possible_dataset_types)]){
   synthetic_visium_data <- readRDS(paste0(path, "rds/synthvisium_spatial/allen_cortex_dwn_", dataset_type, "_synthvisium.rds"))
   spatialRNA_obj_visium <- RCTD:::SpatialRNA(counts=as(as(synthetic_visium_data$counts,"matrix"),"dgCMatrix"))
   
+  start_time <- Sys.time()
   RCTD_deconv <- create.RCTD(spatialRNA_obj_visium, seurat_obj_scRNA, max_cores = 4, CELL_MIN_INSTANCE = 5)
   RCTD_deconv <- run.RCTD(RCTD_deconv, doublet_mode = FALSE)
+  end_time <- Sys.time()
   res = as.matrix(sweep(RCTD_deconv@results$weights, 1, rowSums(RCTD_deconv@results$weights), '/'))
   
   saveRDS(res, paste0(path, "result_synthvisium/RCTD/allen_cortex_dwn_", dataset_type, "_RCTD.rds"))

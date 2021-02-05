@@ -21,9 +21,6 @@ synthetic_visium_data <- readRDS(paste0(path, "rds/synthvisium_spatial/allen_cor
 seurat_obj_visium <- createAndPPSeuratFromVisium(synthetic_visium_data$counts)
 
 spotlight_deconv = readRDS(paste0(path, "result_synthvisium/spotlight/allen_cortex_dwn_", dataset_type, "_spotlight.rds"))
-music_deconv = readRDS(paste0(path, "result_synthvisium/music/allen_cortex_dwn_", dataset_type, "_music.rds"))
-c2l_deconv = read.csv(paste0(path, "result_synthvisium/cell2location/allen_cortex_dwn_", dataset_type, "_cell2location.csv"), row.names=1)
-c2l_deconv = c2l_deconv/rowSums(c2l_deconv) # So everything sums to one
 
 # Correlation
 res = cor(t(synthetic_visium_data$relative_spot_composition[,1:23]), t(spotlight_deconv[[2]][,1:23]))
@@ -119,12 +116,12 @@ for (dataset_type in possible_dataset_types){
 }
 
 #### PLOT EACH METRIC ####
-i <- 1
-metric <- "corr" 
+# corr, RMSE, accuracy, sensitivity, specificity, precision, F1
+metric <- "F1" 
 df <- data.frame(dataset_type = rep(names(all_results), length(methods)),
                  index = rep(1:13, length(methods)),
                  methods = rep(methods, each=13))
-df$vals <- c(sapply(methods, function(u) sapply(possible_dataset_types, function(k) all_results[[k]][u,][i])))
+df$vals <- c(sapply(methods, function(u) sapply(possible_dataset_types, function(k) all_results[[k]][u,][metric])))
 
-ggplot(data=df, aes(x=factor(index), y=as.numeric(vals), color=methods)) + geom_point(size=2)+
+ggplot(data=df, aes(x=factor(index), y=as.numeric(vals), color=methods)) + geom_jitter(width=0.1) +
  labs(title=paste0(metric, " of different methods on all 13 dataset types")) + ylab(metric) + xlab("datasets")

@@ -59,18 +59,20 @@ SeuratToExprSet <- function(seurat_object){
 }
 
 # Convert Seurat object to Loom
-convertSeuratRDSToLoom <- function(input_path, createSeuratFromRDS=FALSE){
+convertSeuratRDSToLoom <- function(input_path, createSeuratFromRDS=FALSE, raw=FALSE){
   seurat_obj =  readRDS(input_path)
   if (createSeuratFromRDS){ seurat_obj <- createAndPPSeuratFromVisium(seurat_obj$counts) }
+  if (raw) { DefaultAssay(seurat_obj) <- "RNA"}
   file_name <- tools::file_path_sans_ext(input_path)
   as.loom(seurat_obj, filename = paste0(file_name, ".loom"))
 }
 
 # Convert Seurat object to h5ad (pp = preprocess and sctransform, if FALSE, raw counts will be saved)
-convertSeuratRDSToh5ad <- function(input_path,createSeuratFromRDS=FALSE, PP=TRUE){
-  seurat_obj =  readRDS(input_path)
+convertSeuratRDSToh5ad <- function(input_path, createSeuratFromRDS=FALSE, PP=TRUE, raw=FALSE){
+  seurat_obj = readRDS(input_path)
   file_name <- tools::file_path_sans_ext(input_path)
   if (createSeuratFromRDS){ seurat_obj <- createAndPPSeuratFromVisium(seurat_obj$counts, PP=PP) }
+  if (raw) { DefaultAssay(seurat_obj) <- "RNA"}
   SaveH5Seurat(seurat_obj, filename = paste0(file_name, ".h5Seurat"))
   Convert(paste0(file_name, ".h5Seurat"), dest = "h5ad")
   file.remove(paste0(file_name, ".h5Seurat"))
@@ -161,6 +163,7 @@ createDeconvResultList <- function(methods, celltypes, result_path="D:/Work (Yr 
 
 # Get the confusion matrix given ground truth and deconvoluted result
 getConfusionMatrix <- function(known_props, test_props){
+  test_props <- round(test_props, 2)
   tp <- 0; tn <- 0; fp <- 0; fn <- 0
   missing_rows <- which(rowSums(is.na(known_props)) > 0)
   
