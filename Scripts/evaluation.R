@@ -18,7 +18,7 @@ possible_dataset_types = c("real", "real_top1","real_top1_uniform","real_top2_ov
 
 #### SAMPLE CODE FOR LOADING DATA ####
 synthetic_visium_data <- readRDS(paste0(path, "rds/synthvisium_spatial/allen_cortex_dwn_", dataset_type, "_synthvisium.rds"))
-seurat_obj_visium <- createAndPPSeuratFromVisium(synthetic_visium_data$counts)
+seurat_obj_visium <- createAndPPSeuratFromCounts(synthetic_visium_data$counts)
 
 spotlight_deconv = readRDS(paste0(path, "result_synthvisium/spotlight/allen_cortex_dwn_", dataset_type, "_spotlight.rds"))
 
@@ -34,7 +34,7 @@ for (dataset_type in possible_dataset_types){
   # Load reference data
   data_path <- paste0(path, "rds/synthvisium_spatial/allen_cortex_dwn_", dataset_type, "_")
   synthetic_visium_data <- readRDS(paste0(data_path, "synthvisium.rds"))
-  seurat_obj_visium <- createAndPPSeuratFromVisium(synthetic_visium_data$counts)
+  seurat_obj_visium <- createAndPPSeuratFromCounts(synthetic_visium_data$counts)
   
   # Initialization of column names
   celltypes <- colnames(synthetic_visium_data$relative_spot_composition)[1:23]

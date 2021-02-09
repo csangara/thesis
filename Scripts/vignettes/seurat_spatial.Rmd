@@ -162,7 +162,7 @@ We apply the 'anchor'-based integration workflow recently introduced in Seurat v
 We first load the data, pre-process the scRNA-seq reference, and then perform label transfer. The procedure outputs, for each spot, a probabilistic classification for each of the scRNA-seq derived classes. We add these predictions as a new assay in the Seurat object.
 
 ```{r}
-allen_reference <- readRDS("../rds/allen_cortex.rds")
+allen_reference <- readRDS("../../rds/allen_cortex.rds")
 ```
 
 ```{r}
@@ -200,6 +200,6 @@ SpatialPlot(object = cortex, features = top.clusters, ncol = 2)
 ```
 
 ```{r}
-saveRDS(brain, file = "../rds/brain.rds")
-saveRDS(brain, file = "../rds/cortex.rds")
+#saveRDS(brain, file = "../../rds/brain.rds")
+#saveRDS(brain, file = "../../rds/cortex.rds")
 ```

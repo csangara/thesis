@@ -45,7 +45,7 @@ synthetic_visium_data$relative_spot_composition %>% .[1:10,] # relative
 synthetic_visium_data$gold_standard_priorregion %>% head()
 
 # To create seurat object from synthetic visium data, use
-seurat_obj_visium <- createAndPPSeuratFromVisium(synthetic_visium_data$counts)
+seurat_obj_visium <- createAndPPSeuratFromCounts(synthetic_visium_data$counts)
 # Visualize a priori defined regions vs clusters from gene expression
 p_priorregion = DimPlot(seurat_obj_visium, reduction = "umap", label = TRUE, group.by = "orig.ident") # a priori defined regions
 p_exprs_clusters = DimPlot(seurat_obj_visium, reduction = "umap", label = TRUE) #
@@ -64,7 +64,7 @@ cluster_markers_all <- FindAllMarkers(object = seurat_obj_scRNA, assay = "SCT", 
 for (dataset_type in possible_dataset_types){
   set.seed(123)
   synthetic_visium_data <- readRDS(paste0(path, "rds/synthvisium_spatial/allen_cortex_dwn_", dataset_type, "_synthvisium.rds"))
-  seurat_obj_visium <- createAndPPSeuratFromVisium(synthetic_visium_data$counts)
+  seurat_obj_visium <- createAndPPSeuratFromCounts(synthetic_visium_data$counts)
   start_time <- Sys.time()
   spotlight_deconv <- spotlight_deconvolution(se_sc = seurat_obj_scRNA, counts_spatial = seurat_obj_visium@assays$Spatial@counts,
                                           clust_vr = "subclass", cluster_markers = cluster_markers_all, cl_n = 50,
@@ -98,7 +98,7 @@ for (dataset_type in possible_dataset_types){
   # Load synthetic visium data and convert to Expreset
   
   synthetic_visium_data <- readRDS(paste0(path, "rds/synthvisium_spatial/allen_cortex_dwn_", dataset_type, "_synthvisium.rds"))
-  seurat_obj_visium <- createAndPPSeuratFromVisium(synthetic_visium_data$counts, PP=FALSE)
+  seurat_obj_visium <- createAndPPSeuratFromCounts(synthetic_visium_data$counts, PP=FALSE)
   eset_obj_visium <- SeuratToExprSet(seurat_obj_visium)
   
   # Deconvolution

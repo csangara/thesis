@@ -28,7 +28,7 @@ createSynthvisiumRDS <- function(inputscRNA_rds, dataset_type, output_folder="sy
 
 # Create seurat object from count data (meant to be used with synthetic visium data) and perform normalization,
 # dimensionality reduction, and clustering
-createAndPPSeuratFromVisium <- function(counts_data, PP=TRUE){
+createAndPPSeuratFromCounts <- function(counts_data, PP=TRUE){
   seurat_obj_visium = CreateSeuratObject(counts = counts_data, min.cells = 2, min.features = 200, assay = "Spatial")
   if (PP){
     seurat_obj_visium = SCTransform(seurat_obj_visium, assay = "Spatial", verbose = FALSE)
@@ -59,19 +59,19 @@ SeuratToExprSet <- function(seurat_object){
 }
 
 # Convert Seurat object to Loom
-convertSeuratRDSToLoom <- function(input_path, createSeuratFromRDS=FALSE, raw=FALSE){
+convertSeuratRDSToLoom <- function(input_path, raw=TRUE, isSeurat=TRUE, PP=FALSE,){
   seurat_obj =  readRDS(input_path)
-  if (createSeuratFromRDS){ seurat_obj <- createAndPPSeuratFromVisium(seurat_obj$counts) }
+  if (!isSeurat){ seurat_obj <- createAndPPSeuratFromCounts(seurat_obj$counts, PP=PP) }
   if (raw) { DefaultAssay(seurat_obj) <- "RNA"}
   file_name <- tools::file_path_sans_ext(input_path)
   as.loom(seurat_obj, filename = paste0(file_name, ".loom"))
 }
 
 # Convert Seurat object to h5ad (pp = preprocess and sctransform, if FALSE, raw counts will be saved)
-convertSeuratRDSToh5ad <- function(input_path, createSeuratFromRDS=FALSE, PP=TRUE, raw=FALSE){
+convertSeuratRDSToh5ad <- function(input_path, raw=TRUE, isSeurat=TRUE, PP=FALSE,){
   seurat_obj = readRDS(input_path)
   file_name <- tools::file_path_sans_ext(input_path)
-  if (createSeuratFromRDS){ seurat_obj <- createAndPPSeuratFromVisium(seurat_obj$counts, PP=PP) }
+  if (!isSeurat){ seurat_obj <- createAndPPSeuratFromCounts(seurat_obj$counts, PP=PP) }
   if (raw) { DefaultAssay(seurat_obj) <- "RNA"}
   SaveH5Seurat(seurat_obj, filename = paste0(file_name, ".h5Seurat"))
   Convert(paste0(file_name, ".h5Seurat"), dest = "h5ad")

@@ -15,11 +15,10 @@ input_path <- "D:/Work (Yr 2 Sem 1)/Thesis/Data/CIBERSORTx/cibersort_mixture_Art
 reduceSpotsCS(input_path, 75)
 
 ### CONVERTING SEURAT OBJECT TO LOOM ###
-
 for (dataset_type in possible_dataset_types){
   print(dataset_type)
   convertSeuratRDSToLoom(paste0(path, "rds/synthvisium_spatial/allen_cortex_dwn_", dataset_type,
-                                "_synthvisium.rds"), TRUE)
+                                "_synthvisium.rds"), isSeurat = FALSE)
 }
 
 ## SAVING NON-NORMALIZED DATA AS H5AD ##
@@ -30,7 +29,7 @@ convertSeuratRDSToh5ad("D:/Work (Yr 2 Sem 1)/Thesis/allen_cortex_dwn_original.rd
 for (dataset_type in possible_dataset_types[10:13]){
   print(dataset_type)
   input_path <- paste0(path, "rds/synthvisium_spatial/allen_cortex_dwn_", dataset_type, "_synthvisium.rds")
-  convertSeuratRDSToh5ad(input_path, createSeuratFromRDS = TRUE, PP=FALSE)
+  convertSeuratRDSToh5ad(input_path, isSeurat = FALSE, PP= FALSE, raw=TRUE)
 }
 
 #### PLOT TIME OF CIBERSORT ####
