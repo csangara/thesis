@@ -1,9 +1,8 @@
 library(Seurat)
-library(SeuratData)
 setwd("D:/Work (Yr 2 Sem 1)/Thesis/")
 
-
-# Histograms for brain sections
+# Histograms for brain sections "stxBrain"
+library(SeuratData)
 sections = c("posterior1", "posterior2", "anterior1", "anterior2")
 stats = data.frame("mean", "sd")
 
@@ -35,7 +34,7 @@ allen_cortex <- colSums(as.matrix(GetAssayData(allen_cortex)))
 print(hist(allen_cortex, main="UMI distribution per cell of SMART-Seq scRNA brain"))
 print(c(mean(allen_cortex), sd(allen_cortex)))
 
-# Load 10x mouse brain data
+# Load 10x mouse brain data (Robin's file)
 brain_sc_10x <- readRDS("rds/seurat_obj_scrnaseq_cortex_filtered.rds")
 DefaultAssay(brain_sc_10x) <- "RNA"
 brain_sc_10x@assays$SCT = NULL
@@ -50,11 +49,12 @@ spotlight_synth <- test_spot_fun(brain_sc_10x, clust_vr="subclass", n=2500)
 hist(colSums(spotlight_synth$topic_profiles), breaks = c(16000, 18000, 20000, 22000))
 
 # Creating h5ad file
-# First, update object
+# First, update object to new Seurat version -> use raw Counts
 brain_sc_10x <- readRDS("rds/seurat_obj_scrnaseq_cortex_filtered.rds")
 new_brain <- CreateSeuratObject(counts=brain_sc_10x@assays$RNA@counts, meta.data = brain_sc_10x@meta.data)
 saveRDS(new_brain, "rds/seurat_obj_scrnaseq_cortex_filtered_rawcounts.rds")
 
+# Convert to loom/h5ad (h5ad doesn't work as of 09/02/2021)
 source("Scripts/helperFunctions.R")
 brain_sc_10x <- readRDS("rds/seurat_obj_scrnaseq_cortex_filtered_rawcounts.rds")
 convertSeuratRDSToh5ad("rds/seurat_obj_scrnaseq_cortex_filtered_rawcounts.rds") # Doesn't work, fails at Convert() 
