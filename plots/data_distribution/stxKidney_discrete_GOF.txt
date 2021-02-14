@@ -1,0 +1,8 @@
+GOF statistics for stxKidney
+chisq	chisqpvalue	ks	cvm	ad	bic	aic
+norm	305.1215	0	0.087	3.1071	19.4291	32677.1588	32666.6168
+pois	Inf	0	0.5388	120.596	Inf	18116627.827	18116622.556
+nbinom	140.4098	0	0.0613	1.2503	8.0453	32542.6654	32532.1234
+ks = Kolomogrov-Smirnov statistic, cvm=Cramer-von Mises statistic, ad=Anderson-Darling statistic,
+                       bic=Bayesian Information Criterion, aic=Akaike's Information criterion
+ks, cvm, and ad are recommended for continuous data, while chisq is for discrete ones

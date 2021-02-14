@@ -1,0 +1,8 @@
+GOF statistics for synthvisium_mean30000,sd8000
+chisq	chisqpvalue	ks	cvm	ad	bic	aic
+norm	40.7136	0.0332	0.0265	0.1464	0.9068	-1033.0928	-1043.1242
+beta	108.0071	0	0.0653	1.8079	Inf	-798.1997	-808.2312
+gamma	120.9926	0	0.0825	2.3631	14.1641	-693.3636	-703.3951
+ks = Kolomogrov-Smirnov statistic, cvm=Cramer-von Mises statistic, ad=Anderson-Darling statistic,
+                       bic=Bayesian Information Criterion, aic=Akaike's Information criterion
+ks, cvm, and ad are recommended for continuous data, while chisq is for discrete ones
