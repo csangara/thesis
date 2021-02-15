@@ -1,0 +1,8 @@
+GOF statistics for stxBrain_anterior1
+chisq	chisqpvalue	ks	cvm	ad	bic	aic
+norm	68.4995	0.0018	0.0199	0.1908	1.7328	57623.3067	57611.5076
+pois	Inf	0	0.4917	215.6293	Inf	13689001.9128	13688996.0133
+nbinom	549.0809	0	0.0959	7.9176	44.5431	58033.5232	58021.7241
+ks = Kolomogrov-Smirnov statistic, cvm=Cramer-von Mises statistic, ad=Anderson-Darling statistic,
+                       bic=Bayesian Information Criterion, aic=Akaike's Information criterion
+ks, cvm, and ad are recommended for continuous data, while chisq is for discrete ones

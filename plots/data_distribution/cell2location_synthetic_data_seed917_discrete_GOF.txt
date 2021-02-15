@@ -1,0 +1,8 @@
+GOF statistics for cell2location_synthetic_data_seed917
+chisq	chisqpvalue	ks	cvm	ad	bic	aic
+norm	400.9478	0	0.1154	5.9805	38.424	66187.3481	66176.1463
+pois	Inf	0	0.582	180.0192	Inf	6431208178.437	6431208172.8361
+nbinom	4789.3939	0	0.3759	80.4382	385.9412	61506.8933	61495.6915
+ks = Kolomogrov-Smirnov statistic, cvm=Cramer-von Mises statistic, ad=Anderson-Darling statistic,
+                       bic=Bayesian Information Criterion, aic=Akaike's Information criterion
+ks, cvm, and ad are recommended for continuous data, while chisq is for discrete ones

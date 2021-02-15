@@ -1,0 +1,8 @@
+GOF statistics for stereoscope_synthetic_data
+chisq	chisqpvalue	ks	cvm	ad	bic	aic
+norm	98.5869	0	0.0583	0.8348	5.3613	-405.2117	-415.0272
+beta	60.9411	1e-04	0.0398	0.2587	Inf	-362.2209	-372.0364
+gamma	101.9773	0	0.0664	1.1506	7.1786	-288.1331	-297.9486
+ks = Kolomogrov-Smirnov statistic, cvm=Cramer-von Mises statistic, ad=Anderson-Darling statistic,
+                       bic=Bayesian Information Criterion, aic=Akaike's Information criterion
+ks, cvm, and ad are recommended for continuous data, while chisq is for discrete ones
