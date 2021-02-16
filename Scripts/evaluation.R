@@ -1,26 +1,35 @@
 #### EVALUATION OF RESULTS ####
 
-setwd("D:/Work (Yr 2 Sem 1)/Thesis/Scripts")
-path <- "D:/Work (Yr 2 Sem 1)/Thesis/"
+setwd("D:/Work (Yr 2 Sem 1)/Thesis/")
+path <- "D:/Work (Yr 2 Sem 1)/Thesis/Data/synthetic_datasets/"
 
 library(Seurat)
 library(synthvisium)
 library(dplyr)
-source("helperFunctions.R")
+source("Scripts/helperFunctions.R")
 library(patchwork)
 library(ggplot2)
 library(stringr)
 
-possible_dataset_types = c("real", "real_top1","real_top1_uniform","real_top2_overlap","real_top2_overlap_uniform",
+possible_dataset_types <- c("real", "real_top1","real_top1_uniform","real_top2_overlap","real_top2_overlap_uniform",
                            "real_missing_celltypes_visium", "artificial_uniform_distinct", "artificial_diverse_distinct",
                            "artificial_uniform_overlap", "artificial_diverse_overlap", "artificial_dominant_celltype_diverse",
                            "artificial_partially_dominant_celltype_diverse", "artificial_missing_celltypes_visium")
 
-#### SAMPLE CODE FOR LOADING DATA ####
-synthetic_visium_data <- readRDS(paste0(path, "rds/synthvisium_spatial/allen_cortex_dwn_", dataset_type, "_synthvisium.rds"))
-seurat_obj_visium <- createAndPPSeuratFromCounts(synthetic_visium_data$counts)
+artificial_dataset_types <- c("artificial_uniform_distinct", "artificial_diverse_distinct", "artificial_uniform_overlap", "artificial_diverse_overlap",
+                  "artificial_dominant_celltype_diverse", "artificial_partially_dominant_celltype_diverse",
+                  "artificial_dominant_rare_celltype_diverse", "artificial_regional_rare_celltype_diverse")
+datasets <- c('allen_cortex_dwn', 'brain_cortex_generation', 'cerebellum_cell_generation', 'cerebellum_nucleus_generation',
+              'hippocampus_generation', 'kidney_generation', 'pbmc_generation', 'scc_p5_generation')
 
-spotlight_deconv = readRDS(paste0(path, "result_synthvisium/spotlight/allen_cortex_dwn_", dataset_type, "_spotlight.rds"))
+#### SAMPLE CODE FOR LOADING DATA ####
+dataset <- datasets[1]
+dataset_type <- possible_dataset_types[1]
+synthetic_visium_data <- readRDS(paste0(path, dataset, "/", dataset, "_", dataset_type, "_synthvisium.rds"))
+seurat_obj_visium <- createAndPPSeuratFromCounts(synthetic_visium_data$counts, PP=FALSE)
+
+spotlight_deconv = readRDS(paste0("results/", dataset, "/", "spotlight/", dataset, "_", 
+                                  dataset_type, "_spotlight.rds"))
 
 # Correlation
 res = cor(t(synthetic_visium_data$relative_spot_composition[,1:23]), t(spotlight_deconv[[2]][,1:23]))
@@ -29,11 +38,11 @@ print(mean(diag(res), na.rm=TRUE))
 ###### PLOT PREDICTIONS ON UMAP #######
 
 methods <- c("spotlight", "music", "cell2location", "RCTD", "stereoscope")
-for (dataset_type in possible_dataset_types){
+for (dataset_type in possible_dataset_types[1:2]){
   
   # Load reference data
-  data_path <- paste0(path, "rds/synthvisium_spatial/allen_cortex_dwn_", dataset_type, "_")
-  synthetic_visium_data <- readRDS(paste0(data_path, "synthvisium.rds"))
+  synthetic_visium_data <- readRDS(paste0(path, dataset, "/", dataset, "_",
+                                          dataset_type, "_synthvisium.rds"))
   seurat_obj_visium <- createAndPPSeuratFromCounts(synthetic_visium_data$counts)
   
   # Initialization of column names
@@ -43,7 +52,7 @@ for (dataset_type in possible_dataset_types){
   known_props <- synthetic_visium_data$relative_spot_composition[,1:23]
   
   # Load deconvolution results
-  deconv_list <- createDeconvResultList(methods, celltypes)
+  deconv_list <- createDeconvResultList(methods, celltypes, paste0("results/", dataset, "/"), dataset)
   
   # Correlation (by spots and by cell type)
   corr_list <- lapply(deconv_list, function(k) cor(known_props[,1:23], k[,1:23], use="complete.obs"))
@@ -56,7 +65,7 @@ for (dataset_type in possible_dataset_types){
       seurat_obj_visium@meta.data[paste0(celltype, "_", method)] = deconv_list[[method]][,celltype]
     }
     
-    plot_dir <- paste0(path, "plots/allen_cortex_dwn/", dataset_type, "/")
+    plot_dir <- paste0("plots/", dataset, "/", dataset_type, "/")
     if (!dir.exists(plot_dir)){ dir.create(plot_dir) }
     
     plots <- FeaturePlot(seurat_obj_visium, c(celltype, paste0(celltype, "_", methods)),
@@ -68,9 +77,9 @@ for (dataset_type in possible_dataset_types){
     }
 
     plots <- plots[[1]] + plots[[2]] + plots[[3]] + plots[[4]] + plots[[5]] + plots[[6]]
-    png(paste0(plot_dir, celltype, ".png"), width=1600, height=800)
+    #png(paste0(plot_dir, celltype, ".png"), width=1600, height=800)
     print(plots)
-    dev.off()
+    #dev.off()
   }
 }
 
@@ -83,8 +92,8 @@ n_celltypes <- 23
 for (dataset_type in possible_dataset_types){
   
   # Load reference data and deconvolution results
-  result_path <- paste0(path, "rds/synthvisium_spatial/allen_cortex_dwn_", dataset_type, "_")
-  synthetic_visium_data <- readRDS(paste0(result_path, "synthvisium.rds"))
+  synthetic_visium_data <- readRDS(paste0(path, dataset, "/", dataset, "_",
+                                          dataset_type, "_synthvisium.rds"))
   
   # Initialization of column names
   celltypes <- colnames(synthetic_visium_data$relative_spot_composition)[1:23]
@@ -93,7 +102,7 @@ for (dataset_type in possible_dataset_types){
   known_props <- synthetic_visium_data$relative_spot_composition[,1:23]
   
   # Load deconvolution results
-  deconv_list <- createDeconvResultList(methods, celltypes)
+  deconv_list <- createDeconvResultList(methods, celltypes, paste0("results/", dataset, "/"), dataset)
 
   # Correlation and RMSE
   corr_spots <- sapply(deconv_list, function(k) mean(diag(cor(t(known_props), t(k[,1:n_celltypes]))), na.rm=TRUE))
