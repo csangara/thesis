@@ -26,18 +26,21 @@ createSynthvisiumRDS <- function(inputscRNA_rds, dataset_type, output_folder="sy
   print(paste0("Dataset saved at ", directory, "/", output_folder, inputscRNA_name, "_", dataset_type, "_synthvisium.rds"))
 }
 
-# Create seurat object from count data (meant to be used with synthetic visium data) and perform normalization,
-# dimensionality reduction, and clustering
-createAndPPSeuratFromCounts <- function(counts_data, PP=TRUE){
+# Perform normalization, dimensionality reduction, and clustering on a seurat object
+preprocessSeurat <- function(seurat_obj, assay="RNA"){
+  seurat_obj = SCTransform(seurat_obj, assay = assay, verbose = FALSE)
+  seurat_obj = RunPCA(seurat_obj, assay = "SCT", verbose = FALSE)
+  seurat_obj = RunTSNE(seurat_obj, reduction = "pca", dims = 1:30)
+  seurat_obj = RunUMAP(seurat_obj, reduction = "pca", dims = 1:30)
+  seurat_obj = FindNeighbors(seurat_obj, reduction = "pca", dims = 1:30)
+  seurat_obj = FindClusters(seurat_obj, verbose = FALSE, resolution = 0.5)  
+  return(seurat_obj)
+}
+
+# Create seurat object from count data (meant to be used with synthetic visium data)
+createSeuratFromCounts <- function(counts_data, PP=TRUE){
   seurat_obj_visium = CreateSeuratObject(counts = counts_data, min.cells = 2, min.features = 200, assay = "Spatial")
-  if (PP){
-    seurat_obj_visium = SCTransform(seurat_obj_visium, assay = "Spatial", verbose = FALSE)
-    seurat_obj_visium = RunPCA(seurat_obj_visium, assay = "SCT", verbose = FALSE)
-    seurat_obj_visium = RunTSNE(seurat_obj_visium, reduction = "pca", dims = 1:30)
-    seurat_obj_visium = RunUMAP(seurat_obj_visium, reduction = "pca", dims = 1:30)
-    seurat_obj_visium = FindNeighbors(seurat_obj_visium, reduction = "pca", dims = 1:30)
-    seurat_obj_visium = FindClusters(seurat_obj_visium, verbose = FALSE, resolution = 0.5)
-  }
+  if (PP){ seurat_obj_visium <- preprocessSeurat(seurat_obj_visium, "Spatial") }
   return(seurat_obj_visium)
 }
 
@@ -59,7 +62,7 @@ SeuratToExprSet <- function(seurat_object){
 }
 
 # Convert Seurat object to Loom
-convertSeuratRDSToLoom <- function(input_path, raw=TRUE, isSeurat=TRUE, PP=FALSE,){
+convertSeuratRDSToLoom <- function(input_path, raw=TRUE, isSeurat=TRUE, PP=FALSE){
   seurat_obj =  readRDS(input_path)
   if (!isSeurat){ seurat_obj <- createAndPPSeuratFromCounts(seurat_obj$counts, PP=PP) }
   if (raw) { DefaultAssay(seurat_obj) <- "RNA"}
@@ -68,7 +71,7 @@ convertSeuratRDSToLoom <- function(input_path, raw=TRUE, isSeurat=TRUE, PP=FALSE
 }
 
 # Convert Seurat object to h5ad (pp = preprocess and sctransform, if FALSE, raw counts will be saved)
-convertSeuratRDSToh5ad <- function(input_path, raw=TRUE, isSeurat=TRUE, PP=FALSE,){
+convertSeuratRDSToh5ad <- function(input_path, raw=TRUE, isSeurat=TRUE, PP=FALSE){
   seurat_obj = readRDS(input_path)
   file_name <- tools::file_path_sans_ext(input_path)
   if (!isSeurat){ seurat_obj <- createAndPPSeuratFromCounts(seurat_obj$counts, PP=PP) }
@@ -117,7 +120,7 @@ reduceSpotsCS <- function(input_path, no_spots){
 }
 
 # Create a list with each element containing the proportion matrix returned from each method
-createDeconvResultList <- function(methods, celltypes, result_path="D:/Work (Yr 2 Sem 1)/Thesis/result_synthvisium/"){
+createDeconvResultList <- function(methods, celltypes, result_path, dataset){
   results <- list()
   
   # Divide methods depending on their output file
@@ -126,13 +129,12 @@ createDeconvResultList <- function(methods, celltypes, result_path="D:/Work (Yr 
   tsv_methods <- c("stereoscope", "cibersort")
   
   for (method in methods){
-    file_name <- paste0(result_path, method, "/allen_cortex_dwn_", dataset_type, "_", method)
+    file_name <- paste0(result_path, method, "/", dataset, "_", dataset_type, "_", method)
     
     if (method %in% rds_methods){
       temp_deconv <- readRDS(paste0(file_name, ".rds"))
       
       if (method == "spotlight"){temp_deconv <- temp_deconv[[2]]}
-      if (method == "music"){temp_deconv <- temp_deconv$Est.prop.weighted }
       
       colnames(temp_deconv)[1:23] <- celltypes
       
