@@ -1,11 +1,12 @@
-cell2location/
 Data/
 doc/
 Literature/
 Misc/
 ppt/
 rds/
-result_synthvisium/
+/cell2location/
+/Scripts/synthetic_data_generation/cell2location/
+
 *.RData
 *.pdf
 *.Rhistory
