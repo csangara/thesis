@@ -1,0 +1,13 @@
+1. real
+2. real_top1
+3. real_top1_uniform
+4. real_top2_overlap
+5. real_top2_overlap_uniform
+6. real_missing_celltypes_visium
+7. artificial_uniform_distinct
+8. artificial_diverse_distinct
+9. artificial_uniform_overlap
+10. artificial_diverse_overlap
+11. artificial_dominant_celltype_diverse
+12. artificial_partially_dominant_celltype_diverse
+13. artificial_missing_celltypes_visium

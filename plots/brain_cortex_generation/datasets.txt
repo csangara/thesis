@@ -1,0 +1,8 @@
+1. artificial_uniform_distinct
+2. artificial_diverse_distinct
+3. artificial_uniform_overlap
+4. artificial_diverse_overlap
+5. artificial_dominant_celltype_diverse
+6. artificial_partially_dominant_celltype_diverse
+7. artificial_dominant_rare_celltype_diverse
+8. artificial_regional_rare_celltype_diverse
