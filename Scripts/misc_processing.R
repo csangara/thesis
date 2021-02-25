@@ -1,16 +1,51 @@
 ### MISCELLANEOUS (PRE)PROCESSING SCRIPTS ###
 
-setwd("D:/Work (Yr 2 Sem 1)/Thesis/Scripts")
+setwd("D:/Work (Yr 2 Sem 1)/Thesis/")
 path <- "D:/Work (Yr 2 Sem 1)/Thesis/"
-source("helperFunctions.R")
+source("Scripts/helperFunctions.R")
 
 possible_dataset_types = c("real", "real_top1","real_top1_uniform","real_top2_overlap","real_top2_overlap_uniform",
                            "real_missing_celltypes_visium", "artificial_uniform_distinct", "artificial_diverse_distinct",
                            "artificial_uniform_overlap", "artificial_diverse_overlap", "artificial_dominant_celltype_diverse",
                            "artificial_partially_dominant_celltype_diverse", "artificial_missing_celltypes_visium")
 
-### DOWNSAMPLING SPOTS FOR CIBERSORT ###
+### PREPROCESSING DATA ###
+# Preprocess scRNA reference data
+seurat_obj_scRNA =  readRDS("rds/allen_cortex_dwn_original.rds")
+seurat_obj_scRNA <- SCTransform(seurat_obj_scRNA, assay="RNA", verbose = FALSE)
+seurat_obj_scRNA <- RunPCA(seurat_obj_scRNA, verbose = FALSE)
+seurat_obj_scRNA <- RunUMAP(seurat_obj_scRNA, dims = 1:30, verbose = FALSE)
+seurat_obj_scRNA <- FindNeighbors(seurat_obj_scRNA, dims = 1:30, verbose = FALSE)
+seurat_obj_scRNA <- FindClusters(seurat_obj_scRNA, verbose = FALSE)
+# Set cell type and object identity
+seurat_obj_scRNA@meta.data$celltype = seurat_obj_scRNA@meta.data$subclass
+seurat_obj_scRNA = seurat_obj_scRNA %>% SetIdent(value = "celltype")
+DimPlot(seurat_obj_scRNA, reduction = "umap",pt.size = 0.5, label = T)
 
+saveRDS(seurat_obj_scRNA, paste0(path,"rds/allen_cortex_dwn.rds"))
+seurat_obj_scRNA <- readRDS(paste0(path, "rds/allen_cortex_dwn.rds"))
+DimPlot(seurat_obj_scRNA, reduction = "umap", label = TRUE, group.by = "celltype")
+
+### EXPLORING SYNTHETIC VISIUM DATA ###
+dataset_type <- "artificial_diverse_distinct"
+synthetic_visium_data <- readRDS("rds/synthvisium_spatial/allen_cortex_dwn_", dataset_type, "_synthvisium.rds")
+
+# Explore synthetic visium data
+synthetic_visium_data$counts %>% as.matrix() %>% .[1:5,1:5] #  Gene counts for each spot
+# Cell type composition of each spot
+synthetic_visium_data$spot_composition %>% .[1:10,] # absolute
+synthetic_visium_data$relative_spot_composition %>% .[1:10,] # relative
+# Which cell type is present in which region, and with which prior frequency
+synthetic_visium_data$gold_standard_priorregion %>% head()
+
+# To create seurat object from synthetic visium data, use
+seurat_obj_visium <- createSeuratFromCounts(synthetic_visium_data$counts)
+# Visualize a priori defined regions vs clusters from gene expression
+p_priorregion = DimPlot(seurat_obj_visium, reduction = "umap", label = TRUE, group.by = "orig.ident") # a priori defined regions
+p_exprs_clusters = DimPlot(seurat_obj_visium, reduction = "umap", label = TRUE) #
+patchwork::wrap_plots(list(p_priorregion, p_exprs_clusters), nrow = 1)
+
+### DOWNSAMPLING SPOTS FOR CIBERSORT ###
 input_path <- "D:/Work (Yr 2 Sem 1)/Thesis/Data/CIBERSORTx/cibersort_mixture_ArtUniDistinct.txt"
 reduceSpotsCS(input_path, 75)
 

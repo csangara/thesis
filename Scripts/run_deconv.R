@@ -10,7 +10,7 @@ possible_dataset_types = c("real", "real_top1","real_top1_uniform","real_top2_ov
                            "artificial_uniform_overlap", "artificial_diverse_overlap", "artificial_dominant_celltype_diverse",
                            "artificial_partially_dominant_celltype_diverse", "artificial_missing_celltypes_visium")
 
-recommended_dataset_types = c("artificial_uniform_distinct", "artificial_diverse_distinct", "artificial_uniform_overlap",
+possible_dataset_types = c("artificial_uniform_distinct", "artificial_diverse_distinct", "artificial_uniform_overlap",
                               "artificial_diverse_overlap", "artificial_dominant_celltype_diverse",
                               "artificial_partially_dominant_celltype_diverse", "artificial_dominant_rare_celltype_diverse",
                               "artificial_regional_rare_celltype_diverse")
@@ -26,9 +26,11 @@ for (dataset_type in possible_dataset_types){
                        output_folder="Data/synthetic_datasets/allen_cortex_dwn/")
 }
 
-dataset <- datasets[1]
-scrna_path <- "rds/allen_cortex_dwn_original.rds"
-  
+dataset <- datasets[2]
+scrna_dir <- paste0(path, "generation_set/")
+scrna_path <- paste0(scrna_dir, dataset, ".rds")
+dir.create(paste0("results/", dataset))
+
 ######### SPOTLIGHT ######### 
 
 library(SPOTlight)
@@ -64,36 +66,42 @@ for (dataset_type in possible_dataset_types){
 
 library(MuSiC)
 library(xbioc)
+dir.create(paste0("results/", dataset, "/music/"))
 
 # Load reference scRNA-seq data and convert to ExprSet
 seurat_obj_scRNA = readRDS(scrna_path)
-seurat_obj_scRNA@meta.data$celltype = seurat_obj_scRNA@meta.data$subclass
+seurat_obj_scRNA@meta.data$celltype = seurat_obj_scRNA@meta.data$celltype
 seurat_obj_scRNA = seurat_obj_scRNA %>% SetIdent(value = "celltype")
 eset_obj_scRNA <- SeuratToExprSet(seurat_obj_scRNA)
+rm(seurat_obj_scRNA)
 res = list()
 
-for (dataset_type in possible_dataset_types){
+for (dataset_type in possible_dataset_types[5:8]){
   # Load synthetic visium data and convert to Expreset
   synthetic_visium_data <- readRDS(paste0(path, dataset, "/", dataset, "_", dataset_type, "_synthvisium.rds"))
   seurat_obj_visium <- createSeuratFromCounts(synthetic_visium_data$counts, PP=FALSE)
   eset_obj_visium <- SeuratToExprSet(seurat_obj_visium)
+  rm(synthetic_visium_data, seurat_obj_visium)
   
   # Deconvolution
   music_deconv = music_prop(bulk.eset = eset_obj_visium, sc.eset = eset_obj_scRNA, clusters = 'celltype', samples='samples')
-  res[dataset_type] = cor(t(synthetic_visium_data$relative_spot_composition[,1:23]), t(music_deconv$Est.prop.weighted[,1:23]))
+  # res[dataset_type] = cor(t(synthetic_visium_data$relative_spot_composition[,1:23]), t(music_deconv$Est.prop.weighted[,1:23]))
   saveRDS(music_deconv$Est.prop.weighted, paste0("results/", dataset, "/music/", dataset, "_", dataset_type, "_music.rds"))
+  rm(music_deconv, eset_obj_visium)
+  gc()
 }
 
 ######### RCTD ##########
 
 library(RCTD)
 library(Matrix)
+dir.create(paste0("results/", dataset, "/RCTD/"))
 
 seurat_obj_scRNA <- readRDS(scrna_path)
 seurat_obj_scRNA@meta.data$liger_ident_coarse <- factor(seurat_obj_scRNA@meta.data$subclass)
 seurat_obj_scRNA@meta.data$nUMI <- colSums(seurat_obj_scRNA@assays$RNA@counts)
 
-for (dataset_type in possible_dataset_types[2:length(possible_dataset_types)]){
+for (dataset_type in possible_dataset_types){
   
   synthetic_visium_data <- readRDS(paste0(path, dataset, "/", dataset, "_", dataset_type, "_synthvisium.rds"))
   spatialRNA_obj_visium <- RCTD:::SpatialRNA(counts=as(as(synthetic_visium_data$counts,"matrix"),"dgCMatrix"))

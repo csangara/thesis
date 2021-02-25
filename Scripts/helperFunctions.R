@@ -30,7 +30,7 @@ createSynthvisiumRDS <- function(inputscRNA_rds, dataset_type, output_folder="sy
 preprocessSeurat <- function(seurat_obj, assay="RNA"){
   seurat_obj = SCTransform(seurat_obj, assay = assay, verbose = FALSE)
   seurat_obj = RunPCA(seurat_obj, assay = "SCT", verbose = FALSE)
-  seurat_obj = RunTSNE(seurat_obj, reduction = "pca", dims = 1:30)
+  seurat_obj = RunTSNE(seurat_obj, reduction = "pca", dims = 1:30, check_duplicates = FALSE)
   seurat_obj = RunUMAP(seurat_obj, reduction = "pca", dims = 1:30)
   seurat_obj = FindNeighbors(seurat_obj, reduction = "pca", dims = 1:30)
   seurat_obj = FindClusters(seurat_obj, verbose = FALSE, resolution = 0.5)  
@@ -135,8 +135,8 @@ createDeconvResultList <- function(methods, celltypes, result_path, dataset){
       temp_deconv <- readRDS(paste0(file_name, ".rds"))
       
       if (method == "spotlight"){temp_deconv <- temp_deconv[[2]]}
-      
-      colnames(temp_deconv)[1:23] <- celltypes
+      colnames(temp_deconv) <- str_replace_all(colnames(temp_deconv), "[/ ]", ".")
+      temp_deconv <- temp_deconv[, match(celltypes, colnames(temp_deconv))]
       
     } else if (method %in% csv_methods){
       temp_deconv <- read.csv(paste0(file_name, ".csv"), row.names=1)
@@ -146,7 +146,7 @@ createDeconvResultList <- function(methods, celltypes, result_path, dataset){
         colnames(temp_deconv) <- str_replace(colnames(temp_deconv), "q05_spot_factors", "")
         temp_deconv <- temp_deconv[, match(celltypes, colnames(temp_deconv))]
       } else {
-        colnames(temp_deconv)[1:23] <- celltypes
+        colnames(temp_deconv)[1:length(celltypes)] <- celltypes
       }
       
     } else if (method %in% tsv_methods){
@@ -155,7 +155,7 @@ createDeconvResultList <- function(methods, celltypes, result_path, dataset){
       if (method == "stereoscope"){
         temp_deconv <- temp_deconv[, match(celltypes, colnames(temp_deconv))]
       } else {
-        colnames(temp_deconv)[1:23] <- celltypes
+        colnames(temp_deconv)[1:length(celltypes)] <- celltypes
       }
     }
     results[[method]] <- temp_deconv
