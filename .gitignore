@@ -4,8 +4,10 @@ Literature/
 Misc/
 ppt/
 rds/
+Scripts/robin
 /cell2location/
 /Scripts/synthetic_data_generation/cell2location/
+.r2gridengine/
 
 *.RData
 *.pdf
