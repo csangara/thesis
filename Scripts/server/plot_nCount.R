@@ -1,3 +1,4 @@
+library(Seurat)
 data_path <- "/group/irc/shared/synthetic_visium/raw_data/"
 
 paths <- c("brain_cortex/scRNAseq/seurat_obj_scrnaseq_cortex_filtered.rds",
@@ -7,7 +8,7 @@ paths <- c("brain_cortex/scRNAseq/seurat_obj_scrnaseq_cortex_filtered.rds",
            "pbmc_data/seurat_obj_pbmc_filtered.rds",
            "scRNAseq/seurat_obj_scrnaseq_scc_p5_filtered.rds")
 
-datasets <- c("brain_cortex", "cerebellum_cell", "cerebellum_nucleus",
+datasets <- c("brain_cortex", "cerebellum",
               "hippocampus", "kidney", "pbmc", "scc_p5")
 p <- list()
 for (i in 1:length(datasets)){
@@ -18,3 +19,5 @@ for (i in 1:length(datasets)){
   print(VlnPlot(seuratObj, features="nCount_RNA"))
   dev.off()
 }
+
+saveRDS(p, "~/nCounts_plots.rds")
