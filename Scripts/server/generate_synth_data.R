@@ -1,6 +1,7 @@
 library(Seurat)
 
-createSynthvisiumRDS <- function(inputscRNA_rds, dataset_type, output_path="", celltype_var = "celltype"){
+createSynthvisiumRDS <- function(inputscRNA_rds, dataset_type, output_path="", 
+                                  celltype_var = "celltype", repl=""){
   seurat_obj_scRNA =readRDS(inputscRNA_rds)
   
   # Create synthetic visium data from scRNA data
@@ -11,8 +12,8 @@ createSynthvisiumRDS <- function(inputscRNA_rds, dataset_type, output_path="", c
   
   directory = dirname(inputscRNA_rds)
   inputscRNA_name = stringr::str_split(basename(inputscRNA_rds), "\\.")[[1]][1]
-  dir.create((paste0(output_path, inputscRNA_name)))
-  output_folder <- paste0(output_path, inputscRNA_name, "/")
+  dir.create((paste0(output_path, inputscRNA_name, "/", repl)))
+  output_folder <- paste0(output_path, inputscRNA_name, "/", repl, "/")
   saveRDS(synthetic_visium_data, paste0(output_folder, inputscRNA_name, "_", dataset_type, "_synthvisium.rds"))
   print(paste0("Dataset saved at ", output_folder, inputscRNA_name, "_", dataset_type, "_synthvisium.rds"))
 }
@@ -29,15 +30,8 @@ dataset_types = c("artificial_uniform_distinct", "artificial_diverse_distinct",
                   "artificial_regional_rare_celltype_diverse")
 
 output_path = "/home/chananchidas/data/"
-
 for (dataset in datasets){
   for (dataset_type in dataset_types){
-    createSynthvisiumRDS(paste0(path, dataset), dataset_type, output_path=output_path)
+    createSynthvisiumRDS(paste0(path, dataset), dataset_type, output_path=output_path, repl="rep3")
   }
-  
 }
-
-# Local
-# library(qsub)
-# qsub_lapply(list(paste0(path, dataset)), createSynthvisiumRDS,
-#            dataset_type = dataset_type, output_path=output_path)
