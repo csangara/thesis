@@ -89,3 +89,53 @@ ggplot(df, aes(x=x, y=y)) + geom_line() + geom_point() + xlab("Number of spots")
 #   scale_shape_manual(values = 1:23) + geom_point(size=1) +
 #   labs(x="Known Proportions", y="Predicted Proportions")
 
+#### UMAP of generation data ####
+path <- "D:/Work (Yr 2 Sem 1)/Thesis/Data/synthetic_datasets/"
+datasets <- c('brain_cortex_generation', 'cerebellum_cell_generation', 'cerebellum_nucleus_generation',
+              'hippocampus_generation', 'kidney_generation', 'pbmc_generation', 'scc_p5_generation')
+for (dataset in datasets){
+  seurat_obj <- readRDS(paste0(path, "generation_set/", dataset, ".rds"))
+  png(paste0("D:/Work (Yr 2 Sem 1)/Thesis/plots/UMAP_generation/", dataset, ".png"))
+  print(DimPlot(seurat_obj, reduction = "umap", label = TRUE, group.by = "celltype"))
+  dev.off()
+}
+
+# UMAP of test
+path <- "D:/Work (Yr 2 Sem 1)/Thesis/Data/synthetic_datasets/"
+test_set <- c('brain_cortex_test.rds', 'cerebellum_cell_test.rds', 'cerebellum_nucleus_test.rds',
+              'hippocampus_test.rds', 'kidney_test.rds',
+              'pbmc_test.rds', 'scc_p5_test.rds')
+for (dataset in test_set){
+  seurat_obj <- readRDS(paste0(path, "test_set/", dataset))
+  png(paste0("D:/Work (Yr 2 Sem 1)/Thesis/plots/UMAP_test/", dataset, ".png"))
+  print(DimPlot(seurat_obj, reduction = "umap", label = TRUE, group.by = "celltype"))
+  dev.off()
+}
+
+#### VIOLIN PLOT nCount_RNA ####
+setwd("D:/Work (Yr 2 Sem 1)/Thesis/")
+path <- "D:/Work (Yr 2 Sem 1)/Thesis/"
+library(patchwork)
+library(ggplot2)
+ncount_list <- readRDS(paste0(path, "rds/nCounts_list.rds"))
+datasets <- c("brain_cortex", "cerebellum_cell", "cerebellum_nucleus",
+              "hippocampus", "kidney", "pbmc", "scc_p5")
+df <- data.frame()
+foi <- "nFeature_RNA"
+for (i in 1:length(datasets)){
+  temp_df <- data.frame(counts = ncount_list[[i]][,foi],
+                        logcounts = log10(ncount_list[[i]][,foi]),
+                        dataset = rep(datasets[i], length(ncount_list[[i]][,foi])))
+  
+  df <- rbind(df, temp_df)
+}
+# sp <- split(df$counts, df$dataset)
+# a <- lapply(seq_along(sp), function(i){
+#   d <- density(sp[[i]])
+#   k <- which.max(d$y)
+#   data.frame(dataset = names(sp)[i], xmax = d$x[k], ymax = d$y[k])
+# })
+# a <- do.call(rbind, a)
+ggplot(df, aes(x=counts, color=dataset, fill=dataset)) + geom_density(alpha=0.2) +
+  #geom_text(data = a, aes(x = xmax, y = ymax, label = dataset)) + xlim(0, 25000)
+  scale_x_continuous(trans='log10') + labs(title=foi)

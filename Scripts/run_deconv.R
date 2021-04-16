@@ -36,7 +36,7 @@ dir.create(paste0("results/", dataset))
 library(SPOTlight)
 
 # Extract the top marker genes from each cluster
-seurat_obj_scRNA <- readRDS(scrna_path)
+seurat_obj_scRNA <- readRDS(stringr::str_replace_all(scrna_path, "generation", "test"))
 seurat_obj_scRNA <- preprocessSeurat(seurat_obj_scRNA)
 Idents(object = seurat_obj_scRNA) <- seurat_obj_scRNA@meta.data$subclass
 cluster_markers_all <- FindAllMarkers(object = seurat_obj_scRNA, assay = "SCT", slot = "data", verbose = TRUE, 
@@ -44,7 +44,7 @@ cluster_markers_all <- FindAllMarkers(object = seurat_obj_scRNA, assay = "SCT", 
 
 for (dataset_type in possible_dataset_types){
   set.seed(123)
-  synthetic_visium_data <- readRDS(paste0(path, dataset, "/", dataset, "_", dataset_type, "_synthvisium.rds"))
+  synthetic_visium_data <- readRDS(paste0(path, dataset, "/", repl, "/", dataset, "_", dataset_type, "_synthvisium.rds"))
   seurat_obj_visium <- createSeuratFromCounts(synthetic_visium_data$counts)
   start_time <- Sys.time()
   spotlight_deconv <- spotlight_deconvolution(se_sc = seurat_obj_scRNA, counts_spatial = seurat_obj_visium@assays$Spatial@counts,
@@ -53,13 +53,13 @@ for (dataset_type in possible_dataset_types){
   end_time <- Sys.time()
   decon_mtrx <- spotlight_deconv[[2]]
   
-  res = cor(t(synthetic_visium_data$relative_spot_composition[,1:23]), t(decon_mtrx[,1:23]))
+  res = cor(t(synthetic_visium_data$relative_spot_composition[,1:18]), t(decon_mtrx[,1:18]))
   print(mean(diag(res), na.rm=TRUE))
   
   #res2 = cor(synthetic_visium_data$relative_spot_composition[,1:23], decon_mtrx[,1:23], use="complete.obs")
   #mean(diag(res2), na.rm=TRUE)
   
-  saveRDS(spotlight_deconv, paste0("results/", dataset, "/spotlight/", dataset, "_", dataset_type, "_spotlight.rds"))
+  saveRDS(spotlight_deconv, paste0("results/", dataset, "/", repl, "_", run, "/spotlight/", dataset, "_", dataset_type, "_spotlight.rds"))
 }
 
 ######### MuSiC ######### 
@@ -69,7 +69,7 @@ library(xbioc)
 dir.create(paste0("results/", dataset, "/music/"))
 
 # Load reference scRNA-seq data and convert to ExprSet
-seurat_obj_scRNA = readRDS(scrna_path)
+seurat_obj_scRNA = readRDS(stringr::str_replace_all(scrna_path, "generation", "test"))
 seurat_obj_scRNA@meta.data$celltype = seurat_obj_scRNA@meta.data$celltype
 seurat_obj_scRNA = seurat_obj_scRNA %>% SetIdent(value = "celltype")
 eset_obj_scRNA <- SeuratToExprSet(seurat_obj_scRNA)
@@ -78,7 +78,7 @@ res = list()
 
 for (dataset_type in possible_dataset_types[5:8]){
   # Load synthetic visium data and convert to Expreset
-  synthetic_visium_data <- readRDS(paste0(path, dataset, "/", dataset, "_", dataset_type, "_synthvisium.rds"))
+  synthetic_visium_data <- readRDS(paste0(path, dataset, "/", repl, "/", dataset, "_", dataset_type, "_synthvisium.rds"))
   seurat_obj_visium <- createSeuratFromCounts(synthetic_visium_data$counts, PP=FALSE)
   eset_obj_visium <- SeuratToExprSet(seurat_obj_visium)
   rm(synthetic_visium_data, seurat_obj_visium)
@@ -86,7 +86,7 @@ for (dataset_type in possible_dataset_types[5:8]){
   # Deconvolution
   music_deconv = music_prop(bulk.eset = eset_obj_visium, sc.eset = eset_obj_scRNA, clusters = 'celltype', samples='samples')
   # res[dataset_type] = cor(t(synthetic_visium_data$relative_spot_composition[,1:23]), t(music_deconv$Est.prop.weighted[,1:23]))
-  saveRDS(music_deconv$Est.prop.weighted, paste0("results/", dataset, "/music/", dataset, "_", dataset_type, "_music.rds"))
+  saveRDS(music_deconv$Est.prop.weighted, paste0("results/", dataset, "/", repl, "_", run, "/music/", dataset, "_", dataset_type, "_music.rds"))
   rm(music_deconv, eset_obj_visium)
   gc()
 }
@@ -113,4 +113,4 @@ for (dataset_type in possible_dataset_types){
   res = as.matrix(sweep(RCTD_deconv@results$weights, 1, rowSums(RCTD_deconv@results$weights), '/'))
   
   saveRDS(res, paste0("results/", dataset, "/RCTD/", dataset, "_", dataset_type, "_RCTD.rds"))
-}
+}i

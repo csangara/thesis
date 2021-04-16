@@ -13,3 +13,4 @@ Scripts/robin
 *.pdf
 *.Rhistory
 *.mp4
+.Rproj.user
