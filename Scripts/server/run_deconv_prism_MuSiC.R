@@ -23,9 +23,11 @@ datasets <- c('allen_cortex_dwn', 'brain_cortex_generation', 'cerebellum_cell_ge
 dataset <- datasets[as.integer(inputs[1])]
 repl <- inputs[2]
 run <- inputs[3]
-results_path <- paste0("results/", dataset, "/", repl, "_", run, "/")
-scrna_dir <- "/group/irc/shared/synthetic_visium/test/"
-scrna_path <- paste0(scrna_dir, str_remove(dataset, "_generation"), "_test.rds")
+results_path <- paste0("results/", dataset, "_s1/", repl, "_", run, "/")
+scrna_dir <- "/group/irc/shared/synthetic_visium/generation/"
+scrna_path <- paste0(scrna_dir, dataset, ".rds")
+#scrna_path <- paste0(scrna_dir, str_remove(dataset, "_generation"), "_test.rds")
+
 dir.create(paste0("results/", dataset))
 
 ######### MuSiC ######### 

@@ -23,9 +23,10 @@ datasets <- c('allen_cortex_dwn', 'brain_cortex_generation', 'cerebellum_cell_ge
 dataset <- datasets[as.integer(inputs[1])]
 repl <- inputs[2]
 run <- inputs[3]
-results_path <- paste0("results/", dataset, "/", repl, "_", run, "/")
-scrna_dir <- "/group/irc/shared/synthetic_visium/test/"
-scrna_path <- paste0(scrna_dir, str_remove(dataset, "_generation"), "_test.rds")
+results_path <- paste0("results/", dataset, "_s1/", repl, "_", run, "/")
+scrna_dir <- "/group/irc/shared/synthetic_visium/generation/"
+scrna_path <- paste0(scrna_dir, dataset, ".rds")
+#scrna_path <- paste0(scrna_dir, str_remove(dataset, "_generation"), "_test.rds")
 dir.create(paste0("results/", dataset))
 
 ######### RCTD ##########
@@ -43,7 +44,7 @@ for (dataset_type in possible_dataset_types){
   synthetic_visium_data <- readRDS(paste0(path, dataset, "/", repl, "/", dataset, "_", dataset_type, "_synthvisium.rds"))
   spatialRNA_obj_visium <- RCTD:::SpatialRNA(counts=as(as(synthetic_visium_data$counts,"matrix"),"dgCMatrix"))
 
-  RCTD_deconv <- create.RCTD(spatialRNA_obj_visium, seurat_obj_scRNA, max_cores = 4, CELL_MIN_INSTANCE = 5)
+  RCTD_deconv <- create.RCTD(spatialRNA_obj_visium, seurat_obj_scRNA, max_cores = 4, CELL_MIN_INSTANCE=5)
   RCTD_deconv <- run.RCTD(RCTD_deconv, doublet_mode = FALSE)
   res = as.matrix(sweep(RCTD_deconv@results$weights, 1, rowSums(RCTD_deconv@results$weights), '/'))
 

@@ -1,3 +1,9 @@
+#!/usr/bin/env Rscript
+inputs = commandArgs(trailingOnly=TRUE)
+if (length(inputs) != 1) {
+    stop("usage: < rep no. >", call.=FALSE)
+}
+
 library(Seurat)
 
 createSynthvisiumRDS <- function(inputscRNA_rds, dataset_type, output_path="", 
@@ -30,8 +36,8 @@ dataset_types = c("artificial_uniform_distinct", "artificial_diverse_distinct",
                   "artificial_regional_rare_celltype_diverse")
 
 output_path = "/home/chananchidas/data/"
-for (dataset in datasets){
+for (dataset in datasets[3:length(datasets)]){
   for (dataset_type in dataset_types){
-    createSynthvisiumRDS(paste0(path, dataset), dataset_type, output_path=output_path, repl="rep3")
+    createSynthvisiumRDS(paste0(path, dataset), dataset_type, output_path=output_path, repl=inputs[1])
   }
 }
