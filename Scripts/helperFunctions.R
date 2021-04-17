@@ -1,12 +1,8 @@
 #### HELPER FUNCTIONS #####
 
 library(Seurat)
-library(synthvisium)
 library(dplyr)
-library(Biobase)
 library(stringr)
-library(loomR)
-library(SeuratDisk)
 # Sys.setenv(R_REMOTES_NO_ERRORS_FROM_WARNINGS="true")
 
 # Creates synthetic visium data given a reference scRNA-seq data and dataset type
@@ -15,7 +11,7 @@ createSynthvisiumRDS <- function(inputscRNA_rds, dataset_type, output_folder="sy
   seurat_obj_scRNA =  readRDS(inputscRNA_rds)
 
   # Create synthetic visium data from scRNA data
-  synthetic_visium_data = generate_synthetic_visium(seurat_obj = seurat_obj_scRNA, dataset_type = dataset_type, 
+  synthetic_visium_data = synthvisium::generate_synthetic_visium(seurat_obj = seurat_obj_scRNA, dataset_type = dataset_type, 
                                                     clust_var = "subclass", region_var = "brain_subregion" , n_regions = NULL,
                                                     n_spots_min = 50, n_spots_max = 200, visium_mean = 20000, visium_sd = 5000)
   
@@ -54,33 +50,46 @@ SeuratToExprSet <- function(seurat_object){
     sc.pheno$celltype = seurat_object@meta.data$celltype
   }
   
-  sc.pdata <- new("AnnotatedDataFrame",
-                  data=sc.pheno)
+  sc.pdata <- new("AnnotatedDataFrame", data=sc.pheno)
   sc.data <- as.matrix(GetAssayData(seurat_object)[,names(Idents(seurat_object)),drop=F])
-  sc.eset <- ExpressionSet(assayData=sc.data, phenoData=sc.pdata)
+  sc.eset <- Biobase::ExpressionSet(assayData=sc.data, phenoData=sc.pdata)
   return(sc.eset)
 }
 
 # Convert Seurat object to Loom
-convertSeuratRDSToLoom <- function(input_path, raw=TRUE, isSeurat=TRUE, PP=FALSE){
-  seurat_obj =  readRDS(input_path)
-  if (!isSeurat){ seurat_obj <- createAndPPSeuratFromCounts(seurat_obj$counts, PP=PP) }
-  if (raw) { DefaultAssay(seurat_obj) <- "RNA"}
+convertSeuratRDSToLoom <- function(input_path, output_path=NULL,isSeurat=TRUE, raw=TRUE){
+  seurat_obj <- readRDS(input_path)
+  if (!isSeurat) {
+    seurat_obj <- Seurat::CreateSeuratObject(counts = seurat_obj$counts, assay = "Spatial")
+  }
+  if (raw) {DefaultAssay(seurat_obj) <- "RNA"}
   file_name <- tools::file_path_sans_ext(input_path)
-  as.loom(seurat_obj, filename = paste0(file_name, ".loom"))
+  if (is.null(output_path)) {output_path <- dirname(input_path)}
+  file_name <- stringr::str_split(basename(input_path), "\\.")[[1]][1]
+  
+  SeuratDisk::as.loom(seurat_obj, filename = paste0(output_path, "/", file_name, ".loom"))
 }
 
-# Convert Seurat object to h5ad (pp = preprocess and sctransform, if FALSE, raw counts will be saved)
-convertSeuratRDSToh5ad <- function(input_path, raw=TRUE, isSeurat=TRUE, PP=FALSE){
-  seurat_obj = readRDS(input_path)
+# Convert Seurat object to h5ad
+convertSeuratRDSToh5ad <- function(input_path, output_path=NULL, isSeurat=TRUE, raw=TRUE, update=FALSE){
+  seurat_obj <- readRDS(input_path)
+  if (!isSeurat){
+    seurat_obj <- CreateSeuratObject(counts = seurat_obj$counts, assay = "Spatial")
+  }
+  if (raw) { DefaultAssay(seurat_obj) <- "RNA" }
+  if (update){
+    seurat_obj <- UpdateSeuratObject(seurat_obj)
+    seurat_obj <- CreateSeuratObject(counts = GetAssayData(seurat_obj), assay = DefaultAssay(seurat_obj))
+  }
+  
   file_name <- tools::file_path_sans_ext(input_path)
-  if (!isSeurat){ seurat_obj <- createAndPPSeuratFromCounts(seurat_obj$counts, PP=PP) }
-  if (raw) { DefaultAssay(seurat_obj) <- "RNA"}
-  SaveH5Seurat(seurat_obj, filename = paste0(file_name, ".h5Seurat"))
-  Convert(paste0(file_name, ".h5Seurat"), dest = "h5ad")
-  file.remove(paste0(file_name, ".h5Seurat"))
+  if (is.null(output_path)) {output_path <- dirname(input_path)}
+  file_name <- stringr::str_split(basename(input_path), "\\.")[[1]][1]
+  if (file.exists(paste0(output_path, "/", file_name, ".h5ad"))){return ("h5ad file exists") }
+  SeuratDisk::SaveH5Seurat(seurat_obj, filename = paste0(output_path, "/", file_name, ".h5Seurat"))
+  SeuratDisk::Convert(paste0(output_path, "/", file_name, ".h5Seurat"), dest = "h5ad")
+  file.remove(paste0(output_path, "/", file_name, ".h5Seurat"))
 }
-
 
 # Write file in a CIBERSORT-compatible format given a Seurat object, by default use SCT column
 # Other arguments are "raw" and "CPM"
