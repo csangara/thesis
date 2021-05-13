@@ -34,8 +34,8 @@ preprocessSeurat <- function(seurat_obj, assay="RNA"){
 }
 
 # Create seurat object from count data (meant to be used with synthetic visium data)
-createSeuratFromCounts <- function(counts_data, PP=TRUE){
-  seurat_obj_visium = CreateSeuratObject(counts = counts_data, assay = "Spatial")
+createSeuratFromCounts <- function(counts_data, PP=TRUE, metadata=NULL){
+  seurat_obj_visium = CreateSeuratObject(counts = counts_data, assay = "Spatial", meta.data=metadata)
   if (PP){ seurat_obj_visium <- preprocessSeurat(seurat_obj_visium, "Spatial") }
   return(seurat_obj_visium)
 }

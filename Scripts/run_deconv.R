@@ -1,22 +1,5 @@
-setwd("D:/Work (Yr 2 Sem 1)/Thesis")
-path <- "D:/Work (Yr 2 Sem 1)/Thesis/Data/synthetic_datasets/"
-library(Seurat)
-library(synthvisium)
-library(dplyr)
-source("Scripts/helperFunctions.R")
-
-possible_dataset_types = c("real", "real_top1","real_top1_uniform","real_top2_overlap","real_top2_overlap_uniform",
-                           "real_missing_celltypes_visium", "artificial_uniform_distinct", "artificial_diverse_distinct",
-                           "artificial_uniform_overlap", "artificial_diverse_overlap", "artificial_dominant_celltype_diverse",
-                           "artificial_partially_dominant_celltype_diverse", "artificial_missing_celltypes_visium")
-
-possible_dataset_types = c("artificial_uniform_distinct", "artificial_diverse_distinct", "artificial_uniform_overlap",
-                              "artificial_diverse_overlap", "artificial_dominant_celltype_diverse",
-                              "artificial_partially_dominant_celltype_diverse", "artificial_dominant_rare_celltype_diverse",
-                              "artificial_regional_rare_celltype_diverse")
-
-datasets <- c('allen_cortex_dwn', 'brain_cortex_generation', 'cerebellum_cell_generation', 'cerebellum_nucleus_generation',
-              'hippocampus_generation', 'kidney_generation', 'pbmc_generation', 'scc_p5_generation')
+######## RUNNING DECONVOLUTION ########
+source("D:/Work (Yr 2 Sem 1)/Thesis/Scripts/init.R")
 
 ######## GENERATING NEEDED DATA ############
 # Create synthetic data from scRNA data and save as RDS
@@ -70,7 +53,6 @@ dir.create(paste0("results/", dataset, "/music/"))
 
 # Load reference scRNA-seq data and convert to ExprSet
 seurat_obj_scRNA = readRDS(stringr::str_replace_all(scrna_path, "generation", "test"))
-seurat_obj_scRNA@meta.data$celltype = seurat_obj_scRNA@meta.data$celltype
 seurat_obj_scRNA = seurat_obj_scRNA %>% SetIdent(value = "celltype")
 eset_obj_scRNA <- SeuratToExprSet(seurat_obj_scRNA)
 rm(seurat_obj_scRNA)
