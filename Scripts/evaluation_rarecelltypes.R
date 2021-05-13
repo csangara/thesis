@@ -1,25 +1,5 @@
 ### DIRICHLET DISTRIBUTION ###
-setwd("D:/Work (Yr 2 Sem 1)/Thesis/")
-path <- "D:/Work (Yr 2 Sem 1)/Thesis/Data/synthetic_datasets/"
-
-library(Seurat)
-library(synthvisium)
-library(dplyr)
-library(DirichletReg)
-source("Scripts/helperFunctions.R")
-library(patchwork)
-library(ggplot2)
-library(stringr)
-
-possible_dataset_types <- c("artificial_dominant_celltype_diverse", "artificial_partially_dominant_celltype_diverse",
-                            "artificial_dominant_rare_celltype_diverse", "artificial_regional_rare_celltype_diverse")
-
-datasets <- c('allen_cortex_dwn', 'brain_cortex_generation', 'cerebellum_cell_generation', 'cerebellum_nucleus_generation',
-              'hippocampus_generation', 'kidney_generation', 'pbmc_generation', 'scc_p5_generation')
-
-methods <- c("spotlight", "music", "cell2location", "RCTD", "stereoscope")
-dataset <- datasets[2]
-run <- ""
+source("D:/Work (Yr 2 Sem 1)/Thesis/Scripts/init.R")
 
 ## CALCULATING METRICS ##
 dataset_type <- possible_dataset_types[3]
