@@ -23,12 +23,24 @@ datasets <- c('allen_cortex_dwn', 'brain_cortex_generation', 'cerebellum_cell_ge
 dataset <- datasets[as.integer(inputs[1])]
 repl <- inputs[2]
 run <- inputs[3]
-results_path <- paste0("results/", dataset, "_s1/", repl, "_", run, "/")
-scrna_dir <- "/group/irc/shared/synthetic_visium/generation/"
-scrna_path <- paste0(scrna_dir, dataset, ".rds")
-#scrna_path <- paste0(scrna_dir, str_remove(dataset, "_generation"), "_test.rds")
 
-dir.create(paste0("results/", dataset))
+# SCENARIO1
+# results_path <- paste0("results/", dataset, "_s1/", repl, "_", run, "/")
+# scrna_dir <- "/group/irc/shared/synthetic_visium/generation/"
+# scrna_path <- paste0(scrna_dir, dataset, ".rds")
+
+# SCENARIO2
+# results_path <- paste0("results/", dataset, "/", repl, "_", run, "/")
+# scrna_dir <- "/group/irc/shared/synthetic_visium/test/"
+# scrna_path <- paste0(scrna_dir, str_remove(dataset, "_generation"), "_test.rds")
+
+# SCENARIO3
+results_path <- paste0("results/", dataset, "_s4/", repl, "_", run, "/")
+scrna_dir <- "/group/irc/shared/synthetic_visium/test/"
+ref_dataset <- ifelse(dataset == "cerebellum_cell_generation", "cerebellum_nucleus_test.rds", "cerebellum_cell_test.rds")
+scrna_path <- paste0(scrna_dir, ref_dataset)
+print(paste("Dataset is: ", dataset))
+print(paste("Reference dataset is:", ref_dataset))
 
 ######### MuSiC ######### 
 
