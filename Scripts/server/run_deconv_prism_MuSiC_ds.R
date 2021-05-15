@@ -1,7 +1,7 @@
 #!/usr/bin/env Rscript
 inputs = commandArgs(trailingOnly=TRUE)
-if (length(inputs) < 3) {
-    stop("usage: < dataset index > < replicate > < k >", call.=FALSE)
+if (length(inputs) < 2) {
+    stop("usage: < dataset index > < replicate >", call.=FALSE)
 }
 # setwd("D:/Work (Yr 2 Sem 1)/Thesis/")
 setwd("~/thesis/")
@@ -18,7 +18,7 @@ datasets <- c('allen_cortex_dwn', 'brain_cortex', 'cerebellum_cell', 'cerebellum
 dataset_type <- "artificial_uniform_distinct"
 dataset <- datasets[as.integer(inputs[1])]
 repl <- inputs[2]
-k <-  inputs[3]
+k <- Sys.getenv("SGE_TASK_ID")
 
 # SERVER
 path <- paste0("~/thesis/downsampling/", dataset, "/", repl, "/")
@@ -66,7 +66,7 @@ rm(music_deconv, eset_obj_visium)
 gc()
 
 job_info <- data.frame(JOB_ID=Sys.getenv("JOB_ID"),
-           SGE_TASK_ID=Sys.getenv("SGE_TASK_ID"),
+           SGE_TASK_ID=k,
            START_TIME=start_time,
            END_TIME=end_time,
            TIME=end_time-start_time)
