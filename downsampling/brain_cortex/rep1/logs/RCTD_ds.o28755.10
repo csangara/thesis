@@ -1,0 +1,61 @@
+[1] "Begin: process_cell_type_info"
+[1] "init_RCTD: number of cells in reference: 5162"
+[1] "init_RCTD: number of genes in reference: 17538"
+
+     Astro       Endo    L2.3.IT         L4      L5.IT      L5.PT      L6.CT 
+       152         47        332        510        331        168        308 
+     L6.IT        L6b      Lamp5 Macrophage         NP      Oligo      Pvalb 
+       636        150        456         27        105         45        489 
+      Sncg        Sst        Vip       VLMC 
+        52        639        694         21 
+[1] "End: process_cell_type_info"
+[1] "create.RCTD: getting regression differentially expressed genes: "
+[1] "get_de_genes: Astro found DE genes: 2"
+[1] "get_de_genes: Endo found DE genes: 3"
+[1] "get_de_genes: L2.3.IT found DE genes: 0"
+[1] "get_de_genes: L4 found DE genes: 0"
+[1] "get_de_genes: L5.IT found DE genes: 1"
+[1] "get_de_genes: L5.PT found DE genes: 0"
+[1] "get_de_genes: L6.CT found DE genes: 0"
+[1] "get_de_genes: L6.IT found DE genes: 0"
+[1] "get_de_genes: L6b found DE genes: 0"
+[1] "get_de_genes: Lamp5 found DE genes: 0"
+[1] "get_de_genes: Macrophage found DE genes: 1"
+[1] "get_de_genes: NP found DE genes: 1"
+[1] "get_de_genes: Oligo found DE genes: 3"
+[1] "get_de_genes: Pvalb found DE genes: 2"
+[1] "get_de_genes: Sncg found DE genes: 1"
+[1] "get_de_genes: Sst found DE genes: 0"
+[1] "get_de_genes: Vip found DE genes: 1"
+[1] "get_de_genes: VLMC found DE genes: 3"
+[1] "get_de_genes: total DE genes: 14"
+[1] "create.RCTD: getting platform effect normalization differentially expressed genes: "
+[1] "get_de_genes: Astro found DE genes: 2"
+[1] "get_de_genes: Endo found DE genes: 4"
+[1] "get_de_genes: L2.3.IT found DE genes: 0"
+[1] "get_de_genes: L4 found DE genes: 2"
+[1] "get_de_genes: L5.IT found DE genes: 1"
+[1] "get_de_genes: L5.PT found DE genes: 2"
+[1] "get_de_genes: L6.CT found DE genes: 0"
+[1] "get_de_genes: L6.IT found DE genes: 0"
+[1] "get_de_genes: L6b found DE genes: 1"
+[1] "get_de_genes: Lamp5 found DE genes: 0"
+[1] "get_de_genes: Macrophage found DE genes: 6"
+[1] "get_de_genes: NP found DE genes: 1"
+[1] "get_de_genes: Oligo found DE genes: 3"
+[1] "get_de_genes: Pvalb found DE genes: 2"
+[1] "get_de_genes: Sncg found DE genes: 2"
+[1] "get_de_genes: Sst found DE genes: 3"
+[1] "get_de_genes: Vip found DE genes: 1"
+[1] "get_de_genes: VLMC found DE genes: 4"
+[1] "get_de_genes: total DE genes: 21"
+[1] "fitBulk: decomposing bulk"
+[1] "chooseSigma: using initial Q_mat with sigma =  1"
+starting worker pid=75852 on localhost:11968 at 18:10:02.802
+starting worker pid=75879 on localhost:11968 at 18:10:04.387
+starting worker pid=75908 on localhost:11968 at 18:10:06.317
+starting worker pid=75938 on localhost:11968 at 18:10:08.423
+starting worker pid=75965 on localhost:11968 at 18:10:10.516
+starting worker pid=76003 on localhost:11968 at 18:10:12.168
+starting worker pid=76032 on localhost:11968 at 18:10:13.883
+starting worker pid=76060 on localhost:11968 at 18:10:15.664
