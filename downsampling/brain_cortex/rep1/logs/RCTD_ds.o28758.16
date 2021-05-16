@@ -1,0 +1,131 @@
+[1] "Begin: process_cell_type_info"
+[1] "init_RCTD: number of cells in reference: 5162"
+[1] "init_RCTD: number of genes in reference: 17538"
+
+     Astro       Endo    L2.3.IT         L4      L5.IT      L5.PT      L6.CT 
+       152         47        332        510        331        168        308 
+     L6.IT        L6b      Lamp5 Macrophage         NP      Oligo      Pvalb 
+       636        150        456         27        105         45        489 
+      Sncg        Sst        Vip       VLMC 
+        52        639        694         21 
+[1] "End: process_cell_type_info"
+[1] "create.RCTD: getting regression differentially expressed genes: "
+[1] "get_de_genes: Astro found DE genes: 319"
+[1] "get_de_genes: Endo found DE genes: 418"
+[1] "get_de_genes: L2.3.IT found DE genes: 104"
+[1] "get_de_genes: L4 found DE genes: 137"
+[1] "get_de_genes: L5.IT found DE genes: 58"
+[1] "get_de_genes: L5.PT found DE genes: 57"
+[1] "get_de_genes: L6.CT found DE genes: 84"
+[1] "get_de_genes: L6.IT found DE genes: 73"
+[1] "get_de_genes: L6b found DE genes: 81"
+[1] "get_de_genes: Lamp5 found DE genes: 89"
+[1] "get_de_genes: Macrophage found DE genes: 397"
+[1] "get_de_genes: NP found DE genes: 87"
+[1] "get_de_genes: Oligo found DE genes: 284"
+[1] "get_de_genes: Pvalb found DE genes: 90"
+[1] "get_de_genes: Sncg found DE genes: 101"
+[1] "get_de_genes: Sst found DE genes: 61"
+[1] "get_de_genes: Vip found DE genes: 90"
+[1] "get_de_genes: VLMC found DE genes: 304"
+[1] "get_de_genes: total DE genes: 1949"
+[1] "create.RCTD: getting platform effect normalization differentially expressed genes: "
+[1] "get_de_genes: Astro found DE genes: 614"
+[1] "get_de_genes: Endo found DE genes: 788"
+[1] "get_de_genes: L2.3.IT found DE genes: 299"
+[1] "get_de_genes: L4 found DE genes: 390"
+[1] "get_de_genes: L5.IT found DE genes: 203"
+[1] "get_de_genes: L5.PT found DE genes: 223"
+[1] "get_de_genes: L6.CT found DE genes: 257"
+[1] "get_de_genes: L6.IT found DE genes: 246"
+[1] "get_de_genes: L6b found DE genes: 253"
+[1] "get_de_genes: Lamp5 found DE genes: 233"
+[1] "get_de_genes: Macrophage found DE genes: 740"
+[1] "get_de_genes: NP found DE genes: 268"
+[1] "get_de_genes: Oligo found DE genes: 576"
+[1] "get_de_genes: Pvalb found DE genes: 313"
+[1] "get_de_genes: Sncg found DE genes: 272"
+[1] "get_de_genes: Sst found DE genes: 204"
+[1] "get_de_genes: Vip found DE genes: 215"
+[1] "get_de_genes: VLMC found DE genes: 609"
+[1] "get_de_genes: total DE genes: 3683"
+[1] "fitBulk: decomposing bulk"
+[1] "chooseSigma: using initial Q_mat with sigma =  1"
+starting worker pid=90601 on localhost:11093 at 00:02:31.161
+starting worker pid=90610 on localhost:11093 at 00:02:31.535
+starting worker pid=90619 on localhost:11093 at 00:02:31.920
+starting worker pid=90628 on localhost:11093 at 00:02:32.290
+starting worker pid=90637 on localhost:11093 at 00:02:32.657
+starting worker pid=90646 on localhost:11093 at 00:02:33.038
+starting worker pid=90655 on localhost:11093 at 00:02:33.410
+starting worker pid=90664 on localhost:11093 at 00:02:33.779
+[1] "Likelihood value: 2803882.34060694"
+[1] "Sigma value:  0.84"
+starting worker pid=91091 on localhost:11093 at 00:04:05.748
+starting worker pid=91100 on localhost:11093 at 00:04:06.119
+starting worker pid=91109 on localhost:11093 at 00:04:06.488
+starting worker pid=91118 on localhost:11093 at 00:04:06.865
+starting worker pid=91127 on localhost:11093 at 00:04:07.234
+starting worker pid=91153 on localhost:11093 at 00:04:07.617
+starting worker pid=91163 on localhost:11093 at 00:04:08.003
+starting worker pid=91172 on localhost:11093 at 00:04:08.372
+[1] "Likelihood value: 2749370.29892967"
+[1] "Sigma value:  0.69"
+starting worker pid=91598 on localhost:11093 at 00:05:40.237
+starting worker pid=91607 on localhost:11093 at 00:05:40.626
+starting worker pid=91616 on localhost:11093 at 00:05:41.004
+starting worker pid=91625 on localhost:11093 at 00:05:41.369
+starting worker pid=91634 on localhost:11093 at 00:05:41.735
+starting worker pid=91643 on localhost:11093 at 00:05:42.106
+starting worker pid=91652 on localhost:11093 at 00:05:42.478
+starting worker pid=91661 on localhost:11093 at 00:05:42.850
+[1] "Likelihood value: 2707134.33343648"
+[1] "Sigma value:  0.61"
+starting worker pid=92092 on localhost:11093 at 00:07:12.969
+starting worker pid=92101 on localhost:11093 at 00:07:13.342
+starting worker pid=92110 on localhost:11093 at 00:07:13.715
+starting worker pid=92119 on localhost:11093 at 00:07:14.115
+starting worker pid=92135 on localhost:11093 at 00:07:14.498
+starting worker pid=92155 on localhost:11093 at 00:07:14.879
+starting worker pid=92165 on localhost:11093 at 00:07:15.260
+starting worker pid=92174 on localhost:11093 at 00:07:15.660
+[1] "Likelihood value: 2690197.70197898"
+[1] "Sigma value:  0.53"
+starting worker pid=92566 on localhost:11093 at 00:08:46.455
+starting worker pid=92593 on localhost:11093 at 00:08:46.872
+starting worker pid=92602 on localhost:11093 at 00:08:47.255
+starting worker pid=92611 on localhost:11093 at 00:08:47.624
+starting worker pid=92620 on localhost:11093 at 00:08:48.005
+starting worker pid=92629 on localhost:11093 at 00:08:48.397
+starting worker pid=92638 on localhost:11093 at 00:08:48.774
+starting worker pid=92647 on localhost:11093 at 00:08:49.148
+[1] "Likelihood value: 2678698.43832092"
+[1] "Sigma value:  0.46"
+starting worker pid=93076 on localhost:11093 at 00:10:19.802
+starting worker pid=93085 on localhost:11093 at 00:10:20.180
+starting worker pid=93094 on localhost:11093 at 00:10:20.558
+starting worker pid=93103 on localhost:11093 at 00:10:20.938
+starting worker pid=93112 on localhost:11093 at 00:10:21.317
+starting worker pid=93121 on localhost:11093 at 00:10:21.705
+starting worker pid=93130 on localhost:11093 at 00:10:22.086
+starting worker pid=93139 on localhost:11093 at 00:10:22.470
+[1] "Likelihood value: 2674267.77350038"
+[1] "Sigma value:  0.45"
+starting worker pid=93631 on localhost:11093 at 00:11:53.203
+starting worker pid=93640 on localhost:11093 at 00:11:53.589
+starting worker pid=93649 on localhost:11093 at 00:11:53.984
+starting worker pid=93667 on localhost:11093 at 00:11:54.360
+starting worker pid=93685 on localhost:11093 at 00:11:54.733
+starting worker pid=93694 on localhost:11093 at 00:11:55.127
+starting worker pid=93703 on localhost:11093 at 00:11:55.513
+starting worker pid=93712 on localhost:11093 at 00:11:55.896
+[1] "Likelihood value: 2674130.79479746"
+[1] "Sigma value:  0.45"
+starting worker pid=94151 on localhost:11093 at 00:13:31.991
+starting worker pid=94160 on localhost:11093 at 00:13:32.371
+starting worker pid=94169 on localhost:11093 at 00:13:32.743
+starting worker pid=94178 on localhost:11093 at 00:13:33.116
+starting worker pid=94187 on localhost:11093 at 00:13:33.493
+starting worker pid=94196 on localhost:11093 at 00:13:33.869
+starting worker pid=94205 on localhost:11093 at 00:13:34.251
+starting worker pid=94214 on localhost:11093 at 00:13:34.630

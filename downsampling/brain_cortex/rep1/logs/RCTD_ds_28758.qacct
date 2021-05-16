@@ -1,0 +1,720 @@
+==============================================================
+qname        all.q               
+hostname     prismcls07          
+group        irc                 
+owner        chananchidas        
+project      NONE                
+department   defaultdepartment   
+jobname      RCTD_ds             
+jobnumber    28758               
+taskid       1                   
+account      sge                 
+priority     0                   
+qsub_time    Sat May 15 23:57:11 2021
+start_time   Sat May 15 23:57:26 2021
+end_time     Sun May 16 00:01:14 2021
+granted_pe   serial              
+slots        8                   
+failed       0    
+exit_status  0                   
+ru_wallclock 228s
+ru_utime     47.929s
+ru_stime     9.280s
+ru_maxrss    4.529MB
+ru_ixrss     0.000B
+ru_ismrss    0.000B
+ru_idrss     0.000B
+ru_isrss     0.000B
+ru_minflt    1713389             
+ru_majflt    106                 
+ru_nswap     0                   
+ru_inblock   2449768             
+ru_oublock   328                 
+ru_msgsnd    0                   
+ru_msgrcv    0                   
+ru_nsignals  0                   
+ru_nvcsw     12682               
+ru_nivcsw    6809                
+cpu          453.380s
+mem          198.907GBs
+io           3.791GB
+iow          0.000s
+maxvmem      6.391GB
+arid         undefined
+ar_sub_time  undefined
+category     -q all.q -l h_stack=128m,h_vmem=4G -pe serial 8
+==============================================================
+qname        all.q               
+hostname     prismcls07          
+group        irc                 
+owner        chananchidas        
+project      NONE                
+department   defaultdepartment   
+jobname      RCTD_ds             
+jobnumber    28758               
+taskid       2                   
+account      sge                 
+priority     0                   
+qsub_time    Sat May 15 23:57:11 2021
+start_time   Sat May 15 23:57:26 2021
+end_time     Sun May 16 00:01:23 2021
+granted_pe   serial              
+slots        8                   
+failed       0    
+exit_status  0                   
+ru_wallclock 237s
+ru_utime     59.068s
+ru_stime     9.678s
+ru_maxrss    4.501MB
+ru_ixrss     0.000B
+ru_ismrss    0.000B
+ru_idrss     0.000B
+ru_isrss     0.000B
+ru_minflt    3735740             
+ru_majflt    101                 
+ru_nswap     0                   
+ru_inblock   101944              
+ru_oublock   312                 
+ru_msgsnd    0                   
+ru_msgrcv    0                   
+ru_nsignals  0                   
+ru_nvcsw     12362               
+ru_nivcsw    5016                
+cpu          423.630s
+mem          241.777GBs
+io           3.475GB
+iow          0.000s
+maxvmem      6.330GB
+arid         undefined
+ar_sub_time  undefined
+category     -q all.q -l h_stack=128m,h_vmem=4G -pe serial 8
+==============================================================
+qname        all.q               
+hostname     prismcls07          
+group        irc                 
+owner        chananchidas        
+project      NONE                
+department   defaultdepartment   
+jobname      RCTD_ds             
+jobnumber    28758               
+taskid       3                   
+account      sge                 
+priority     0                   
+qsub_time    Sat May 15 23:57:11 2021
+start_time   Sat May 15 23:57:26 2021
+end_time     Sun May 16 00:01:49 2021
+granted_pe   serial              
+slots        8                   
+failed       0    
+exit_status  0                   
+ru_wallclock 263s
+ru_utime     76.420s
+ru_stime     12.546s
+ru_maxrss    4.481MB
+ru_ixrss     0.000B
+ru_ismrss    0.000B
+ru_idrss     0.000B
+ru_isrss     0.000B
+ru_minflt    5767307             
+ru_majflt    94                  
+ru_nswap     0                   
+ru_inblock   122312              
+ru_oublock   336                 
+ru_msgsnd    0                   
+ru_msgrcv    0                   
+ru_nsignals  0                   
+ru_nvcsw     12728               
+ru_nivcsw    5928                
+cpu          504.290s
+mem          334.901GBs
+io           3.761GB
+iow          0.000s
+maxvmem      6.360GB
+arid         undefined
+ar_sub_time  undefined
+category     -q all.q -l h_stack=128m,h_vmem=4G -pe serial 8
+==============================================================
+qname        all.q               
+hostname     prismcls05          
+group        irc                 
+owner        chananchidas        
+project      NONE                
+department   defaultdepartment   
+jobname      RCTD_ds             
+jobnumber    28758               
+taskid       5                   
+account      sge                 
+priority     0                   
+qsub_time    Sat May 15 23:57:11 2021
+start_time   Sat May 15 23:57:26 2021
+end_time     Sun May 16 00:02:16 2021
+granted_pe   serial              
+slots        8                   
+failed       0    
+exit_status  0                   
+ru_wallclock 290s
+ru_utime     82.029s
+ru_stime     14.407s
+ru_maxrss    4.519MB
+ru_ixrss     0.000B
+ru_ismrss    0.000B
+ru_idrss     0.000B
+ru_isrss     0.000B
+ru_minflt    6199844             
+ru_majflt    99                  
+ru_nswap     0                   
+ru_inblock   440680              
+ru_oublock   536                 
+ru_msgsnd    0                   
+ru_msgrcv    0                   
+ru_nsignals  0                   
+ru_nvcsw     19093               
+ru_nivcsw    5716                
+cpu          707.740s
+mem          442.886GBs
+io           3.467GB
+iow          0.000s
+maxvmem      6.770GB
+arid         undefined
+ar_sub_time  undefined
+category     -q all.q -l h_stack=128m,h_vmem=4G -pe serial 8
+==============================================================
+qname        all.q               
+hostname     prismcls01          
+group        irc                 
+owner        chananchidas        
+project      NONE                
+department   defaultdepartment   
+jobname      RCTD_ds             
+jobnumber    28758               
+taskid       13                  
+account      sge                 
+priority     0                   
+qsub_time    Sat May 15 23:57:11 2021
+start_time   Sat May 15 23:57:26 2021
+end_time     Sun May 16 00:03:46 2021
+granted_pe   serial              
+slots        8                   
+failed       0    
+exit_status  0                   
+ru_wallclock 380s
+ru_utime     113.525s
+ru_stime     14.179s
+ru_maxrss    4.559MB
+ru_ixrss     0.000B
+ru_ismrss    0.000B
+ru_idrss     0.000B
+ru_isrss     0.000B
+ru_minflt    7702894             
+ru_majflt    90                  
+ru_nswap     0                   
+ru_inblock   2498480             
+ru_oublock   3080                
+ru_msgsnd    0                   
+ru_msgrcv    0                   
+ru_nsignals  0                   
+ru_nvcsw     28107               
+ru_nivcsw    13169               
+cpu          1201.740s
+mem          703.710GBs
+io           3.781GB
+iow          0.000s
+maxvmem      6.846GB
+arid         undefined
+ar_sub_time  undefined
+category     -q all.q -l h_stack=128m,h_vmem=4G -pe serial 8
+==============================================================
+qname        all.q               
+hostname     prismcls08          
+group        irc                 
+owner        chananchidas        
+project      NONE                
+department   defaultdepartment   
+jobname      RCTD_ds             
+jobnumber    28758               
+taskid       9                   
+account      sge                 
+priority     0                   
+qsub_time    Sat May 15 23:57:11 2021
+start_time   Sat May 15 23:57:26 2021
+end_time     Sun May 16 00:03:54 2021
+granted_pe   serial              
+slots        8                   
+failed       0    
+exit_status  0                   
+ru_wallclock 388s
+ru_utime     107.102s
+ru_stime     16.332s
+ru_maxrss    4.537MB
+ru_ixrss     0.000B
+ru_ismrss    0.000B
+ru_idrss     0.000B
+ru_isrss     0.000B
+ru_minflt    7874395             
+ru_majflt    113                 
+ru_nswap     0                   
+ru_inblock   160208              
+ru_oublock   1688                
+ru_msgsnd    0                   
+ru_msgrcv    0                   
+ru_nsignals  0                   
+ru_nvcsw     24444               
+ru_nivcsw    4643                
+cpu          1010.250s
+mem          629.727GBs
+io           3.765GB
+iow          0.000s
+maxvmem      6.900GB
+arid         undefined
+ar_sub_time  undefined
+category     -q all.q -l h_stack=128m,h_vmem=4G -pe serial 8
+==============================================================
+qname        all.q               
+hostname     prismcls05          
+group        irc                 
+owner        chananchidas        
+project      NONE                
+department   defaultdepartment   
+jobname      RCTD_ds             
+jobnumber    28758               
+taskid       4                   
+account      sge                 
+priority     0                   
+qsub_time    Sat May 15 23:57:11 2021
+start_time   Sat May 15 23:57:26 2021
+end_time     Sun May 16 00:06:52 2021
+granted_pe   serial              
+slots        8                   
+failed       0    
+exit_status  0                   
+ru_wallclock 566s
+ru_utime     89.727s
+ru_stime     12.092s
+ru_maxrss    4.497MB
+ru_ixrss     0.000B
+ru_ismrss    0.000B
+ru_idrss     0.000B
+ru_isrss     0.000B
+ru_minflt    4560168             
+ru_majflt    103                 
+ru_nswap     0                   
+ru_inblock   833760              
+ru_oublock   312                 
+ru_msgsnd    0                   
+ru_msgrcv    0                   
+ru_nsignals  0                   
+ru_nvcsw     14331               
+ru_nivcsw    10021               
+cpu          177.680s
+mem          173.874GBs
+io           1.983GB
+iow          0.000s
+maxvmem      6.381GB
+arid         undefined
+ar_sub_time  undefined
+category     -q all.q -l h_stack=128m,h_vmem=4G -pe serial 8
+==============================================================
+qname        all.q               
+hostname     prismcls05          
+group        irc                 
+owner        chananchidas        
+project      NONE                
+department   defaultdepartment   
+jobname      RCTD_ds             
+jobnumber    28758               
+taskid       6                   
+account      sge                 
+priority     0                   
+qsub_time    Sat May 15 23:57:11 2021
+start_time   Sat May 15 23:57:26 2021
+end_time     Sun May 16 00:09:33 2021
+granted_pe   serial              
+slots        8                   
+failed       0    
+exit_status  0                   
+ru_wallclock 727s
+ru_utime     190.154s
+ru_stime     13.585s
+ru_maxrss    4.574MB
+ru_ixrss     0.000B
+ru_ismrss    0.000B
+ru_idrss     0.000B
+ru_isrss     0.000B
+ru_minflt    8122179             
+ru_majflt    99                  
+ru_nswap     0                   
+ru_inblock   1398920             
+ru_oublock   528                 
+ru_msgsnd    0                   
+ru_msgrcv    0                   
+ru_nsignals  0                   
+ru_nvcsw     22022               
+ru_nivcsw    6896                
+cpu          690.340s
+mem          716.749GBs
+io           2.878GB
+iow          0.000s
+maxvmem      6.741GB
+arid         undefined
+ar_sub_time  undefined
+category     -q all.q -l h_stack=128m,h_vmem=4G -pe serial 8
+==============================================================
+qname        all.q               
+hostname     prismcls04          
+group        irc                 
+owner        chananchidas        
+project      NONE                
+department   defaultdepartment   
+jobname      RCTD_ds             
+jobnumber    28758               
+taskid       10                  
+account      sge                 
+priority     0                   
+qsub_time    Sat May 15 23:57:11 2021
+start_time   Sat May 15 23:57:26 2021
+end_time     Sun May 16 00:10:18 2021
+granted_pe   serial              
+slots        8                   
+failed       0    
+exit_status  0                   
+ru_wallclock 772s
+ru_utime     203.464s
+ru_stime     13.226s
+ru_maxrss    4.574MB
+ru_ixrss     0.000B
+ru_ismrss    0.000B
+ru_idrss     0.000B
+ru_isrss     0.000B
+ru_minflt    6627174             
+ru_majflt    104                 
+ru_nswap     0                   
+ru_inblock   761048              
+ru_oublock   1672                
+ru_msgsnd    0                   
+ru_msgrcv    0                   
+ru_nsignals  0                   
+ru_nvcsw     25779               
+ru_nivcsw    6801                
+cpu          1278.580s
+mem          1.095TBs
+io           3.478GB
+iow          0.000s
+maxvmem      6.908GB
+arid         undefined
+ar_sub_time  undefined
+category     -q all.q -l h_stack=128m,h_vmem=4G -pe serial 8
+==============================================================
+qname        all.q               
+hostname     prismcls01          
+group        irc                 
+owner        chananchidas        
+project      NONE                
+department   defaultdepartment   
+jobname      RCTD_ds             
+jobnumber    28758               
+taskid       14                  
+account      sge                 
+priority     0                   
+qsub_time    Sat May 15 23:57:11 2021
+start_time   Sat May 15 23:57:26 2021
+end_time     Sun May 16 00:10:36 2021
+granted_pe   serial              
+slots        8                   
+failed       0    
+exit_status  0                   
+ru_wallclock 790s
+ru_utime     224.616s
+ru_stime     14.451s
+ru_maxrss    5.352MB
+ru_ixrss     0.000B
+ru_ismrss    0.000B
+ru_idrss     0.000B
+ru_isrss     0.000B
+ru_minflt    9318810             
+ru_majflt    106                 
+ru_nswap     0                   
+ru_inblock   157480              
+ru_oublock   3064                
+ru_msgsnd    0                   
+ru_msgrcv    0                   
+ru_nsignals  0                   
+ru_nvcsw     30792               
+ru_nivcsw    15230               
+cpu          1515.530s
+mem          1.419TBs
+io           3.477GB
+iow          0.000s
+maxvmem      8.201GB
+arid         undefined
+ar_sub_time  undefined
+category     -q all.q -l h_stack=128m,h_vmem=4G -pe serial 8
+==============================================================
+qname        all.q               
+hostname     prismcls08          
+group        irc                 
+owner        chananchidas        
+project      NONE                
+department   defaultdepartment   
+jobname      RCTD_ds             
+jobnumber    28758               
+taskid       7                   
+account      sge                 
+priority     0                   
+qsub_time    Sat May 15 23:57:11 2021
+start_time   Sat May 15 23:57:26 2021
+end_time     Sun May 16 00:11:21 2021
+granted_pe   serial              
+slots        8                   
+failed       0    
+exit_status  0                   
+ru_wallclock 835s
+ru_utime     270.937s
+ru_stime     12.872s
+ru_maxrss    4.594MB
+ru_ixrss     0.000B
+ru_ismrss    0.000B
+ru_idrss     0.000B
+ru_isrss     0.000B
+ru_minflt    7572872             
+ru_majflt    85                  
+ru_nswap     0                   
+ru_inblock   72824               
+ru_oublock   528                 
+ru_msgsnd    0                   
+ru_msgrcv    0                   
+ru_nsignals  0                   
+ru_nvcsw     22292               
+ru_nivcsw    12929               
+cpu          455.620s
+mem          496.988GBs
+io           1.962GB
+iow          0.000s
+maxvmem      6.713GB
+arid         undefined
+ar_sub_time  undefined
+category     -q all.q -l h_stack=128m,h_vmem=4G -pe serial 8
+==============================================================
+qname        all.q               
+hostname     prismcls08          
+group        irc                 
+owner        chananchidas        
+project      NONE                
+department   defaultdepartment   
+jobname      RCTD_ds             
+jobnumber    28758               
+taskid       8                   
+account      sge                 
+priority     0                   
+qsub_time    Sat May 15 23:57:11 2021
+start_time   Sat May 15 23:57:26 2021
+end_time     Sun May 16 00:11:46 2021
+granted_pe   serial              
+slots        8                   
+failed       0    
+exit_status  0                   
+ru_wallclock 860s
+ru_utime     268.603s
+ru_stime     12.505s
+ru_maxrss    4.601MB
+ru_ixrss     0.000B
+ru_ismrss    0.000B
+ru_idrss     0.000B
+ru_isrss     0.000B
+ru_minflt    8672063             
+ru_majflt    104                 
+ru_nswap     0                   
+ru_inblock   2441296             
+ru_oublock   520                 
+ru_msgsnd    0                   
+ru_msgrcv    0                   
+ru_nsignals  0                   
+ru_nvcsw     22200               
+ru_nivcsw    6262                
+cpu          1451.550s
+mem          1.409TBs
+io           3.408GB
+iow          0.000s
+maxvmem      6.857GB
+arid         undefined
+ar_sub_time  undefined
+category     -q all.q -l h_stack=128m,h_vmem=4G -pe serial 8
+==============================================================
+qname        all.q               
+hostname     prismcls04          
+group        irc                 
+owner        chananchidas        
+project      NONE                
+department   defaultdepartment   
+jobname      RCTD_ds             
+jobnumber    28758               
+taskid       11                  
+account      sge                 
+priority     0                   
+qsub_time    Sat May 15 23:57:11 2021
+start_time   Sat May 15 23:57:26 2021
+end_time     Sun May 16 00:12:11 2021
+granted_pe   serial              
+slots        8                   
+failed       0    
+exit_status  0                   
+ru_wallclock 885s
+ru_utime     287.037s
+ru_stime     14.202s
+ru_maxrss    5.394MB
+ru_ixrss     0.000B
+ru_ismrss    0.000B
+ru_idrss     0.000B
+ru_isrss     0.000B
+ru_minflt    7821879             
+ru_majflt    103                 
+ru_nswap     0                   
+ru_inblock   1787912             
+ru_oublock   1656                
+ru_msgsnd    0                   
+ru_msgrcv    0                   
+ru_nsignals  0                   
+ru_nvcsw     27468               
+ru_nivcsw    6789                
+cpu          1663.960s
+mem          1.775TBs
+io           3.480GB
+iow          0.000s
+maxvmem      8.287GB
+arid         undefined
+ar_sub_time  undefined
+category     -q all.q -l h_stack=128m,h_vmem=4G -pe serial 8
+==============================================================
+qname        all.q               
+hostname     prismcls04          
+group        irc                 
+owner        chananchidas        
+project      NONE                
+department   defaultdepartment   
+jobname      RCTD_ds             
+jobnumber    28758               
+taskid       12                  
+account      sge                 
+priority     0                   
+qsub_time    Sat May 15 23:57:11 2021
+start_time   Sat May 15 23:57:26 2021
+end_time     Sun May 16 00:14:33 2021
+granted_pe   serial              
+slots        8                   
+failed       0    
+exit_status  0                   
+ru_wallclock 1027s
+ru_utime     314.324s
+ru_stime     19.287s
+ru_maxrss    5.351MB
+ru_ixrss     0.000B
+ru_ismrss    0.000B
+ru_idrss     0.000B
+ru_isrss     0.000B
+ru_minflt    9183536             
+ru_majflt    96                  
+ru_nswap     0                   
+ru_inblock   124936              
+ru_oublock   1664                
+ru_msgsnd    0                   
+ru_msgrcv    0                   
+ru_nsignals  0                   
+ru_nvcsw     30169               
+ru_nivcsw    24465               
+cpu          2127.190s
+mem          2.079TBs
+io           3.774GB
+iow          0.000s
+maxvmem      8.585GB
+arid         undefined
+ar_sub_time  undefined
+category     -q all.q -l h_stack=128m,h_vmem=4G -pe serial 8
+==============================================================
+qname        all.q               
+hostname     prismcls07          
+group        irc                 
+owner        chananchidas        
+project      NONE                
+department   defaultdepartment   
+jobname      RCTD_ds             
+jobnumber    28758               
+taskid       15                  
+account      sge                 
+priority     0                   
+qsub_time    Sat May 15 23:57:11 2021
+start_time   Sun May 16 00:01:16 2021
+end_time     Sun May 16 00:16:22 2021
+granted_pe   serial              
+slots        8                   
+failed       0    
+exit_status  0                   
+ru_wallclock 906s
+ru_utime     313.882s
+ru_stime     24.232s
+ru_maxrss    6.316MB
+ru_ixrss     0.000B
+ru_ismrss    0.000B
+ru_idrss     0.000B
+ru_isrss     0.000B
+ru_minflt    12069845            
+ru_majflt    0                   
+ru_nswap     0                   
+ru_inblock   592                 
+ru_oublock   3048                
+ru_msgsnd    0                   
+ru_msgrcv    0                   
+ru_nsignals  0                   
+ru_nvcsw     28401               
+ru_nivcsw    1590                
+cpu          2159.110s
+mem          2.432TBs
+io           3.483GB
+iow          0.000s
+maxvmem      9.882GB
+arid         undefined
+ar_sub_time  undefined
+category     -q all.q -l h_stack=128m,h_vmem=4G -pe serial 8
+==============================================================
+qname        all.q               
+hostname     prismcls07          
+group        irc                 
+owner        chananchidas        
+project      NONE                
+department   defaultdepartment   
+jobname      RCTD_ds             
+jobnumber    28758               
+taskid       16                  
+account      sge                 
+priority     0                   
+qsub_time    Sat May 15 23:57:11 2021
+start_time   Sun May 16 00:01:26 2021
+end_time     Sun May 16 00:17:17 2021
+granted_pe   serial              
+slots        8                   
+failed       0    
+exit_status  0                   
+ru_wallclock 951s
+ru_utime     305.296s
+ru_stime     15.614s
+ru_maxrss    6.567MB
+ru_ixrss     0.000B
+ru_ismrss    0.000B
+ru_idrss     0.000B
+ru_isrss     0.000B
+ru_minflt    7904027             
+ru_majflt    0                   
+ru_nswap     0                   
+ru_inblock   664                 
+ru_oublock   3032                
+ru_msgsnd    0                   
+ru_msgrcv    0                   
+ru_nsignals  0                   
+ru_nvcsw     30437               
+ru_nivcsw    12786               
+cpu          2580.790s
+mem          2.613TBs
+io           3.477GB
+iow          0.000s
+maxvmem      9.607GB
+arid         undefined
+ar_sub_time  undefined
+category     -q all.q -l h_stack=128m,h_vmem=4G -pe serial 8

@@ -1,0 +1,720 @@
+==============================================================
+qname        all.q               
+hostname     prismcls05          
+group        irc                 
+owner        chananchidas        
+project      NONE                
+department   defaultdepartment   
+jobname      music_ds            
+jobnumber    28760               
+taskid       1                   
+account      sge                 
+priority     0                   
+qsub_time    Sat May 15 23:57:45 2021
+start_time   Sun May 16 00:16:44 2021
+end_time     Sun May 16 00:22:20 2021
+granted_pe   serial              
+slots        8                   
+failed       0    
+exit_status  0                   
+ru_wallclock 336s
+ru_utime     306.462s
+ru_stime     17.430s
+ru_maxrss    6.004MB
+ru_ixrss     0.000B
+ru_ismrss    0.000B
+ru_idrss     0.000B
+ru_isrss     0.000B
+ru_minflt    5131930             
+ru_majflt    10                  
+ru_nswap     0                   
+ru_inblock   1703352             
+ru_oublock   272                 
+ru_msgsnd    0                   
+ru_msgrcv    0                   
+ru_nsignals  0                   
+ru_nvcsw     8433                
+ru_nivcsw    1458                
+cpu          323.892s
+mem          1.603TBs
+io           1.059GB
+iow          0.000s
+maxvmem      6.006GB
+arid         undefined
+ar_sub_time  undefined
+category     -q all.q -l h_stack=128m,h_vmem=4G -pe serial 8
+==============================================================
+qname        all.q               
+hostname     prismcls07          
+group        irc                 
+owner        chananchidas        
+project      NONE                
+department   defaultdepartment   
+jobname      music_ds            
+jobnumber    28760               
+taskid       2                   
+account      sge                 
+priority     0                   
+qsub_time    Sat May 15 23:57:45 2021
+start_time   Sun May 16 00:17:20 2021
+end_time     Sun May 16 00:22:54 2021
+granted_pe   serial              
+slots        8                   
+failed       0    
+exit_status  0                   
+ru_wallclock 334s
+ru_utime     311.018s
+ru_stime     17.553s
+ru_maxrss    6.014MB
+ru_ixrss     0.000B
+ru_ismrss    0.000B
+ru_idrss     0.000B
+ru_isrss     0.000B
+ru_minflt    5079316             
+ru_majflt    10                  
+ru_nswap     0                   
+ru_inblock   71272               
+ru_oublock   280                 
+ru_msgsnd    0                   
+ru_msgrcv    0                   
+ru_nsignals  0                   
+ru_nvcsw     7510                
+ru_nivcsw    633                 
+cpu          328.571s
+mem          1.635TBs
+io           1.059GB
+iow          0.000s
+maxvmem      6.016GB
+arid         undefined
+ar_sub_time  undefined
+category     -q all.q -l h_stack=128m,h_vmem=4G -pe serial 8
+==============================================================
+qname        all.q               
+hostname     prismcls08          
+group        irc                 
+owner        chananchidas        
+project      NONE                
+department   defaultdepartment   
+jobname      music_ds            
+jobnumber    28760               
+taskid       3                   
+account      sge                 
+priority     0                   
+qsub_time    Sat May 15 23:57:45 2021
+start_time   Sun May 16 00:17:45 2021
+end_time     Sun May 16 00:23:32 2021
+granted_pe   serial              
+slots        8                   
+failed       0    
+exit_status  0                   
+ru_wallclock 347s
+ru_utime     318.052s
+ru_stime     22.156s
+ru_maxrss    6.023MB
+ru_ixrss     0.000B
+ru_ismrss    0.000B
+ru_idrss     0.000B
+ru_isrss     0.000B
+ru_minflt    27492516            
+ru_majflt    10                  
+ru_nswap     0                   
+ru_inblock   1703480             
+ru_oublock   280                 
+ru_msgsnd    0                   
+ru_msgrcv    0                   
+ru_nsignals  0                   
+ru_nvcsw     8466                
+ru_nivcsw    1666                
+cpu          340.208s
+mem          1.574TBs
+io           1.062GB
+iow          0.000s
+maxvmem      6.025GB
+arid         undefined
+ar_sub_time  undefined
+category     -q all.q -l h_stack=128m,h_vmem=4G -pe serial 8
+==============================================================
+qname        all.q               
+hostname     prismcls05          
+group        irc                 
+owner        chananchidas        
+project      NONE                
+department   defaultdepartment   
+jobname      music_ds            
+jobnumber    28760               
+taskid       4                   
+account      sge                 
+priority     0                   
+qsub_time    Sat May 15 23:57:45 2021
+start_time   Sun May 16 00:19:47 2021
+end_time     Sun May 16 00:25:32 2021
+granted_pe   serial              
+slots        8                   
+failed       0    
+exit_status  0                   
+ru_wallclock 345s
+ru_utime     320.610s
+ru_stime     18.664s
+ru_maxrss    6.031MB
+ru_ixrss     0.000B
+ru_ismrss    0.000B
+ru_idrss     0.000B
+ru_isrss     0.000B
+ru_minflt    16518970            
+ru_majflt    0                   
+ru_nswap     0                   
+ru_inblock   0                   
+ru_oublock   280                 
+ru_msgsnd    0                   
+ru_msgrcv    0                   
+ru_nsignals  0                   
+ru_nvcsw     8118                
+ru_nivcsw    376                 
+cpu          339.274s
+mem          1.574TBs
+io           1.059GB
+iow          0.000s
+maxvmem      6.033GB
+arid         undefined
+ar_sub_time  undefined
+category     -q all.q -l h_stack=128m,h_vmem=4G -pe serial 8
+==============================================================
+qname        all.q               
+hostname     prismcls08          
+group        irc                 
+owner        chananchidas        
+project      NONE                
+department   defaultdepartment   
+jobname      music_ds            
+jobnumber    28760               
+taskid       5                   
+account      sge                 
+priority     0                   
+qsub_time    Sat May 15 23:57:45 2021
+start_time   Sun May 16 00:21:23 2021
+end_time     Sun May 16 00:27:07 2021
+granted_pe   serial              
+slots        8                   
+failed       0    
+exit_status  0                   
+ru_wallclock 344s
+ru_utime     320.209s
+ru_stime     17.665s
+ru_maxrss    6.021MB
+ru_ixrss     0.000B
+ru_ismrss    0.000B
+ru_idrss     0.000B
+ru_isrss     0.000B
+ru_minflt    6145673             
+ru_majflt    0                   
+ru_nswap     0                   
+ru_inblock   64                  
+ru_oublock   488                 
+ru_msgsnd    0                   
+ru_msgrcv    0                   
+ru_nsignals  0                   
+ru_nvcsw     8112                
+ru_nivcsw    354                 
+cpu          337.874s
+mem          1.681TBs
+io           1.059GB
+iow          0.000s
+maxvmem      6.023GB
+arid         undefined
+ar_sub_time  undefined
+category     -q all.q -l h_stack=128m,h_vmem=4G -pe serial 8
+==============================================================
+qname        all.q               
+hostname     prismcls05          
+group        irc                 
+owner        chananchidas        
+project      NONE                
+department   defaultdepartment   
+jobname      music_ds            
+jobnumber    28760               
+taskid       6                   
+account      sge                 
+priority     0                   
+qsub_time    Sat May 15 23:57:45 2021
+start_time   Sun May 16 00:22:23 2021
+end_time     Sun May 16 00:28:36 2021
+granted_pe   serial              
+slots        8                   
+failed       0    
+exit_status  0                   
+ru_wallclock 373s
+ru_utime     349.140s
+ru_stime     18.166s
+ru_maxrss    6.093MB
+ru_ixrss     0.000B
+ru_ismrss    0.000B
+ru_idrss     0.000B
+ru_isrss     0.000B
+ru_minflt    6096179             
+ru_majflt    0                   
+ru_nswap     0                   
+ru_inblock   1632056             
+ru_oublock   504                 
+ru_msgsnd    0                   
+ru_msgrcv    0                   
+ru_nsignals  0                   
+ru_nvcsw     8257                
+ru_nivcsw    12983               
+cpu          367.306s
+mem          1.857TBs
+io           1.061GB
+iow          0.000s
+maxvmem      6.095GB
+arid         undefined
+ar_sub_time  undefined
+category     -q all.q -l h_stack=128m,h_vmem=4G -pe serial 8
+==============================================================
+qname        all.q               
+hostname     prismcls05          
+group        irc                 
+owner        chananchidas        
+project      NONE                
+department   defaultdepartment   
+jobname      music_ds            
+jobnumber    28760               
+taskid       7                   
+account      sge                 
+priority     0                   
+qsub_time    Sat May 15 23:57:45 2021
+start_time   Sun May 16 00:22:32 2021
+end_time     Sun May 16 00:29:19 2021
+granted_pe   serial              
+slots        8                   
+failed       0    
+exit_status  0                   
+ru_wallclock 407s
+ru_utime     380.414s
+ru_stime     20.929s
+ru_maxrss    6.185MB
+ru_ixrss     0.000B
+ru_ismrss    0.000B
+ru_idrss     0.000B
+ru_isrss     0.000B
+ru_minflt    6180119             
+ru_majflt    0                   
+ru_nswap     0                   
+ru_inblock   192                 
+ru_oublock   520                 
+ru_msgsnd    0                   
+ru_msgrcv    0                   
+ru_nsignals  0                   
+ru_nvcsw     7303                
+ru_nivcsw    613                 
+cpu          401.343s
+mem          2.055TBs
+io           1.059GB
+iow          0.000s
+maxvmem      6.187GB
+arid         undefined
+ar_sub_time  undefined
+category     -q all.q -l h_stack=128m,h_vmem=4G -pe serial 8
+==============================================================
+qname        all.q               
+hostname     prismcls07          
+group        irc                 
+owner        chananchidas        
+project      NONE                
+department   defaultdepartment   
+jobname      music_ds            
+jobnumber    28760               
+taskid       8                   
+account      sge                 
+priority     0                   
+qsub_time    Sat May 15 23:57:45 2021
+start_time   Sun May 16 00:22:57 2021
+end_time     Sun May 16 00:29:59 2021
+granted_pe   serial              
+slots        8                   
+failed       0    
+exit_status  0                   
+ru_wallclock 422s
+ru_utime     391.629s
+ru_stime     23.926s
+ru_maxrss    6.388MB
+ru_ixrss     0.000B
+ru_ismrss    0.000B
+ru_idrss     0.000B
+ru_isrss     0.000B
+ru_minflt    6673591             
+ru_majflt    0                   
+ru_nswap     0                   
+ru_inblock   1632320             
+ru_oublock   544                 
+ru_msgsnd    0                   
+ru_msgrcv    0                   
+ru_nsignals  0                   
+ru_nvcsw     8437                
+ru_nivcsw    8788                
+cpu          415.554s
+mem          2.162TBs
+io           2.117GB
+iow          0.000s
+maxvmem      6.390GB
+arid         undefined
+ar_sub_time  undefined
+category     -q all.q -l h_stack=128m,h_vmem=4G -pe serial 8
+==============================================================
+qname        all.q               
+hostname     prismcls08          
+group        irc                 
+owner        chananchidas        
+project      NONE                
+department   defaultdepartment   
+jobname      music_ds            
+jobnumber    28760               
+taskid       9                   
+account      sge                 
+priority     0                   
+qsub_time    Sat May 15 23:57:45 2021
+start_time   Sun May 16 00:23:35 2021
+end_time     Sun May 16 00:30:32 2021
+granted_pe   serial              
+slots        8                   
+failed       0    
+exit_status  1                   
+ru_wallclock 417s
+ru_utime     387.005s
+ru_stime     24.043s
+ru_maxrss    6.095MB
+ru_ixrss     0.000B
+ru_ismrss    0.000B
+ru_idrss     0.000B
+ru_isrss     0.000B
+ru_minflt    13131348            
+ru_majflt    0                   
+ru_nswap     0                   
+ru_inblock   1632056             
+ru_oublock   664                 
+ru_msgsnd    0                   
+ru_msgrcv    0                   
+ru_nsignals  0                   
+ru_nvcsw     8413                
+ru_nivcsw    1682                
+cpu          411.048s
+mem          1.930TBs
+io           1.062GB
+iow          0.000s
+maxvmem      6.097GB
+arid         undefined
+ar_sub_time  undefined
+category     -q all.q -l h_stack=128m,h_vmem=4G -pe serial 8
+==============================================================
+qname        all.q               
+hostname     prismcls01          
+group        irc                 
+owner        chananchidas        
+project      NONE                
+department   defaultdepartment   
+jobname      music_ds            
+jobnumber    28760               
+taskid       13                  
+account      sge                 
+priority     0                   
+qsub_time    Sat May 15 23:57:45 2021
+start_time   Sun May 16 00:26:08 2021
+end_time     Sun May 16 00:32:55 2021
+granted_pe   serial              
+slots        8                   
+failed       0    
+exit_status  1                   
+ru_wallclock 407s
+ru_utime     380.753s
+ru_stime     19.150s
+ru_maxrss    6.190MB
+ru_ixrss     0.000B
+ru_ismrss    0.000B
+ru_idrss     0.000B
+ru_isrss     0.000B
+ru_minflt    5467032             
+ru_majflt    10                  
+ru_nswap     0                   
+ru_inblock   1703328             
+ru_oublock   672                 
+ru_msgsnd    0                   
+ru_msgrcv    0                   
+ru_nsignals  0                   
+ru_nvcsw     8743                
+ru_nivcsw    1594                
+cpu          399.903s
+mem          2.043TBs
+io           1.060GB
+iow          0.000s
+maxvmem      6.192GB
+arid         undefined
+ar_sub_time  undefined
+category     -q all.q -l h_stack=128m,h_vmem=4G -pe serial 8
+==============================================================
+qname        all.q               
+hostname     prismcls07          
+group        irc                 
+owner        chananchidas        
+project      NONE                
+department   defaultdepartment   
+jobname      music_ds            
+jobnumber    28760               
+taskid       10                  
+account      sge                 
+priority     0                   
+qsub_time    Sat May 15 23:57:45 2021
+start_time   Sun May 16 00:25:07 2021
+end_time     Sun May 16 00:36:06 2021
+granted_pe   serial              
+slots        8                   
+failed       0    
+exit_status  0                   
+ru_wallclock 659s
+ru_utime     544.510s
+ru_stime     108.555s
+ru_maxrss    9.030MB
+ru_ixrss     0.000B
+ru_ismrss    0.000B
+ru_idrss     0.000B
+ru_isrss     0.000B
+ru_minflt    11118954            
+ru_majflt    0                   
+ru_nswap     0                   
+ru_inblock   0                   
+ru_oublock   1624                
+ru_msgsnd    0                   
+ru_msgrcv    0                   
+ru_nsignals  0                   
+ru_nvcsw     9393                
+ru_nivcsw    636                 
+cpu          653.064s
+mem          4.380TBs
+io           1.061GB
+iow          0.000s
+maxvmem      8.927GB
+arid         undefined
+ar_sub_time  undefined
+category     -q all.q -l h_stack=128m,h_vmem=4G -pe serial 8
+==============================================================
+qname        all.q               
+hostname     prismcls05          
+group        irc                 
+owner        chananchidas        
+project      NONE                
+department   defaultdepartment   
+jobname      music_ds            
+jobnumber    28760               
+taskid       11                  
+account      sge                 
+priority     0                   
+qsub_time    Sat May 15 23:57:45 2021
+start_time   Sun May 16 00:25:35 2021
+end_time     Sun May 16 00:40:48 2021
+granted_pe   serial              
+slots        8                   
+failed       0    
+exit_status  0                   
+ru_wallclock 913s
+ru_utime     701.662s
+ru_stime     204.981s
+ru_maxrss    10.044MB
+ru_ixrss     0.000B
+ru_ismrss    0.000B
+ru_idrss     0.000B
+ru_isrss     0.000B
+ru_minflt    12896218            
+ru_majflt    0                   
+ru_nswap     0                   
+ru_inblock   368                 
+ru_oublock   1776                
+ru_msgsnd    0                   
+ru_msgrcv    0                   
+ru_nsignals  0                   
+ru_nvcsw     10805               
+ru_nivcsw    967                 
+cpu          906.643s
+mem          6.887TBs
+io           1.060GB
+iow          0.000s
+maxvmem      10.020GB
+arid         undefined
+ar_sub_time  undefined
+category     -q all.q -l h_stack=128m,h_vmem=4G -pe serial 8
+==============================================================
+qname        all.q               
+hostname     prismcls08          
+group        irc                 
+owner        chananchidas        
+project      NONE                
+department   defaultdepartment   
+jobname      music_ds            
+jobnumber    28760               
+taskid       12                  
+account      sge                 
+priority     0                   
+qsub_time    Sat May 15 23:57:45 2021
+start_time   Sun May 16 00:25:48 2021
+end_time     Sun May 16 00:44:37 2021
+granted_pe   serial              
+slots        8                   
+failed       0    
+exit_status  0                   
+ru_wallclock 1129s
+ru_utime     826.190s
+ru_stime     295.909s
+ru_maxrss    12.315MB
+ru_ixrss     0.000B
+ru_ismrss    0.000B
+ru_idrss     0.000B
+ru_isrss     0.000B
+ru_minflt    30342468            
+ru_majflt    0                   
+ru_nswap     0                   
+ru_inblock   440                 
+ru_oublock   1744                
+ru_msgsnd    0                   
+ru_msgrcv    0                   
+ru_nsignals  0                   
+ru_nvcsw     11729               
+ru_nivcsw    969                 
+cpu          1122.098s
+mem          10.518TBs
+io           1.062GB
+iow          0.000s
+maxvmem      12.305GB
+arid         undefined
+ar_sub_time  undefined
+category     -q all.q -l h_stack=128m,h_vmem=4G -pe serial 8
+==============================================================
+qname        all.q               
+hostname     prismcls04          
+group        irc                 
+owner        chananchidas        
+project      NONE                
+department   defaultdepartment   
+jobname      music_ds            
+jobnumber    28760               
+taskid       14                  
+account      sge                 
+priority     0                   
+qsub_time    Sat May 15 23:57:45 2021
+start_time   Sun May 16 00:26:27 2021
+end_time     Sun May 16 00:48:58 2021
+granted_pe   serial              
+slots        8                   
+failed       0    
+exit_status  0                   
+ru_wallclock 1351s
+ru_utime     957.150s
+ru_stime     387.009s
+ru_maxrss    10.132MB
+ru_ixrss     0.000B
+ru_ismrss    0.000B
+ru_idrss     0.000B
+ru_isrss     0.000B
+ru_minflt    22520974            
+ru_majflt    10                  
+ru_nswap     0                   
+ru_inblock   1703328             
+ru_oublock   3072                
+ru_msgsnd    0                   
+ru_msgrcv    0                   
+ru_nsignals  0                   
+ru_nvcsw     13279               
+ru_nivcsw    2919                
+cpu          1344.159s
+mem          10.644TBs
+io           1.061GB
+iow          0.000s
+maxvmem      10.134GB
+arid         undefined
+ar_sub_time  undefined
+category     -q all.q -l h_stack=128m,h_vmem=4G -pe serial 8
+==============================================================
+qname        all.q               
+hostname     prismcls08          
+group        irc                 
+owner        chananchidas        
+project      NONE                
+department   defaultdepartment   
+jobname      music_ds            
+jobnumber    28760               
+taskid       15                  
+account      sge                 
+priority     0                   
+qsub_time    Sat May 15 23:57:45 2021
+start_time   Sun May 16 00:27:10 2021
+end_time     Sun May 16 01:03:34 2021
+granted_pe   serial              
+slots        8                   
+failed       0    
+exit_status  0                   
+ru_wallclock 2184s
+ru_utime     1433.258s
+ru_stime     744.545s
+ru_maxrss    10.875MB
+ru_ixrss     0.000B
+ru_ismrss    0.000B
+ru_idrss     0.000B
+ru_isrss     0.000B
+ru_minflt    23969766            
+ru_majflt    0                   
+ru_nswap     0                   
+ru_inblock   592                 
+ru_oublock   3424                
+ru_msgsnd    0                   
+ru_msgrcv    0                   
+ru_nsignals  0                   
+ru_nvcsw     16338               
+ru_nivcsw    1570                
+cpu          2177.803s
+mem          19.185TBs
+io           1.063GB
+iow          0.000s
+maxvmem      10.850GB
+arid         undefined
+ar_sub_time  undefined
+category     -q all.q -l h_stack=128m,h_vmem=4G -pe serial 8
+==============================================================
+qname        all.q               
+hostname     prismcls04          
+group        irc                 
+owner        chananchidas        
+project      NONE                
+department   defaultdepartment   
+jobname      music_ds            
+jobnumber    28760               
+taskid       16                  
+account      sge                 
+priority     0                   
+qsub_time    Sat May 15 23:57:45 2021
+start_time   Sun May 16 00:27:10 2021
+end_time     Sun May 16 01:18:01 2021
+granted_pe   serial              
+slots        8                   
+failed       0    
+exit_status  0                   
+ru_wallclock 3051s
+ru_utime     1929.570s
+ru_stime     1116.008s
+ru_maxrss    13.271MB
+ru_ixrss     0.000B
+ru_ismrss    0.000B
+ru_idrss     0.000B
+ru_isrss     0.000B
+ru_minflt    31021310            
+ru_majflt    0                   
+ru_nswap     0                   
+ru_inblock   664                 
+ru_oublock   5240                
+ru_msgsnd    0                   
+ru_msgrcv    0                   
+ru_nsignals  0                   
+ru_nvcsw     19511               
+ru_nivcsw    2336                
+cpu          3045.578s
+mem          32.451TBs
+io           1.061GB
+iow          0.000s
+maxvmem      13.226GB
+arid         undefined
+ar_sub_time  undefined
+category     -q all.q -l h_stack=128m,h_vmem=4G -pe serial 8
