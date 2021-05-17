@@ -63,6 +63,7 @@ dataset_types = c("artificial_uniform_distinct", "artificial_diverse_distinct",
 # }
 
 # generation files
+# path <- "D:/Work (Yr 2 Sem 1)/Thesis/Data/synthetic_datasets/" # local
 # path <- "/group/irc/shared/synthetic_visium/generation/"
 # for (dataset in datasets){
 #     convertSeuratRDSToh5ad(paste0(path, dataset, ".rds"), output_path="data/generation_h5ad/", update=TRUE)
@@ -82,5 +83,4 @@ dataset_types = c("artificial_uniform_distinct", "artificial_diverse_distinct",
 
 convertSeuratRDSToh5ad("/group/irc/shared/synthetic_visium/raw_data/brain_cortex/scRNAseq/seurat_obj_scrnaseq_cortex_filtered.rds",
    output_path="thesis/downsampling/brain_cortex/", update=TRUE)
-
 
