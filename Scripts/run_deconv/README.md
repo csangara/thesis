@@ -6,11 +6,11 @@ MuSiC, RCTD, and SPOTlight can be run from the command line as follows:
 
 ``Rscript --vanilla run_deconv_prism_\*.R <dataset_index> <replication no.> <run no.>``
 
-(This was just tweaked from the file `../run_deconv.R` to accept command line arguments so it can be run on a gridengine more easily.)
+(This was just tweaked from the file `run_deconv.R` to accept command line arguments so it can be run on a gridengine more easily.)
 
 ## Methods in python
 
-The file `convertRDStoLoom_synthvisium.R` provides functions and sample code for converting a rds file to loom or h5ad. Both cell2location and stereoscope contain two steps, model building and model fitting.
+The file `convertRDStoLoom_synthvisium.R` provides functions and sample code for converting a rds file to loom and h5ad. In case you have converted it to loom, you can continue the conversion on Python using the code in `convert_loom_to_h5ad.ipynb`. Both cell2location and stereoscope contain two steps, model building and model fitting. 
 I have provided three scripts for each method, two for each step and the third script is for running both together.
 
 ### cell2location
