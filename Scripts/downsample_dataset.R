@@ -66,9 +66,9 @@ downsampleSCref <- function(cells_df, genes, n_cells, n_features, seed=10){
   return (list(cells=chosen_cells$cells, genes=feature_names))
   
 }
-
-all_scales <- gtools::permutations(3,2,c(1000, 5000, 10000), repeats.allowed=TRUE)
-colnames(all_scales) <- c("n_cells", "n_genes")
+## OLD CODE ## 
+# all_scales <- gtools::permutations(3,2,c(1000, 5000, 10000), repeats.allowed=TRUE)
+# colnames(all_scales) <- c("n_cells", "n_genes")
 # Write conversion file (only run this once)
 # write.table(all_scales, file = paste0("downsampling/", str_replace(dataset, "_generation", ""),
 #                                       "/scref_conversion.txt"),
@@ -76,29 +76,47 @@ colnames(all_scales) <- c("n_cells", "n_genes")
 
 # Only get the names of cells and genes (and metadata) to save space
 # seurat_obj_scRNA <- readRDS("rds/seurat_obj_scrnaseq_cortex_filtered.rds")
+# seurat_obj_scRNA <- readRDS("Scripts\\robin\\raw_data\\brain_cortex\\scRNAseq\\seurat_obj_scrnaseq_cortex_filtered.rds")
+# cells_df <- data.frame(cells=colnames(seurat_obj_scRNA), celltype = seurat_obj_scRNA$subclass)
+# genes <- rownames(seurat_obj_scRNA)
+# 
+# # Generate list of cells and genes for each case
+# for (k in 1:nrow(all_scales)){
+#   n_cells <- all_scales[k,1]
+#   n_features <- all_scales[k,2]
+#   print(c(n_cells, n_features))
+#   ds_object <- downsampleSCref(cells_df, genes, n_cells, n_features)
+#   
+#   write.table(ds_object$cells, file = paste0("downsampling/", str_replace(dataset, "_generation", ""), "/", repl,
+#                                                 "/scref_downsample_info/ref_cells", k, ".txt"),
+#               quote = FALSE, row.names = FALSE, col.names = FALSE)
+#   write.table(ds_object$genes, file = paste0("downsampling/", str_replace(dataset, "_generation", ""), "/", repl,
+#                                                 "/scref_downsample_info/ref_genes", k, ".txt"),
+#               quote = FALSE, row.names = FALSE, col.names = FALSE)
+# }
+
+# NEW CODE - ONLY DOWNSAMPLE CELLS
 seurat_obj_scRNA <- readRDS("Scripts\\robin\\raw_data\\brain_cortex\\scRNAseq\\seurat_obj_scrnaseq_cortex_filtered.rds")
 cells_df <- data.frame(cells=colnames(seurat_obj_scRNA), celltype = seurat_obj_scRNA$subclass)
-genes <- rownames(seurat_obj_scRNA)
-
-# Generate list of cells and genes for each case
-for (k in 1:nrow(all_scales)){
-  n_cells <- all_scales[k,1]
-  n_features <- all_scales[k,2]
-  print(c(n_cells, n_features))
-  ds_object <- downsampleSCref(cells_df, genes, n_cells, n_features)
-  
-  write.table(ds_object$cells, file = paste0("downsampling/", str_replace(dataset, "_generation", ""), "/", repl,
-                                                "/scref_downsample_info/ref_cells", k, ".txt"),
-              quote = FALSE, row.names = FALSE, col.names = FALSE)
-  write.table(ds_object$genes, file = paste0("downsampling/", str_replace(dataset, "_generation", ""), "/", repl,
-                                                "/scref_downsample_info/ref_genes", k, ".txt"),
-              quote = FALSE, row.names = FALSE, col.names = FALSE)
+cells_ds <- c(1000, 5000, 10000)
+for (k in 1:length(cells_ds)){
+  n_cells <- cells_ds[k]
+  # seurat_obj_scRNA <- readRDS("rds/seurat_obj_scrnaseq_cortex_filtered.rds")
+  cell_pct <- n_cells/nrow(cells_df)
+  seed = 10
+  set.seed(seed)
+  chosen_cells <- cells_df %>% group_by(celltype) %>% sample_frac(cell_pct)
+  write.table(chosen_cells$cells, file = paste0("downsampling/", str_replace(dataset, "_generation", ""), "/", repl,
+                                              "/scref_downsample_info/ref_cells", k, ".txt"),
+                                               quote = FALSE, row.names = FALSE, col.names = FALSE)
 }
 
 # Check equal proportions
 library(ggplot2)
-df <- data.frame(vals = c(table(ds_object$cells), table(seurat_obj_scRNA$celltype)),
-                 celltypes = names(table(ds_object$cells)),
+seurat_obj_scRNA$celltype <- seurat_obj_scRNA$subclass
+ds_celltypes <- seurat_obj_scRNA[,ds_object$cells]$celltype
+df <- data.frame(vals = c(table(ds_celltypes), table(seurat_obj_scRNA$celltype)),
+                 celltypes = names(table(seurat_obj_scRNA$celltype)),
                  source=rep(c("downsampled", "full"), each=length(unique(seurat_obj_scRNA$celltype))))
 ggplot(df, aes(fill=celltypes, y=vals, x=source)) + 
   geom_bar(position="fill", stat="identity")
