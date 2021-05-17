@@ -1,0 +1,135 @@
+==============================================================
+qname        all.q               
+hostname     prismcls01          
+group        irc                 
+owner        chananchidas        
+project      NONE                
+department   defaultdepartment   
+jobname      spotlight_ds        
+jobnumber    28767               
+taskid       1                   
+account      sge                 
+priority     0                   
+qsub_time    Mon May 17 09:09:50 2021
+start_time   Mon May 17 09:10:06 2021
+end_time     Mon May 17 09:20:44 2021
+granted_pe   serial              
+slots        8                   
+failed       0    
+exit_status  0                   
+ru_wallclock 638s
+ru_utime     580.373s
+ru_stime     6.489s
+ru_maxrss    6.221MB
+ru_ixrss     0.000B
+ru_ismrss    0.000B
+ru_idrss     0.000B
+ru_isrss     0.000B
+ru_minflt    5242267             
+ru_majflt    102                 
+ru_nswap     0                   
+ru_inblock   3424008             
+ru_oublock   2568                
+ru_msgsnd    0                   
+ru_msgrcv    0                   
+ru_nsignals  0                   
+ru_nvcsw     15037               
+ru_nivcsw    6890                
+cpu          586.862s
+mem          1.829TBs
+io           1.832GB
+iow          0.000s
+maxvmem      6.126GB
+arid         undefined
+ar_sub_time  undefined
+category     -q all.q -l h_stack=128m,h_vmem=4G -pe serial 8
+==============================================================
+qname        all.q               
+hostname     prismcls01          
+group        irc                 
+owner        chananchidas        
+project      NONE                
+department   defaultdepartment   
+jobname      spotlight_ds        
+jobnumber    28767               
+taskid       2                   
+account      sge                 
+priority     0                   
+qsub_time    Mon May 17 09:09:50 2021
+start_time   Mon May 17 09:10:06 2021
+end_time     Mon May 17 09:23:56 2021
+granted_pe   serial              
+slots        8                   
+failed       0    
+exit_status  0                   
+ru_wallclock 830s
+ru_utime     756.976s
+ru_stime     24.027s
+ru_maxrss    11.499MB
+ru_ixrss     0.000B
+ru_ismrss    0.000B
+ru_idrss     0.000B
+ru_isrss     0.000B
+ru_minflt    9661084             
+ru_majflt    107                 
+ru_nswap     0                   
+ru_inblock   302584              
+ru_oublock   8784                
+ru_msgsnd    0                   
+ru_msgrcv    0                   
+ru_nsignals  0                   
+ru_nvcsw     14957               
+ru_nivcsw    3918                
+cpu          781.003s
+mem          5.951TBs
+io           1.835GB
+iow          0.000s
+maxvmem      11.458GB
+arid         undefined
+ar_sub_time  undefined
+category     -q all.q -l h_stack=128m,h_vmem=4G -pe serial 8
+==============================================================
+qname        all.q               
+hostname     prismcls01          
+group        irc                 
+owner        chananchidas        
+project      NONE                
+department   defaultdepartment   
+jobname      spotlight_ds        
+jobnumber    28767               
+taskid       3                   
+account      sge                 
+priority     0                   
+qsub_time    Mon May 17 09:09:50 2021
+start_time   Mon May 17 09:10:06 2021
+end_time     Mon May 17 09:30:20 2021
+granted_pe   serial              
+slots        8                   
+failed       0    
+exit_status  0                   
+ru_wallclock 1214s
+ru_utime     1126.265s
+ru_stime     38.945s
+ru_maxrss    19.676MB
+ru_ixrss     0.000B
+ru_ismrss    0.000B
+ru_idrss     0.000B
+ru_isrss     0.000B
+ru_minflt    17927536            
+ru_majflt    97                  
+ru_nswap     0                   
+ru_inblock   288872              
+ru_oublock   16376               
+ru_msgsnd    0                   
+ru_msgrcv    0                   
+ru_nsignals  0                   
+ru_nvcsw     17030               
+ru_nivcsw    5541                
+cpu          1165.210s
+mem          15.263TBs
+io           1.839GB
+iow          0.000s
+maxvmem      19.407GB
+arid         undefined
+ar_sub_time  undefined
+category     -q all.q -l h_stack=128m,h_vmem=4G -pe serial 8
