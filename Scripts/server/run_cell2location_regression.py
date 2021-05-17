@@ -1,6 +1,8 @@
 import argparse as arp
 import sys
 import os
+import matplotlib as mpl
+mpl.use('Agg')
 
 def main():
     ##### PARSING COMMAND LINE ARGUMENTS #####
@@ -9,7 +11,7 @@ def main():
     prs.add_argument('sc_data_path',
                      type = str, help = 'path to single cell h5ad count data')
     
-    prs.add_argument('cuda_device', type = str, help = "index of cuda device ID, from 0-7")
+    prs.add_argument('cuda_device', type = str, help = "index of cuda device ID (from 0-7) or cpu")
 
     prs.add_argument('-o','--out_dir', default = None,
                      type = str, help = 'directory for regression model')
@@ -20,7 +22,7 @@ def main():
     args = prs.parse_args()
     cuda_device = args.cuda_device
 
-    assert cuda_device in ["0", "1", "2", "3", "4", "5", "6", "7"], "invalid device id"
+    assert (cuda_device in ["0", "1", "2", "3", "4", "5", "6", "7"] or cuda_device == "cpu"), "invalid device id"
     
     ## scRNA reference (raw counts)
     sc_data_path = args.sc_data_path
@@ -38,15 +40,13 @@ def main():
     celltype = args.annotation_column
     
     ##### MAIN CODE #####
-    os.environ["CUDA_VISIBLE_DEVICES"]=cuda_device
+    if cuda_device.isdigit():
+        os.environ["CUDA_VISIBLE_DEVICES"]=cuda_device
 
     import sys
     import scanpy as sc
     import pandas as pd
     import numpy as np
-
-    data_type = 'float32'
-
     import cell2location
     import matplotlib as mpl
     from matplotlib import rcParams
@@ -95,7 +95,7 @@ def main():
 
                         'n_epochs': 100, 'minibatch_size': 1024, 'learning_rate': 0.01,
 
-                        'use_cuda': True, # use GPU?
+                        'use_cuda': cuda_device.isdigit(), # use GPU?
 
                         'train_proportion': 0.9, # proportion of cells in the training set (for cross-validation)
                         'l2_weight': True,  # uses defaults for the model
