@@ -22,7 +22,8 @@ convertSeuratRDSToh5ad <- function(input_path, output_path=NULL, isSeurat=TRUE, 
   if (raw) { DefaultAssay(seurat_obj) <- "RNA" }
   if (update){
     seurat_obj <- UpdateSeuratObject(seurat_obj)
-    seurat_obj <- CreateSeuratObject(counts = GetAssayData(seurat_obj), assay = DefaultAssay(seurat_obj))
+    seurat_obj <- CreateSeuratObject(counts = GetAssayData(seurat_obj), assay = DefaultAssay(seurat_obj),
+                                     meta.data=seurat_obj@meta.data)
   }
   
   file_name <- tools::file_path_sans_ext(input_path)
@@ -62,10 +63,10 @@ dataset_types = c("artificial_uniform_distinct", "artificial_diverse_distinct",
 # }
 
 # generation files
-path <- "/group/irc/shared/synthetic_visium/generation/"
-for (dataset in datasets){
-    convertSeuratRDSToh5ad(paste0(path, dataset, ".rds"), output_path="data/generation_h5ad/", update=TRUE)
-}
+# path <- "/group/irc/shared/synthetic_visium/generation/"
+# for (dataset in datasets){
+#     convertSeuratRDSToh5ad(paste0(path, dataset, ".rds"), output_path="data/generation_h5ad/", update=TRUE)
+# }
 
 # reference files
 # test_set <- c('brain_cortex_test.rds', 'cerebellum_cell_test.rds', 'cerebellum_nucleus_test.rds',
@@ -75,4 +76,11 @@ for (dataset in datasets){
 # for (dataset in test_set[2:3]){
 #   convertSeuratRDSToLoom(paste0(path, "test_set/", dataset))
 # }
+
+# convertSeuratRDSToh5ad("/group/irc/shared/synthetic_visium/raw_data/scRNAseq/seurat_obj_scrnaseq_kidney_filtered.rds",
+#   output_path="data/", update=TRUE)
+
+convertSeuratRDSToh5ad("/group/irc/shared/synthetic_visium/raw_data/brain_cortex/scRNAseq/seurat_obj_scrnaseq_cortex_filtered.rds",
+   output_path="thesis/downsampling/brain_cortex/", update=TRUE)
+
 
