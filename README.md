@@ -22,5 +22,7 @@ Instead of synthvisium you can generate synthetic data using scripts from SPOTli
 ## Running deconvolution methods
 Scripts for running the deconvolution methods can be found at `Scripts/run_deconv` along with a description for using those files.
 
+For scripts to generate downsampled data and get the runtime of each method, check out `Scripts/run_deconv_downsample`.
+
 ## Evaluation
 Evaluation scripts are found at `Scripts/` with the prefix `evaluation_`.
