@@ -33,7 +33,7 @@ convertSeuratRDSToh5ad <- function(input_path, output_path=NULL, isSeurat=TRUE, 
   Convert(paste0(output_path, "/", file_name, ".h5Seurat"), dest = "h5ad")
   file.remove(paste0(output_path, "/", file_name, ".h5Seurat"))
 }
-
+# path <- "D:/Work (Yr 2 Sem 1)/Thesis/Data/synthetic_datasets/" # local
 path <- "/home/chananchidas/data/"
 repl <- "rep6/"
 datasets <- c("brain_cortex_generation", "cerebellum_cell_generation",
