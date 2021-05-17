@@ -1,4 +1,11 @@
 # Generating synthetic spots
+The file `generate_synthetic_data_all_methods.R` compiles the generation (if possible) and reading of the synthetic data from each method. You can compare the distributions of these data with `../check_distributions_countsimQC.R` and/or `../check_distributions_fitdistr.R`.
+
+## Synthvisium
+
+https://github.com/browaeysrobin/synthvisium
+
+If you have access to this package, you can use the file `generate_synth_data.R` as a template to generate the artificial dataset types.
 
 ## SPOTlight
 
@@ -77,35 +84,7 @@ https://github.com/emdann/ST_simulation
 * csv file containing the count matrix for the simulated ST spots
 * csv file containing the number of UMIs per cell type in each spot, for benchmarking deconvolution methods that model number of UMIs
 
-Sample code (step-by-step explanation below)
-```
-SCRIPT_PATH=thesis/Scripts/synthetic_data_generation/cell2location
-OUT_DIR=data/synthetic_data_cell2location/
-mkdir -p $OUT_DIR
-
-N_SPOTS=1000
-
-# Step 1 (returns three seeds)
-python $SCRIPT_PATH/split_sc.py data/data_rawcounts.h5ad \
-data/data_metadata.csv --out_dir $OUT_DIR --annotation_col bio_celltype
- 
-# Step 2
-# This gives all three seeds that were returned
-seed=$(ls $OUT_DIR/labels_generation* | sed 's/.*_//' | sed 's/.p//')
-# Loop through each seed
-for SEED in $seed
-do
-    python $SCRIPT_PATH/assemble_design.py --tot_spots $N_SPOTS --mean_high 3 --mean_low 1 \
-    --out_dir $OUT_DIR --annotation_col bio_celltype $SEED
-
-    # Step 3
-    python $SCRIPT_PATH/assemble_composition.py --tot_spots $N_SPOTS \
-    --annotation_col bio_celltype --out_dir $OUT_DIR $SEED
- 
-    # Step 4
-    python $SCRIPT_PATH/assemble_st.py --out_dir $OUT_DIR --annotation_col bio_celltype $SEED
-done
-```
+Sample code can be found at `create_synthetic_data_cell2location.sh`.
 
 **Step 1:** Split single-cell dataset. we split the cells in the single-cell dataset in a 'generation set', that will be used to simulate the ST spots, and a 'validation' set, that will be used to train the deconvolution models that we want to benchmark.
 
