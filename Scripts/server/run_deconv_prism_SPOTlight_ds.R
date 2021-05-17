@@ -22,8 +22,9 @@ k <- Sys.getenv("SGE_TASK_ID")
 
 # SERVER
 path <- paste0("~/thesis/downsampling/", dataset, "/", repl, "/")
-results_path <- paste0(path, "results/")
-scrna_path <- paste0("/group/irc/shared/synthetic_visium/test/", dataset, "_test.rds")
+results_path <- paste0(path, "results_sc/")
+# scrna_path <- paste0("/group/irc/shared/synthetic_visium/test/", dataset, "_test.rds")
+scrna_path <- "/group/irc/shared/synthetic_visium/raw_data/brain_cortex/scRNAseq/seurat_obj_scrnaseq_cortex_filtered.rds"
 
 # LOCAL
 # path <- paste0("D:/Work (Yr 2 Sem 1)/Thesis/downsampling/", dataset, "/", repl, "/")
@@ -37,17 +38,29 @@ dir.create(paste0(results_path, "spotlight/"), recursive=TRUE)
 
 # Extract the top marker genes from each cluster
 seurat_obj_scRNA <- readRDS(scrna_path)
+if (dataset == "brain_cortex"){ seurat_obj_scRNA$celltype <- seurat_obj_scRNA$subclass }
+
+# DOWNSAMPLING
+cells <- unlist(read.table(paste0(path, "scref_downsample_info/ref_cells", k, ".txt")))
+seurat_obj_scRNA <- subset(seurat_obj_scRNA, cells=cells)
+print(paste0("Reference now has ", ncol(seurat_obj_scRNA), " cells and ", nrow(seurat_obj_scRNA), " genes."))
+
 seurat_obj_scRNA <- preprocessSeurat(seurat_obj_scRNA)
 Idents(object = seurat_obj_scRNA) <- seurat_obj_scRNA@meta.data$celltype
 cluster_markers_all <- FindAllMarkers(object = seurat_obj_scRNA, assay = "SCT", slot = "data", verbose = TRUE,
                                       only.pos = TRUE, logfc.threshold = 1, min.pct = 0.9)
 
-# Load synthetic visium data and downsample
+# Load synthetic visium data
+# DOWNSAMPLING
 synthetic_visium_data <- readRDS(paste0(path, list.files(path, pattern="rds")[1]))
-spots <- unlist(read.table(paste0(path, "synthvisium_downsample_info/cells", k, ".txt")))
-genes <- unlist(read.table(paste0(path, "synthvisium_downsample_info/genes", k, ".txt")))
+spots <- unlist(read.table(paste0(path, "synthvisium_downsample_info/cells", 8, ".txt")))
+genes <- unlist(read.table(paste0(path, "synthvisium_downsample_info/genes", 8, ".txt")))
 synthetic_visium_data <- synthetic_visium_data$counts[genes, spots]
+print(paste0("Spatial dataset now has ", ncol(synthetic_visium_data), " spots and ", nrow(synthetic_visium_data), " genes."))
 seurat_obj_visium <- CreateSeuratObject(counts = synthetic_visium_data, assay = "Spatial")
+
+# synthetic_visium_data <- readRDS(paste0(path, list.files(path, pattern="rds")[1]))
+# seurat_obj_visium <- CreateSeuratObject(counts = synthetic_visium_data$counts, assay = "Spatial")
 
 start_time <- Sys.time()
 spotlight_deconv <- spotlight_deconvolution(se_sc = seurat_obj_scRNA, counts_spatial = seurat_obj_visium@assays$Spatial@counts,

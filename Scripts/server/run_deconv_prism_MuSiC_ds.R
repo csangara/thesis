@@ -39,27 +39,29 @@ dir.create(paste0(results_path, "music/"), recursive=TRUE)
 
 # Load reference scRNA-seq data and convert to ExprSet
 seurat_obj_scRNA = readRDS(scrna_path)
+if (dataset == "brain_cortex"){ seurat_obj_scRNA$celltype <- seurat_obj_scRNA$subclass }
 
 ### DOWNSAMPLING SCRNA-SEQ
 cells <- unlist(read.table(paste0(path, "scref_downsample_info/ref_cells", k, ".txt")))
-genes <- unlist(read.table(paste0(path, "scref_downsample_info/ref_genes", k, ".txt")))
-seurat_obj_scRNA <- subset(seurat_obj_scRNA, cells=cells, features=genes)
+seurat_obj_scRNA <- subset(seurat_obj_scRNA, cells=cells)
+print(paste0("Reference now has ", ncol(seurat_obj_scRNA), " cells and ", nrow(seurat_obj_scRNA), " genes."))
 
-seurat_obj_scRNA = seurat_obj_scRNA %>% SetIdent(value = "subclass")
+seurat_obj_scRNA = seurat_obj_scRNA %>% SetIdent(value = "celltype")
 DefaultAssay(seurat_obj_scRNA) <- "RNA"
 eset_obj_scRNA <- SeuratToExprSet(seurat_obj_scRNA)
 rm(seurat_obj_scRNA)
 
 # Read in synthvisium
-synthetic_visium_data <- readRDS(paste0(path, list.files(path, pattern="rds")[1]))
-seurat_obj_visium <- createSeuratFromCounts(synthetic_visium_data$counts, PP=FALSE)
+# synthetic_visium_data <- readRDS(paste0(path, list.files(path, pattern="rds")[1]))
+# seurat_obj_visium <- createSeuratFromCounts(synthetic_visium_data$counts, PP=FALSE)
 
 ### DOWNSAMPLING SYNTHVISIUM
-# synthetic_visium_data <- readRDS(paste0(path, list.files(path, pattern="rds")[1]))
-# spots <- unlist(read.table(paste0(path, "synthvisium_downsample_info/cells", k, ".txt")))
-# genes <- unlist(read.table(paste0(path, "synthvisium_downsample_info/genes", k, ".txt")))
-# synthetic_visium_data <- synthetic_visium_data$counts[genes, spots]
-# seurat_obj_visium <- createSeuratFromCounts(synthetic_visium_data, PP=FALSE)
+synthetic_visium_data <- readRDS(paste0(path, list.files(path, pattern="rds")[1]))
+spots <- unlist(read.table(paste0(path, "synthvisium_downsample_info/cells", 8, ".txt")))
+genes <- unlist(read.table(paste0(path, "synthvisium_downsample_info/genes", 8, ".txt")))
+synthetic_visium_data <- synthetic_visium_data$counts[genes, spots]
+print(paste0("Spatial dataset now has ", ncol(synthetic_visium_data), " spots and ", nrow(synthetic_visium_data), " genes."))
+seurat_obj_visium <- CreateSeuratObject(counts = synthetic_visium_data, assay = "Spatial")
 
 # Convert to ExprSet
 eset_obj_visium <- SeuratToExprSet(seurat_obj_visium)
@@ -67,7 +69,7 @@ rm(synthetic_visium_data, seurat_obj_visium)
 
 start_time <- Sys.time()
 # Deconvolution
-music_deconv = music_prop(bulk.eset = eset_obj_visium, sc.eset = eset_obj_scRNA, clusters = 'subclass', samples='samples')
+music_deconv = music_prop(bulk.eset = eset_obj_visium, sc.eset = eset_obj_scRNA, clusters = 'celltype', samples='samples')
 end_time <- Sys.time()
 # res[dataset_type] = cor(t(synthetic_visium_data$relative_spot_composition[,1:23]), t(music_deconv$Est.prop.weighted[,1:23]))
 saveRDS(music_deconv$Est.prop.weighted, paste0(results_path, "music/", dataset, "_", k, "_music.rds"))

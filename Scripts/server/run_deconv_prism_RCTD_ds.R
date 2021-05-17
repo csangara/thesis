@@ -22,8 +22,9 @@ k <- Sys.getenv("SGE_TASK_ID")
 
 # SERVER
 path <- paste0("~/thesis/downsampling/", dataset, "/", repl, "/")
-results_path <- paste0(path, "results/")
-scrna_path <- paste0("/group/irc/shared/synthetic_visium/test/", dataset, "_test.rds")
+results_path <- paste0(path, "results_sc/")
+# scrna_path <- paste0("/group/irc/shared/synthetic_visium/test/", dataset, "_test.rds")
+scrna_path <- "/group/irc/shared/synthetic_visium/raw_data/brain_cortex/scRNAseq/seurat_obj_scrnaseq_cortex_filtered.rds"
 
 # LOCAL
 # path <- paste0("D:/Work (Yr 2 Sem 1)/Thesis/downsampling/", dataset, "/", repl, "/")
@@ -38,17 +39,28 @@ dir.create(paste0(results_path, "RCTD/"), recursive=TRUE)
 
 # Load reference scRNA-seq
 seurat_obj_scRNA <- readRDS(scrna_path)
+if (dataset == "brain_cortex"){ seurat_obj_scRNA$celltype <- seurat_obj_scRNA$subclass }
 DefaultAssay(seurat_obj_scRNA) <- "RNA"
+
+# Downsampling
+cells <- unlist(read.table(paste0(path, "scref_downsample_info/ref_cells", k, ".txt")))
+seurat_obj_scRNA <- subset(seurat_obj_scRNA, cells=cells)
+print(paste0("Reference now has ", ncol(seurat_obj_scRNA), " cells and ", nrow(seurat_obj_scRNA), " genes."))
+
 seurat_obj_scRNA@meta.data$liger_ident_coarse <- factor(seurat_obj_scRNA@meta.data$celltype)
 seurat_obj_scRNA@meta.data$nUMI <- colSums(seurat_obj_scRNA@assays$RNA@counts)
 
-# Load synthetic visium data and downsample
+# Load synthetic visium data
+# Downsample
 synthetic_visium_data <- readRDS(paste0(path, list.files(path, pattern="rds")[1]))
-spots <- unlist(read.table(paste0(path, "synthvisium_downsample_info/cells", k, ".txt")))
-genes <- unlist(read.table(paste0(path, "synthvisium_downsample_info/genes", k, ".txt")))
-
+spots <- unlist(read.table(paste0(path, "synthvisium_downsample_info/cells", 8, ".txt")))
+genes <- unlist(read.table(paste0(path, "synthvisium_downsample_info/genes", 8, ".txt")))
 synthetic_visium_data <- synthetic_visium_data$counts[genes, spots]
+print(paste0("Spatial dataset now has ", ncol(synthetic_visium_data), " spots and ", nrow(synthetic_visium_data), " genes."))
 spatialRNA_obj_visium <- RCTD:::SpatialRNA(counts=as(as(synthetic_visium_data,"matrix"),"dgCMatrix"))
+
+# synthetic_visium_data <- readRDS(paste0(path, list.files(path, pattern="rds")[1]))
+# spatialRNA_obj_visium <- RCTD:::SpatialRNA(counts=as(as(synthetic_visium_data$counts,"matrix"),"dgCMatrix"))
 
 start_time <- Sys.time()
 RCTD_deconv <- create.RCTD(spatialRNA_obj_visium, seurat_obj_scRNA, max_cores = 8, CELL_MIN_INSTANCE=5)
