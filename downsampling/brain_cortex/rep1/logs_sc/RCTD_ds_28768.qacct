@@ -133,3 +133,48 @@ maxvmem      14.745GB
 arid         undefined
 ar_sub_time  undefined
 category     -q all.q -l h_stack=128m,h_vmem=4G -pe serial 8
+==============================================================
+qname        all.q               
+hostname     prismcls07          
+group        irc                 
+owner        chananchidas        
+project      NONE                
+department   defaultdepartment   
+jobname      RCTD_ds             
+jobnumber    28770               
+taskid       1                   
+account      sge                 
+priority     0                   
+qsub_time    Tue May 18 03:37:47 2021
+start_time   Tue May 18 03:38:04 2021
+end_time     Tue May 18 03:53:12 2021
+granted_pe   serial              
+slots        8                   
+failed       0    
+exit_status  0                   
+ru_wallclock 908s
+ru_utime     301.144s
+ru_stime     15.671s
+ru_maxrss    6.239MB
+ru_ixrss     0.000B
+ru_ismrss    0.000B
+ru_idrss     0.000B
+ru_isrss     0.000B
+ru_minflt    10350627            
+ru_majflt    134                 
+ru_nswap     0                   
+ru_inblock   4290624             
+ru_oublock   528                 
+ru_msgsnd    0                   
+ru_msgrcv    0                   
+ru_nsignals  0                   
+ru_nvcsw     23452               
+ru_nivcsw    6580                
+cpu          1780.080s
+mem          1.829TBs
+io           4.543GB
+iow          0.000s
+maxvmem      7.700GB
+arid         undefined
+ar_sub_time  undefined
+category     -q all.q -l h_stack=128m,h_vmem=4G -pe serial 8
