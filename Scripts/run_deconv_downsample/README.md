@@ -84,9 +84,8 @@ done
 To fit the model, you can use `run_cell2location_downsample.py` and enter the path to each regression model separately. I also used a downsampled version of the synthetic data with 1000 spots and 15000 genes (case 8):
 
 ```
-python run_cell2location_downsample.py
-$DIR/brain_cortex_synthvisium_full.h5ad $OUT_DIR $cuda_device \
-$DIR/synthvisium_downsample_info/ 8 \
+python run_cell2location_downsample.py $DIR/brain_cortex_synthvisium_full.h5ad \
+$OUT_DIR $cuda_device $DIR/synthvisium_downsample_info/ 8 \
 -r $DIR/results_sc/cell2location/regression_model/$REGRESSION_MODEL_NAME/
 ```
 
