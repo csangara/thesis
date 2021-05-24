@@ -330,13 +330,19 @@ ggplot(df, aes(x=method, y=mean, color=proper_dataset_names,
 dev.off()
 
 # FACET GRID
-df$dataset_type <- factor(df$dataset_type, levels=unique(df$dataset_type))
-png("plots/all_RMSE_facet_annotate.png", width=1500, height=1000)
-p <- ggplot(df, aes(x=method, y=all_RMSE, color=method)) + geom_boxplot() +
-  ylab("Mean RMSE over 10 iterations") +stat_summary(geom="text", fun=median,
-                                                      aes(label=sprintf("%1.3f", ..y..), color=method),
-                                                      position=position_nudge(x=0.33), size=3.5)
-print(p + facet_grid(rows=vars(proper_dataset_names), cols=vars(dataset_type)))
+df <- mutate(df, dt_linebreak = str_wrap(str_replace_all(dataset_type, "_", " "), width = 20))
+df$dt_linebreak_new <- factor(df$dt_linebreak, levels=unique(df$dt_linebreak))
+png("plots/all_RMSE_facet2.png", width=297, height=190, units="mm", res=200)
+p <- ggplot(df, aes(x=method, y=all_RMSE, color=method)) + geom_boxplot(width=0.75) +
+  ylab("Mean RMSE") + labs(color="Method") + ylim(0, 0.25) +
+  scale_color_discrete(labels=c("cell2location", "MuSiC", "RCTD", "SPOTlight", "stereoscope")) +
+  theme(legend.position="bottom", legend.direction = "horizontal",
+        axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank())
+#+ stat_summary(geom="text", fun=median,
+#              aes(label=sprintf("%1.3f", ..y..), color=method),
+#              position=position_nudge(x=0.33), size=3.5)
+   
+print(p + facet_grid(rows=vars(proper_dataset_names), cols=vars(dt_linebreak_new)))
 dev.off()
 
 ### WILCOXON TEST ###
