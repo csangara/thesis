@@ -198,3 +198,41 @@ getConfusionMatrix <- function(known_props, test_props){
   return(list(tp=tp, tn=tn, fn=fn, fp=fp))
 }
 
+
+getregionComp <- function (synthetic_visium_data, verbose=TRUE,
+                           plotUMAP=FALSE, labelUMAP=TRUE){
+  # Create seurat obj and UMAP
+  spot_comp <- synthetic_visium_data$relative_spot_composition
+  
+  if (plotUMAP){
+    seurat_obj_visium <- createSeuratFromCounts(synthetic_visium_data$counts)
+    p <- DimPlot(seurat_obj_visium, reduction = "umap", label = FALSE, group.by = "orig.ident")
+  }
+  
+  region_comp = c()
+  for (region in paste0("priorregion", 1:5)){
+    temp_spot_comp <- spot_comp[spot_comp$region==region,1:(ncol(spot_comp)-2)]  
+    mean_comp <- apply(temp_spot_comp, 2, mean)
+    mean_comp <- mean_comp[mean_comp != 0]
+    comp_text <- paste(names(mean_comp), round(mean_comp, 2), sep = ":", collapse = "; ")
+    region_comp[region] <- comp_text
+    
+    if (verbose){
+      print(region)
+      print(comp_text)
+    }
+    
+    # sd_comp <- apply(temp_spot_comp, 2, sd)
+    # sd_comp <- sd_comp[sd_comp != 0]
+    # print(paste(names(sd_comp), round(sd_comp, 2), sep = ":", collapse = "; "))
+    
+    if (plotUMAP & labelUMAP){
+      umap_coords <-seurat_obj_visium@reductions$umap@cell.embeddings[seurat_obj_visium$orig.ident==region,]
+      median_umap <- apply(umap_coords, 2, median)
+      p <- p + annotate("text", label=comp_text, x=median_umap[1], y=median_umap[2])
+    }
+    
+  }
+  if (plotUMAP) {print(p + ggtitle(dataset_type))}
+  return (region_comp)
+}

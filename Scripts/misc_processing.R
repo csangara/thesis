@@ -46,40 +46,24 @@ dataset_types = c("artificial_uniform_distinct", "artificial_diverse_distinct",
                   "artificial_partially_dominant_celltype_diverse",
                   "artificial_dominant_rare_celltype_diverse",
                   "artificial_regional_rare_celltype_diverse")
+
+
+data_path <- "Data/synthetic_datasets/"
 ds_list <- list()
+
 for (dataset_type in dataset_types){
-  synthetic_visium_data <- readRDS(paste0("Data/synthetic_datasets/cerebellum_cell_generation/rep3/cerebellum_cell_generation_", dataset_type, "_synthvisium.rds"))
-  spot_comp <- synthetic_visium_data$relative_spot_composition
   
-  # Create seurat obj and UMAP
-  seurat_obj_visium <- createSeuratFromCounts(synthetic_visium_data$counts)
-  p <- DimPlot(seurat_obj_visium, reduction = "umap", label = FALSE, group.by = "orig.ident")
+  synthetic_visium_data <- readRDS(paste0(data_path, dataset ,"/", repl, "/", dataset, "_", dataset_type, "_synthvisium.rds"))
+  region_comp <- getregionComp(synthetic_visium_data)
   
   #png(paste0("plots/UMAP_synthvisium_cer_cell/", dataset_type, "_no_comp.png"))
-  print(p + ggtitle(dataset_type) + theme(legend.position="none"))
+  #print(p + ggtitle(dataset_type) + theme(legend.position="none"))
   #dev.off()
   # Get all celltypes
   # celltypes <- colnames(spot_comp)[1:(ncol(spot_comp)-2)]
   # FeaturePlot(seurat_obj_visium, celltypes)
   
-  region_comp = c()
-  for (region in paste0("priorregion", 1:5)){
-    temp_spot_comp <- spot_comp[spot_comp$region==region,1:(ncol(spot_comp)-2)]  
-    mean_comp <- apply(temp_spot_comp, 2, mean)
-    mean_comp <- mean_comp[mean_comp != 0]
-    sd_comp <- apply(temp_spot_comp, 2, sd)
-    sd_comp <- sd_comp[sd_comp != 0]
-    comp_text <- paste(names(mean_comp), round(mean_comp, 2), sep = ":", collapse = "; ")
-    
-    print(comp_text)
-    print(paste(names(sd_comp), round(sd_comp, 2), sep = ":", collapse = "; "))
-    
-    umap_coords <-seurat_obj_visium@reductions$umap@cell.embeddings[seurat_obj_visium$orig.ident==region,]
-    median_umap <- apply(umap_coords, 2, median)
-    p <- p + annotate("text", label=comp_text, x=median_umap[1], y=median_umap[2])
-    region_comp[region] <- comp_text
-  }
-  print(p + ggtitle(dataset_type))
+  
   ds_list[[dataset_type]] <- region_comp
 }
 
