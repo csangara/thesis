@@ -46,34 +46,34 @@ DownsampleMatrix <- function(mat){
 # description <- "comparing all four methods of generating synth data"
 
 ## KIDNEY ##
-kidney <- LoadData("stxKidney.SeuratData")
-
-# Synthvisium - brain
-synthvisium_synth <- readRDS("data/synthetic_datasets/synthvisium/kidney_1314spots.rds")
-kidney <- subset(kidney, features = rownames(synthvisium_synth$counts))
-
-# SPOTLIGHT
-spotlight_synth <- readRDS("data/synthetic_datasets/spotlight/kidney/1500spots.rds")
-
-# STEREOSCOPE
-stereoscope_synth <- read.table("data/synthetic_datasets/stereoscope/kidney/1500spots/counts.st_synth.tsv",
-                                header=TRUE, sep="\t", row.names=1)
-
-# CELL2LOCATION
-cell2location_synth <- read.table(paste0("data/synthetic_datasets/cell2location/kidney/1500spots/synthetic_ST_seed371_1500_counts.csv"),
-                                  header=TRUE, sep=",", row.names=1)
-cell2location_synth <- cell2location_synth[rowSums(cell2location_synth)>0,] # Remove spots with zero counts
-
-ddsList <- list(
-  realKidney = as.matrix(GetAssayData(kidney)),
-  spotlight_synth = as.matrix(spotlight_synth$topic_profiles),
-  synthvisium = as.matrix(synthvisium_synth$counts),
-  stereoscope = as.matrix(t(stereoscope_synth)),
-  cell2location = as.matrix(t(cell2location_synth))
-)
-
-outputFileName <- "four_methods_kidney_oridwn_withstats.html"
-description <- "comparing all four methods of generating synth data, original data is downsampled"
+# kidney <- LoadData("stxKidney.SeuratData")
+# 
+# # Synthvisium - brain
+# synthvisium_synth <- readRDS("data/synthetic_datasets/synthvisium/kidney_1314spots.rds")
+# kidney <- subset(kidney, features = rownames(synthvisium_synth$counts))
+# 
+# # SPOTLIGHT
+# spotlight_synth <- readRDS("data/synthetic_datasets/spotlight/kidney/1500spots.rds")
+# 
+# # STEREOSCOPE
+# stereoscope_synth <- read.table("data/synthetic_datasets/stereoscope/kidney/1500spots/counts.st_synth.tsv",
+#                                 header=TRUE, sep="\t", row.names=1)
+# 
+# # CELL2LOCATION
+# cell2location_synth <- read.table(paste0("data/synthetic_datasets/cell2location/kidney/1500spots/synthetic_ST_seed371_1500_counts.csv"),
+#                                   header=TRUE, sep=",", row.names=1)
+# cell2location_synth <- cell2location_synth[rowSums(cell2location_synth)>0,] # Remove spots with zero counts
+# 
+# ddsList <- list(
+#   realKidney = as.matrix(GetAssayData(kidney)),
+#   spotlight_synth = as.matrix(spotlight_synth$topic_profiles),
+#   synthvisium = as.matrix(synthvisium_synth$counts),
+#   stereoscope = as.matrix(t(stereoscope_synth)),
+#   cell2location = as.matrix(t(cell2location_synth))
+# )
+# 
+# outputFileName <- "four_methods_kidney_oridwn_withstats.html"
+# description <- "comparing all four methods of generating synth data, original data is downsampled"
 
 
 #### PART 2: COMPARING DIFFERENT GENERATION SCHEMES ####
@@ -123,12 +123,25 @@ description <- "comparing all four methods of generating synth data, original da
 # outputFileName <- "stxDatasets_withstats.html"
 # description <- "comparing brain and kidney datasets"
 
-#### RUNNING COUNTSIMQC ####
+#### PART 4: BRAIN VS KIDNEY ####
+brain <- LoadData("stxBrain.SeuratData", type = "posterior1")
+kidney <- subset(kidney, features = rownames(synthvisium_synth$counts))
+
+ddsList <- list(
+  realKidney = as.matrix(GetAssayData(kidney)),
+  realBrain = as.matrix(GetAssayData(brain))
+)
+
+outputFileName <- "kidney_brain_withstats.html"
+description <- "comparing real datasets"
+
+
+#### RUNNING COUNTSIMQC0 ####
 print(Sys.getenv("RSTUDIO_PANDOC"))
 print(outputFileName)
 countsimQC::countsimQCReport(ddsList = ddsList, 
                              outputFile = outputFileName,
-                             outputDir = "countsimQC_results/",
+                             outputDir = "plots/countsimQC/",
                              description = description,
                              forceOverwrite = TRUE,
                              calculateStatistics = TRUE)
