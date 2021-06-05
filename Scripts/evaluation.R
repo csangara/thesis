@@ -252,24 +252,14 @@ for (repl in paste0("rep", 1:10)){
 
 #### DEVIATION BETWEEN REPLICATES ####
 df <- data.frame()
+# "corr", "RMSE", "accuracy", "sensitivity", "specificity", "precision", "F1"
+metric <- "F1"
 for (dataset in datasets[-1]){
   all_reps <- lapply(paste0('rep', 1:10), function(repl){
       all_results <- readRDS(paste0(paste0("results/", dataset, "/", repl, "_/"),
                                     "all_metrics_", dataset, ".rds"))
-      sapply(possible_dataset_types, function (u) all_results[[u]][["RMSE"]] )
+      sapply(possible_dataset_types, function (u) all_results[[u]][[metric]] )
   })
-  
-  mean_reps <- sapply(possible_dataset_types, function(u) {
-    apply(sapply(1:10, function(k) all_reps[[k]][,u]), 1, mean)})
-  sd_reps <- sapply(possible_dataset_types, function(u) {
-    apply(sapply(1:10, function(k) all_reps[[k]][,u]), 1, sd)})
-  
-  #temp_df <- data.frame(mean=c(mean_reps),
-  #                      sd=c(sd_reps),
-  #                      method=rep(methods, length(possible_dataset_types)),
-  #                      dataset_type=rep(possible_dataset_types, each=length(methods)),
-  #                      dataset=rep(dataset,length(possible_dataset_types)*length(methods)))
-  
   temp_df <- data.frame(all_RMSE=unlist(all_reps),
                         reps=rep(1:10, each=length(methods)*length(possible_dataset_types)),
                         method=c("SPOT", "MuSiC", "c2l", "RCTD", "stereo"),
@@ -285,9 +275,81 @@ df$method <- sapply(df$method, str_replace, "music", "MuSiC")
 df$method <- sapply(df$method, str_replace, "spotlight", "SPOTlight")
 proper_dataset_names <- c("Brain cortex", "Cerebellum (sc)", "Cerebellum (sn)", 
                           "Hippocampus", "Kidney", "PBMC", "SCC (patient 5)")
-proper_dataset_names <- paste0(proper_dataset_names, " [", n_cells_list, "]")
-df$proper_dataset_names <- rep(proper_dataset_names, each = length(possible_dataset_types)*length(methods))
+#proper_dataset_names <- paste0(proper_dataset_names, " [", n_cells_list, "]")
+df$proper_dataset_names <- rep(proper_dataset_names, each = length(possible_dataset_types)*length(methods)*10)
 df$dataset_type <- sapply(df$dataset_type, str_replace, "artificial_", "")
+
+# FACET GRID
+df <- mutate(df, dt_linebreak = str_wrap(str_replace_all(dataset_type, "_", " "), width = 20))
+df$dt_linebreak_new <- factor(df$dt_linebreak, levels=unique(df$dt_linebreak))
+p <- ggplot(df, aes(x=method, y=all_RMSE, color=method)) + geom_boxplot(width=0.75) +
+  ylab("Mean RMSE") + labs(color="Method") +
+  scale_color_discrete(labels=c("cell2location", "MuSiC", "RCTD", "SPOTlight", "stereoscope")) +
+  theme(legend.position="bottom", legend.direction = "horizontal",
+        axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank()) +
+  facet_grid(rows=vars(proper_dataset_names), cols=vars(dt_linebreak_new), scales="free_y")
+
+png(paste0("plots/all_", metric, "_facet.png"), width=297, height=190, units="mm", res=200)
+print(p)
+dev.off()
+
+# ANNOTATING MEDIAN VALUE
+png("plots/all_RMSE_facet_annote.png", width=297, height=190, units="mm", res=200)
+p + stat_summary(geom="text", fun=median,
+             aes(label=sprintf("%1.3f", ..y..), color=method),
+             position=position_nudge(x=0.33), size=2)
+dev.off()
+
+# PLOTTING DASHED LINE
+if (metric == RMSE){
+  RMSE_ref_list <- melt(readRDS("rds/ref_RMSE_all.rds")) %>% group_by(L2, L1) %>% summarise(ref_RMSE=mean(value), .groups="drop")
+  RMSE_dir_df2 <- RMSE_ref_list %>% `colnames<-`(c("dataset_type", "dataset", "value"))
+  RMSE_dir_df2$dataset_type <- sapply(RMSE_dir_df2$dataset_type, str_replace, "artificial_", "")
+  RMSE_dir_df2 <- mutate(RMSE_dir_df2, dt_linebreak = str_wrap(str_replace_all(dataset_type, "_", " "), width = 20))
+  RMSE_dir_df2$dt_linebreak_new <- factor(RMSE_dir_df2$dt_linebreak, levels=unique(RMSE_dir_df2$dt_linebreak))
+  RMSE_dir_df2$proper_dataset_names <- rep(proper_dataset_names, length(possible_dataset_types))
+  p <- p + geom_hline(data=RMSE_dir_df2, aes(yintercept=value), linetype="dashed", color="gray")
+} else {
+  ref_metric_list <- readRDS("rds/ref_all_metrics.rds")
+  ref_metric_df <- reshape2::melt(ref_metric_list) %>% mutate("metric"=rep(possible_metrics, 56)) %>%
+    `colnames<-`(c("value", "dataset_type", "dataset", "metric"))
+  ref_metric_df <- ref_metric_df[ref_metric_df$metric==metric,]
+  ref_metric_df$dataset_type <- sapply(ref_metric_df$dataset_type, str_replace, "artificial_", "")
+  ref_metric_df <- mutate(ref_metric_df, dt_linebreak = str_wrap(str_replace_all(dataset_type, "_", " "), width = 20))
+  ref_metric_df$dt_linebreak_new <- factor(ref_metric_df$dt_linebreak, levels=unique(ref_metric_df$dt_linebreak))
+  ref_metric_df$proper_dataset_names <- rep(proper_dataset_names, each=length(possible_dataset_types))
+  p <- p + geom_hline(data=ref_metric_df, aes(yintercept=value), linetype="dashed", color="gray")
+}
+
+png(paste0("plots/metrics_facet/all_", metric, "_facet_ref.png"), width=297, height=190, units="mm", res=200)
+print(p)
+dev.off()
+
+## BEST VALUES ##
+possible_metrics <- c("corr", "RMSE", "accuracy", "sensitivity", "specificity", "precision", "F1")
+
+for (metric in possible_metrics){
+  df <- data.frame()
+  for (dataset in datasets[-1]){
+    all_reps <- lapply(paste0('rep', 1:10), function(repl){
+      all_results <- readRDS(paste0(paste0("results/", dataset, "/", repl, "_/"),
+                                    "all_metrics_", dataset, ".rds"))
+      sapply(possible_dataset_types, function (u) all_results[[u]][[metric]] )
+    })
+    temp_df <- data.frame(all_RMSE=unlist(all_reps),
+                          reps=rep(1:10, each=length(methods)*length(possible_dataset_types)),
+                          method=c("SPOT", "MuSiC", "c2l", "RCTD", "stereo"),
+                          dataset_type=rep(possible_dataset_types, each=length(methods)),
+                          dataset=dataset)
+    
+    df <- rbind(df, temp_df)
+  }
+  df$dataset_type <- factor(df$dataset_type, levels=possible_dataset_types)
+  best <- df %>% group_by(dataset, dataset_type, method) %>% summarise(medi=median(all_RMSE)) %>%
+    slice_max(order_by=medi, n=1)
+  write.table(best, paste0("Misc/best_values_", metric, ".tsv"), sep="\t", row.names=FALSE, quote=FALSE)
+}
+
 
 # SD ?
 ggplot(df, aes(x=method, y=sd, shape=factor(str_replace(dataset_type, "artificial_", "")), color=str_replace(dataset, "_generation", ""))) +
@@ -321,7 +383,7 @@ dev.off()
 png("plots/mean_between_10reps_groupbydataset.png", width=800, height=400)
 ggplot(df, aes(x=method, y=mean, color=proper_dataset_names,
                shape=factor(dataset_type, levels=unique(dataset_type)),
-                            group=proper_dataset_names)) +
+               group=proper_dataset_names)) +
   geom_point(size=2, position=position_dodge(0.6)) +
   labs(title="Mean RMSE between reps", color="Dataset", shape="Dataset type") +
   ylab("RMSE") + xlab ("Method") + scale_shape_manual(values=1:length(possible_dataset_types)) +
@@ -329,23 +391,9 @@ ggplot(df, aes(x=method, y=mean, color=proper_dataset_names,
   guides(color = guide_legend(order=1), shape=guide_legend(order=2))
 dev.off()
 
-# FACET GRID
-df <- mutate(df, dt_linebreak = str_wrap(str_replace_all(dataset_type, "_", " "), width = 20))
-df$dt_linebreak_new <- factor(df$dt_linebreak, levels=unique(df$dt_linebreak))
-png("plots/all_RMSE_facet2.png", width=297, height=190, units="mm", res=200)
-p <- ggplot(df, aes(x=method, y=all_RMSE, color=method)) + geom_boxplot(width=0.75) +
-  ylab("Mean RMSE") + labs(color="Method") + ylim(0, 0.25) +
-  scale_color_discrete(labels=c("cell2location", "MuSiC", "RCTD", "SPOTlight", "stereoscope")) +
-  theme(legend.position="bottom", legend.direction = "horizontal",
-        axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank())
-#+ stat_summary(geom="text", fun=median,
-#              aes(label=sprintf("%1.3f", ..y..), color=method),
-#              position=position_nudge(x=0.33), size=3.5)
-   
-print(p + facet_grid(rows=vars(proper_dataset_names), cols=vars(dt_linebreak_new)))
-dev.off()
 
-### WILCOXON TEST ###
+#### WILCOXON TEST ####
+### OLD - concatenate all values ###
 pvalues <- list()
 mean_RMSEs <- list()
 median_RMSEs <- list()
@@ -371,7 +419,7 @@ for (dataset in datasets[2:length(datasets)]){
       # Load deconvolution results
       deconv_list <- createDeconvResultList(methods, celltypes, result_path, dataset)
       
-      # Correlation and RMSE
+      # RMSE_all spots
       RMSE <- sapply(deconv_list, function(k) sqrt(rowSums((known_props-k[,1:ncells])**2, na.rm=TRUE)/ncells))
       stacked_RMSE <- rbind(stacked_RMSE, stack(data.frame(RMSE)))
     }
@@ -425,3 +473,81 @@ for (dataset in datasets[2:length(datasets)]){
   }
   print("")
 }
+
+### NEW - mean of 10 iterations ###
+
+all_reps <- lapply(paste0('rep', 1:10), function(repl){
+  all_results <- readRDS(paste0(paste0("results/", dataset, "/", repl, "_/"),
+                                "all_metrics_", dataset, ".rds"))
+  sapply(possible_dataset_types, function (u) all_results[[u]][["RMSE"]] )
+})
+melt_all_reps <- melt(all_reps)
+melt_all_reps$methods <- methods
+
+pvalues <- list()
+median_RMSEs <- list()
+ref_RMSE_list <- readRDS("rds/ref_RMSE_all.rds")
+# 15 = n*(n-1)/2, where n is the number of methods+reference
+n_comparisons <- 15*length(possible_dataset_types)*(length(datasets)-1)
+for (dataset in datasets[2:length(datasets)]){
+  for (dataset_type in possible_dataset_types){
+    stacked_RMSE <- data.frame()
+    for (repl in paste0('rep', 1:10)){
+      result_path <- paste0("results/", dataset, "/", repl, "_", run, "/")
+      
+      # Load reference data and deconvolution results
+      synthetic_visium_data <- readRDS(paste0(path, dataset, "/", repl, "/", dataset, "_",
+                                              dataset_type, "_synthvisium.rds"))
+      ncells <- length(colnames(synthetic_visium_data$spot_composition))-2
+      
+      # Initialization of column names
+      celltypes <- colnames(synthetic_visium_data$relative_spot_composition)[1:ncells]
+      celltypes <- str_replace(celltypes, "/", ".")
+      colnames(synthetic_visium_data$relative_spot_composition)[1:ncells] <- celltypes
+      known_props <- synthetic_visium_data$relative_spot_composition[,1:ncells]
+      
+      # Load deconvolution results
+      deconv_list <- createDeconvResultList(methods, celltypes, result_path, dataset)
+      
+      # Mean RMSE
+      RMSE <- sapply(deconv_list, function(k) mean(sqrt(rowSums((known_props-k[,1:ncells])**2, na.rm=TRUE)/ncells)))
+      ref_RMSE <- mean(unlist(ref_RMSE_list[[dataset]][[dataset_type]])) %>% setNames("ref")
+      stacked_RMSE <- rbind(stacked_RMSE, stack(c(ref_RMSE, RMSE)))
+    }
+    pval <- pairwise.wilcox.test(stacked_RMSE[,1], stacked_RMSE[,2],
+                                 p.adjust.method = "none",
+                                 paired=TRUE) 
+
+    pvalues[[dataset]][[dataset_type]] <- melt(pval$p.value, na.rm=TRUE)
+    median_RMSEs[[dataset]][[dataset_type]] <- stacked_RMSE %>% group_by(ind) %>%
+      summarise(median_RMSE=median(values), .groups="drop")
+  }
+}
+pvalues_melt <- melt(pvalues, value.name=c("pvals"), id.vars=c("Var1", "Var2"))
+pvalues_melt$padj <- p.adjust(pvalues_melt$pvals, method="BY")
+
+temp %>% dcast(Var1~Var2, value.var="padj")
+
+library(xlsx)
+wb = createWorkbook()
+sheet = createSheet(wb, "sheet1")
+j = 1
+for (dataset in datasets[2:length(datasets)]){
+  addDataFrame(data.frame(x=dataset), sheet=sheet, startRow=1,
+               startColumn=j, row.names=FALSE, col.names=FALSE)
+  i = 2
+  for (dataset_type in possible_dataset_types){
+    addDataFrame(data.frame(x=dataset_type), sheet=sheet, startRow=i,
+                 startColumn=j, row.names=FALSE, col.names=FALSE)
+    #temp_data <- pvalues_melt[pvalues_melt$L2==dataset_type & pvalues_melt$L1==dataset, c("Var1", "Var2", "padj")]
+    #temp_data <- temp_data %>% dcast(Var1~Var2, value.var="padj")
+    temp_data <- as.matrix(median_RMSEs[[dataset]][[dataset_type]])
+    addDataFrame(temp_data, sheet=sheet, startRow=i+1, startColumn=j, row.names=FALSE, col.names=FALSE)
+    i = i + nrow(temp_data) + 2
+  }
+  j = j+4
+}
+
+#saveWorkbook(wb, paste0("results/summary files/all_pvalues_wilcoxpaired_pairwise.xlsx"))
+#saveWorkbook(wb, paste0("results/summary files/all_meanRMSEs.xlsx"))
+saveWorkbook(wb, paste0("results/summary files/all_medianRMSEs.xlsx"))
