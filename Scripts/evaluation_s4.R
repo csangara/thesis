@@ -174,7 +174,7 @@ for (dataset in datasets[3:4]){
 }
 
 # Deviation between scenarios
-
+library(patchwork)
 for (dataset in datasets[3:4]){
   df <- data.frame()
   for (i in 1:2){
@@ -197,14 +197,15 @@ for (dataset in datasets[3:4]){
                           method=rep(methods, length(possible_dataset_types)),
                           dataset_type=rep(possible_dataset_types, each=length(methods)),
                           dataset=rep(dataset,length(possible_dataset_types)*length(methods)))
-    temp_df$scenario <- c("Scenario 2", "Scenario 4")[i]
+    temp_df$scenario <- c("Scenario 2", "Scenario 3")[i]
     df <- rbind(df, temp_df)
   
   }
   
   df$dataset_type_index <-as.numeric(as.factor(df$dataset_type))
-  df$method <- sapply(df$method, str_replace, "music", "MuSiC")
-  df$method <- sapply(df$method, str_replace, "spotlight", "SPOTlight")
+  df$method <- factor(df$method, levels=sort(methods))
+  proper_method_names <- c("c2l", "MuSiC", "RCTD", "SPOT", "stereo")
+  names(proper_method_names) <- sort(methods)
   df$dataset_type <- sapply(df$dataset_type, str_replace, "artificial_", "")
   df$dataset_type <- factor(df$dataset_type, levels=unique(df$dataset_type))
   title <- ifelse(dataset == "cerebellum_cell_generation", "Cerebellum (sc)", "Cerebellum (sn)")
@@ -212,10 +213,11 @@ for (dataset in datasets[3:4]){
   # png("plots/mean_10reps_s2s4_cercell.png", width=680, height=400)
   p_temp <- ggplot(df, aes(x=method, y=mean, shape=dataset_type,
                  color=scenario, group=dataset_type)) +
-    geom_point(size=3, position=position_dodge(0.6)) +
-    labs(title=title, color="Dataset", shape="Dataset type") + xlab("Method") +
+    geom_point(size=2, stroke=1, position=position_dodge(0.6)) +
+    labs(title=title, color="Scenario", shape="Dataset type") + xlab("Method") +
     ylab("RMSE") + scale_shape_manual(values=1:length(possible_dataset_types)) +
-    ylim(0, 0.3) + guides(color = guide_legend(order=1), shape=guide_legend(order=2))
+    ylim(0, 0.3) + guides(color = guide_legend(order=1), shape=guide_legend(order=2)) +
+    scale_x_discrete(labels=proper_method_names)
   # dev.off()
   if (dataset == "cerebellum_cell_generation"){
     p <- p_temp
@@ -224,21 +226,27 @@ for (dataset in datasets[3:4]){
   }
 }
 p <- p + plot_layout(guides = "collect")
-png("plots/mean_10reps_s2s4_cerboth.png", width=800, height=400)
+png("plots/mean_10reps_s2s4_cerboth2.png", width=210, height=100, units="mm", res=200)
 print(p)
 dev.off()
 
 # Difference
-dfs1 <- df[df$scenario=="Scenario 1",]
-dfs2 <- df[df$scenario=="Scenario 2",]
+dfs1 <- df[df$scenario=="Scenario 2",]
+dfs2 <- df[df$scenario=="Scenario 3",]
+diffs <- c()
 for (method in methods){
   tempdfs1 <- dfs1[dfs1$method==method,]
   tempdfs2 <- dfs2[dfs2$method==method,]
   print(method)
   meandiff <- mean(tempdfs2$mean - tempdfs1$mean)
+  percent_inc <- mean((tempdfs2$mean - tempdfs1$mean)/tempdfs1$mean)
+  #mean_percent_inc <- (mean(tempdfs2$mean) - mean(tempdfs1$mean))/mean(tempdfs1$mean)
   scaled <- meandiff/mean(tempdfs1$mean)
   print(meandiff)
-  print(scaled)
+  diffs[method] <- meandiff
+  #print(scaled)
+  #print(percent_inc)
+  #print(mean_percent_inc)
 }
 
 # SD

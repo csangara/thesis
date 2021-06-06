@@ -177,50 +177,46 @@ for (i in 1:2){
     
       all_results <- readRDS(paste0(paste0("results/", dataset, ext,"/", repl, "_/"),
                                     "all_metrics_", dataset, ".rds"))
-      sapply(possible_dataset_types, function (u) all_results[[u]][["RMSE"]] )
+      sapply(possible_dataset_types, function (u) all_results[[u]][["RMSE"]]) %>%
+        `rownames<-`(methods)
     }
     
   )
-  mean_reps <- sapply(possible_dataset_types, function(u) {
-    apply(sapply(1:10, function(k) all_reps[[k]][,u]), 1, mean)})
-  sd_reps <- sapply(possible_dataset_types, function(u) {
-    apply(sapply(1:10, function(k) all_reps[[k]][,u]), 1, sd)})
   
-  temp_df <- data.frame(mean=c(mean_reps),
-                        sd=c(sd_reps),
-                        method=rep(methods, length(possible_dataset_types)),
-                        dataset_type=rep(possible_dataset_types, each=length(methods)),
-                        dataset=rep(dataset,length(possible_dataset_types)*length(methods)))
-  temp_df$scenario <- paste("Scenario", i)
+  temp_df <- reshape2::melt(all_reps)
+  temp_df$scenario <- paste0("Scenario", i)
   df <- rbind(df, temp_df)
 }
-
+colnames(df) <- c("method", "dataset_type", "value", "rep", "scenario")
 df$dataset_type_index <-as.numeric(as.factor(df$dataset_type))
-df$method <- sapply(df$method, str_replace, "music", "MuSiC")
-df$method <- sapply(df$method, str_replace, "spotlight", "SPOTlight")
+df$method <- factor(df$method, levels=sort(methods))
+proper_method_names <- c("cell2location", "MuSiC", "RCTD", "SPOTlight", "stereoscope")
+names(proper_method_names) <- sort(methods)
 df$dataset_type <- sapply(df$dataset_type, str_replace, "artificial_", "")
 df$dataset_type <- factor(df$dataset_type, levels=unique(df$dataset_type))
+mean_df <- df %>% group_by(method, dataset_type, scenario) %>% summarise(value=mean(value))
 # mean
-png("plots/mean_10reps_s1s2_braincortex.png", width=680, height=400)
-ggplot(df, aes(x=method, y=mean, shape=dataset_type,
-               color=scenario, group=dataset_type)) +
-  geom_point(size=3, position=position_dodge(0.6)) +
-  labs(title="", color="Dataset", shape="Dataset type") + xlab("Method") +
-  ylab("RMSE") + scale_shape_manual(values=1:length(possible_dataset_types)) +
-  ylim(0, 0.13) + guides(color = guide_legend(order=1), shape=guide_legend(order=2))
+png("plots/mean_10reps_s1s2_braincortex.png", width=210, height=100, units="mm", res=200)
+ggplot(mean_df, aes(x=method, y=value, shape=dataset_type, color=scenario, group=dataset_type)) +
+  geom_point(size=3, stroke=1, position=position_dodge(0.6)) +
+  labs(color="Scenario", shape="Dataset type") + xlab("Method") +
+  ylab("Mean RMSE") + scale_shape_manual(values=1:length(possible_dataset_types)) +
+  ylim(0, 0.13) + guides(color = guide_legend(order=1), shape=guide_legend(order=2)) +
+  scale_x_discrete(labels=proper_method_names) +
+  theme(title=element_blank())
 dev.off()
 
-# Difference
-dfs1 <- df[df$scenario=="Scenario 1",]
-dfs2 <- df[df$scenario=="Scenario 2",]
+# Difference (didn't fix this yet)
+dfs1 <- mean_df[mean_df$scenario=="Scenario1",]
+dfs2 <- mean_df[mean_df$scenario=="Scenario2",]
 for (method in methods){
   tempdfs1 <- dfs1[dfs1$method==method,]
   tempdfs2 <- dfs2[dfs2$method==method,]
   print(method)
-  meandiff <- mean(tempdfs2$mean - tempdfs1$mean)
-  scaled <- meandiff/mean(tempdfs1$mean)
+  meandiff <- mean((tempdfs2$value - tempdfs1$value)/tempdfs1$value)
+  #scaled <- mean(tempdfs2$value - tempdfs1$value)/mean(tempdfs1$value)
   print(meandiff)
-  print(scaled)
+  #print(scaled)
 }
 
 # SD
