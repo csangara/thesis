@@ -1,74 +1,7 @@
 #### EVALUATION OF RESULTS ####
 source("D:/Work (Yr 2 Sem 1)/Thesis/Scripts/init.R")
-
-#### SAMPLE CODE FOR LOADING DATA ####
-dataset_type <- possible_dataset_types[1]
-synthetic_visium_data <- readRDS(paste0(path, dataset, "/", repl, "/", dataset, "_",
-                                        dataset_type, "_synthvisium.rds"))
-seurat_obj_visium <- createSeuratFromCounts(synthetic_visium_data$counts, PP=FALSE)
-
 method <- methods[1]
-temp_deconv = readRDS(paste0(result_path, method, "/", dataset, "_", 
-                                  dataset_type, "_", method, ".rds"))
 
-# Correlation
-ncells <- length(colnames(synthetic_visium_data$spot_composition))-2
-res = cor(t(synthetic_visium_data$relative_spot_composition[,1:ncells]), t(temp_deconv[[2]][,1:ncells]))
-print(mean(diag(res), na.rm=TRUE))
-
-###### PLOT PREDICTIONS ON UMAP #######
-for (dataset in datasets[2:length(datasets)]){
-for (repl in paste0('rep', 1:10)){
-    result_path <- paste0("results/", dataset, "/", repl, "_", run, "/")
-    for (dataset_type in possible_dataset_types){
-      
-      # Load reference data
-      synthetic_visium_data <- readRDS(paste0(path, dataset, "/", repl, "/", dataset, "_",
-                                              dataset_type, "_synthvisium.rds"))
-      seurat_obj_visium <- createSeuratFromCounts(synthetic_visium_data$counts)
-      
-      # Initialization of column names
-      ncells <- length(colnames(synthetic_visium_data$spot_composition))-2
-      celltypes <- colnames(synthetic_visium_data$relative_spot_composition)[1:ncells]
-      celltypes <- str_replace(celltypes, "/", ".")
-      colnames(synthetic_visium_data$relative_spot_composition)[1:ncells] <- celltypes
-      known_props <- synthetic_visium_data$relative_spot_composition[,1:ncells]
-      
-      # Load deconvolution results
-      deconv_list <- createDeconvResultList(methods, celltypes, result_path, dataset)
-      
-      # Correlation by cell type
-      corr_list <- lapply(deconv_list, function(k) cor(known_props[,1:ncells],
-                                                       k[,1:ncells], use="complete.obs"))
-      
-      for (celltype in celltypes){
-        # Add deconv result to visium metadata
-        seurat_obj_visium@meta.data[celltype] = synthetic_visium_data$relative_spot_composition[,celltype]
-        
-        for (method in methods){
-          seurat_obj_visium@meta.data[paste0(celltype, "_", method)] = deconv_list[[method]][,celltype]
-        }
-        
-        plot_dir <- paste0(result_path, "plots/", dataset_type, "/")
-        if (!dir.exists(plot_dir)){ dir.create(plot_dir, recursive=TRUE) }
-        
-        # Plot proportion of each cell type for all methods
-        plots <- FeaturePlot(seurat_obj_visium, c(celltype, paste0(celltype, "_", methods)),
-                                                  combine=FALSE)
-        # Add title for each method (first plot is the ground truth)
-        for (i in 1:length(methods)){
-          plots[[i+1]] <- plots[[i+1]] + ggtitle(methods[i], paste0("Corr=", round(corr_list[[methods[i]]][celltype, celltype], 3)))
-          
-        }
-    
-        plots <- plots[[1]] + plots[[2]] + plots[[3]] + plots[[4]] + plots[[5]] + plots[[6]]
-        png(paste0(plot_dir, celltype, ".png"), width=1600, height=800)
-        print(plots)
-        dev.off()
-      }
-    }
-  }
-}
 #### CALCULATE PERFORMANCE METRICS ####
 for (dataset in datasets[2:length(datasets)]){
   for (repl in paste0('rep', 1:10)){
@@ -94,6 +27,7 @@ for (dataset in datasets[2:length(datasets)]){
       corr_spots <- sapply(deconv_list, function(k) mean(diag(cor(t(known_props), t(k[,1:ncells]))), na.rm=TRUE))
       RMSE <- sapply(deconv_list, function(k) mean(sqrt(rowSums((known_props-k[,1:ncells])**2, na.rm=TRUE)/ncells)))
       reference_RMSE <- mean(sqrt(rowSums((known_props-(1/ncells))**2)/ncells))
+      
       # Classification metrics
       conf_matrices <- lapply(deconv_list, function(k) getConfusionMatrix(known_props, k))
       accuracy <- sapply(conf_matrices, function(k) round((k$tp + k$tn) / (k$tp + k$tn + k$fp + k$fn), 2))
@@ -102,10 +36,20 @@ for (dataset in datasets[2:length(datasets)]){
       precision <- sapply(conf_matrices, function(k) round(k$tp / (k$tp + k$fp), 2))
       F1 <- sapply(methods, function(k) round(2 * ((precision[k] * sensitivity[k]) /
                                                      (precision[k] + sensitivity[k])), 2))
+      
+      # Area under precision-recall curve
+      known_binary_all <- ifelse(known_props > 0, "present", "absent") %>% melt() %>% select(value)
+      deconv_unlist <- lapply(deconv_list, function (k) c(as.matrix(k)))
+      scores <- join_scores(deconv_unlist)
+      model <- mmdata(scores, known_binary_all, modnames=methods) # make model
+      curve <- evalmod(model)
+      prcs <- subset(auc(curve), curvetypes == "PRC")
+      
       # Get them into dataframe
       metrics <- data.frame(row.names=methods, "corr"=corr_spots, "RMSE"=RMSE,
                             "accuracy"=accuracy, "sensitivity"=sensitivity,
-                            "specificity"=specificity, "precision"=precision, "F1"=F1)
+                            "specificity"=specificity, "precision"=precision, "F1"=F1,
+                            "prc"=prcs$aucs)
       
       all_results[[dataset_type]] <- metrics
     }
@@ -113,222 +57,84 @@ for (dataset in datasets[2:length(datasets)]){
   }
 }
 
+#### PLOTTING ####
+possible_metrics <- c("corr", "RMSE", "accuracy", "sensitivity", "specificity", "precision", "F1", "prc")
+proper_metric_names <- c("Correlation", "RMSE", "Accuracy", "Sensitivity", "Specificity", "Precision", "F1", "PRC AUC") %>%
+  setNames(possible_metrics)
+metric <- "RMSE"
 
-#### PLOT EACH METRIC ####
-# corr, RMSE, accuracy, sensitivity, specificity, precision, F1
-for (dataset in datasets[2:length(datasets)]){
-  for (repl in paste0('rep', 1:10)){
-    
-    result_path <- paste0("results/", dataset, "/", repl, "_", run, "/")
-    ntypes <- length(possible_dataset_types)
-    all_results <- readRDS(paste0(result_path, "all_metrics_", dataset, ".rds"))
-    metrics <- c("corr", "RMSE", "accuracy", "sensitivity", "specificity", "precision", "F1")
-    if (!dir.exists(paste0(result_path, "plots/"))){ dir.create(paste0(result_path, "plots/"), recursive=TRUE) }
-    for (metric in metrics){
-      df <- data.frame(dataset_type = rep(names(all_results), length(methods)),
-                       index = rep(1:ntypes, length(methods)),
-                       methods = rep(methods, each=ntypes))
-      df$vals <- c(sapply(methods, function(u) sapply(possible_dataset_types, function(k) all_results[[k]][u,][metric])))
-      png(paste0(result_path, "plots/", metric, ".png"), width=769, height=442)
-      print(ggplot(data=df, aes(x=factor(index), y=as.numeric(vals), color=methods)) + geom_jitter(width=0.1) +
-        labs(title=paste0(metric, " of different methods on all ", ntypes, " dataset types; ", dataset)) + ylab(metric) + xlab("datasets"))
-      dev.off()
-    }
-  }
-}
-
-#### PLOT DISTRIBUTION OF CORRELATION ####
-for (dataset in datasets[2:length(datasets)]){
-  for (repl in paste0('rep', 1:10)){
-    result_path <- paste0("results/", dataset, "/", repl, "_", run, "/")
-    for (dataset_type in possible_dataset_types){
-      # Load reference data and deconvolution results
-      synthetic_visium_data <- readRDS(paste0(path, dataset, "/", repl, "/", dataset, "_",
-                                              dataset_type, "_synthvisium.rds"))
-      ncells <- length(colnames(synthetic_visium_data$spot_composition))-2
-      # Initialization of column names
-      celltypes <- colnames(synthetic_visium_data$relative_spot_composition)[1:ncells]
-      celltypes <- str_replace(celltypes, "/", ".")
-      colnames(synthetic_visium_data$relative_spot_composition)[1:ncells] <- celltypes
-      known_props <- synthetic_visium_data$relative_spot_composition[,1:ncells]
-      
-      # Load deconvolution results
-      deconv_list <- createDeconvResultList(methods, celltypes, result_path, dataset)
-      
-      # Correlation and RMSE
-      corr_spots <- lapply(deconv_list, function(k) diag(cor(t(known_props), t(k[,1:ncells]))))
-      plot_dir <- paste0(result_path, "plots/corr_distribution/")
-      dir.create(plot_dir, showWarnings = FALSE)
-      df = data.frame(x=unlist(corr_spots),
-                      method=rep(names(corr_spots), each=length(corr_spots[[1]])))
-      png(paste0(plot_dir, dataset_type, ".png"), width=769, height=442)
-      print(ggplot(df, aes(x=x, color=method)) + geom_density() +
-        labs(title=paste0("Correlation distribution of spots; ", dataset_type, ", ", dataset)))
-      dev.off()
-      
-    }
-  }
-}
-
-#### PRINT OUT RESULTS IN A TABLE ####
-library(xlsx)
-for (repl in paste0("rep", 1:10)){
-  wb = createWorkbook()
-  for (ds in datasets[-1]){
-    res_path <- paste0("results/", ds, "/", repl, "_", run, "/")
-    
-    all_results <- readRDS(paste0(res_path, "all_metrics_", ds, ".rds"))
-    sheet = createSheet(wb, ds)
-    i = 1
-    for (dataset_type in names(all_results)){
-      addDataFrame(data.frame(x=dataset_type), sheet=sheet, startRow=i,
-                   row.names=FALSE, col.names=FALSE)
-      temp_data = t(all_results[[dataset_type]])
-      addDataFrame(temp_data, sheet=sheet, startRow=i+1)
-      i = i + nrow(temp_data) + 2
-    }
-  }
-  dir.create(paste0("results/summary files/", repl, "_", run, "/"), recursive=TRUE, showWarnings = FALSE)
-  saveWorkbook(wb, paste0("results/summary files/", repl, "_", run, "/all_results.xlsx"))
-}
-
-#### PLOT RESULTS BY DATASET ####
-library(stringr)
-
-for (repl in paste0("rep", 1:10)){
+for (metric in possible_metrics[8]){
   df <- data.frame()
-  for (ds in datasets[-1]){
-    res_path <- paste0("results/", ds, "/", repl, "_", run, "/")
-    all_results <- readRDS(paste0(res_path, "all_metrics_", ds, ".rds"))
-    metric <- "RMSE"
-    methods <- rownames(all_results[[1]])
-    temp_df <- data.frame(sapply(all_results, function (k) k[metric]))
-    temp_df <- data.frame(y=apply(temp_df, 1, mean),
-                     ymin=apply(temp_df, 1, min),
-                     ymax=apply(temp_df, 1, max),
-                     method=methods,
-                     dataset=rep(str_replace(ds, "_generation", ""), 
-                                             length(methods)))
+  for (dataset in datasets[-1]){
+    all_reps <- lapply(paste0('rep', 1:10), function(repl){
+        all_results <- readRDS(paste0(paste0("results/", dataset, "/", repl, "_/"),
+                                      "all_metrics_", dataset, ".rds"))
+        sapply(possible_dataset_types, function (u) all_results[[u]][[metric]] )
+    })
+    temp_df <- data.frame(all_values=unlist(all_reps),
+                          reps=rep(1:10, each=length(methods)*length(possible_dataset_types)),
+                          method=c("SPOT", "MuSiC", "c2l", "RCTD", "stereo"),
+                          dataset_type=rep(possible_dataset_types, each=length(methods)),
+                          dataset=dataset)
     df <- rbind(df, temp_df)
   }
-  df$dataset <- str_replace(df$dataset, "cerebellum_", "cer_")
-  df$dataset <- str_replace(df$dataset, "hippocampus", "hipp")
-  dir.create(paste0("results/summary files/", repl, "_", run, "/"), recursive=TRUE, showWarnings = FALSE)
-  png(paste0("results/summary files/", repl, "_", run, "/all_datasets_", metric, ".png"), width=800, height=500)
-  print(ggplot(data=df, aes(x=dataset, y=y, color=method)) +
-    geom_point(size=2, position=position_dodge(.5)) +
-    geom_errorbar(aes(ymin=ymin, ymax=ymax), width=.2, position=position_dodge(.5)) +
-    labs(title=paste0(metric, " of different methods on all datasets")) + ylab(metric) + xlab("datasets"))
-  dev.off()
-}
-
-#### PLOT RESULTS BY DATASET TYPE ####
-for (repl in paste0("rep", 1:10)){
-  df <- data.frame()
-  metric <- "RMSE"
-  for (dataset_type in possible_dataset_types){
-    all_results <- lapply(datasets[-1], function(k) {
-      readRDS(paste0("results/", k, "/", repl, "_", run, "/all_metrics_", k, ".rds"))})
-    temp_df <- data.frame(sapply(all_results, function(k) k[[dataset_type]][[metric]]))
-    colnames(temp_df) <- datasets[-1]
-    
-    methods <- rownames(all_results[[1]][[1]])
   
-    temp_df <- data.frame(y=apply(temp_df, 1, mean),
-                          ymin=apply(temp_df, 1, min),
-                          ymax=apply(temp_df, 1, max),
-                          method=methods)
-    df <- rbind(df, temp_df)
+  proper_dataset_names <- c("Brain cortex", "Cerebellum (sc)", "Cerebellum (sn)", 
+                            "Hippocampus", "Kidney", "PBMC", "SCC (patient 5)")
+  names(proper_dataset_names) <- datasets[2:length(datasets)]
+  df$dataset_type <- sapply(df$dataset_type, str_replace, "artificial_", "")
+  
+  # FACET GRID
+  df <- mutate(df, dt_linebreak = str_wrap(str_replace_all(dataset_type, "_", " "), width = 20))
+  df$dt_linebreak <- factor(df$dt_linebreak, levels=unique(df$dt_linebreak))
+  
+  p <- ggplot(df, aes(x=method, y=all_values, color=method)) + geom_boxplot(width=0.75) +
+    ylab(paste0("Average ", proper_metric_names[metric])) + labs(color="Method") +
+    scale_color_discrete(labels=c("cell2location", "MuSiC", "RCTD", "SPOTlight", "stereoscope")) +
+    theme(legend.position="bottom", legend.direction = "horizontal",
+          axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank()) +
+    facet_grid(rows=vars(dataset), cols=vars(dt_linebreak), scales="free_y",
+               labeller=labeller(dataset=proper_dataset_names))
+  
+  png(paste0("plots/metrics_facet/all_", metric, "_facet.png"), width=297, height=190, units="mm", res=200)
+  print(p)
+  dev.off()
+  
+  # ANNOTATING MEDIAN VALUE
+  # png("plots/all_RMSE_facet_annote.png", width=297, height=190, units="mm", res=200)
+  # p + stat_summary(geom="text", fun=median,
+  #              aes(label=sprintf("%1.3f", ..y..), color=method),
+  #              position=position_nudge(x=0.33), size=2)
+  # dev.off()
+  
+  # PLOTTING REFERENCE LINE
+  if (metric == "RMSE"){
+    RMSE_ref_list <- melt(readRDS("rds/ref_RMSE_all.rds")) %>% group_by(L2, L1) %>% summarise(ref_RMSE=mean(value), .groups="drop")
+    RMSE_dir_df2 <- RMSE_ref_list %>% `colnames<-`(c("dataset_type", "dataset", "value"))
+    RMSE_dir_df2$dataset_type <- sapply(RMSE_dir_df2$dataset_type, str_replace, "artificial_", "")
+    RMSE_dir_df2 <- mutate(RMSE_dir_df2, dt_linebreak = str_wrap(str_replace_all(dataset_type, "_", " "), width = 20))
+    RMSE_dir_df2$dt_linebreak <- factor(RMSE_dir_df2$dt_linebreak, levels=unique(RMSE_dir_df2$dt_linebreak))
+    p <- p + geom_hline(data=RMSE_dir_df2, aes(yintercept=value), linetype="dashed", color="gray")
+  } else {
+    ref_metric_list <- readRDS("rds/ref_all_metrics.rds")
+    ref_metric_df <- reshape2::melt(ref_metric_list) %>% mutate("metric"=rep(possible_metrics, 56)) %>%
+      `colnames<-`(c("value", "dataset_type", "dataset", "metric"))
+    ref_metric_df <- ref_metric_df[ref_metric_df$metric==metric,]
+    ref_metric_df$dataset_type <- sapply(ref_metric_df$dataset_type, str_replace, "artificial_", "")
+    ref_metric_df <- mutate(ref_metric_df, dt_linebreak = str_wrap(str_replace_all(dataset_type, "_", " "), width = 20))
+    ref_metric_df$dt_linebreak <- factor(ref_metric_df$dt_linebreak, levels=unique(ref_metric_df$dt_linebreak))
+    p <- p + geom_hline(data=ref_metric_df, aes(yintercept=value), linetype="dashed", color="gray")
   }
-  df$dataset_type = rep(1:length(possible_dataset_types), each=length(methods))
-
-  png(paste0("results/summary files/", repl, "_", run, "/all_dataset_types_", metric, ".png"), width=800, height=500)
-  print(ggplot(data=df, aes(x=factor(dataset_type), y=y, color=method)) +
-    geom_point(size=2, position=position_dodge(.5)) +
-    geom_errorbar(aes(ymin=ymin, ymax=ymax), width=.2, position=position_dodge(.5)) +
-    labs(title=paste0(metric, " of different methods on all dataset types")) + ylab(metric) + xlab("dataset type"))
+  
+  png(paste0("plots/metrics_facet/all_", metric, "_facet_ref.png"), width=297, height=190, units="mm", res=200)
+  print(p)
   dev.off()
 }
-
-#### DEVIATION BETWEEN REPLICATES ####
-df <- data.frame()
-# "corr", "RMSE", "accuracy", "sensitivity", "specificity", "precision", "F1"
-metric <- "F1"
-for (dataset in datasets[-1]){
-  all_reps <- lapply(paste0('rep', 1:10), function(repl){
-      all_results <- readRDS(paste0(paste0("results/", dataset, "/", repl, "_/"),
-                                    "all_metrics_", dataset, ".rds"))
-      sapply(possible_dataset_types, function (u) all_results[[u]][[metric]] )
-  })
-  temp_df <- data.frame(all_RMSE=unlist(all_reps),
-                        reps=rep(1:10, each=length(methods)*length(possible_dataset_types)),
-                        method=c("SPOT", "MuSiC", "c2l", "RCTD", "stereo"),
-                        dataset_type=rep(possible_dataset_types, each=length(methods)),
-                        dataset=dataset)
-  
-  df <- rbind(df, temp_df)
-}
-
-df$dataset_type_index <-as.numeric(factor(df$dataset_type, levels=unique(possible_dataset_types)))
-n_cells_list = c(18, 8, 8, 6, 16, 9, 14)
-df$method <- sapply(df$method, str_replace, "music", "MuSiC")
-df$method <- sapply(df$method, str_replace, "spotlight", "SPOTlight")
-proper_dataset_names <- c("Brain cortex", "Cerebellum (sc)", "Cerebellum (sn)", 
-                          "Hippocampus", "Kidney", "PBMC", "SCC (patient 5)")
-#proper_dataset_names <- paste0(proper_dataset_names, " [", n_cells_list, "]")
-df$proper_dataset_names <- rep(proper_dataset_names, each = length(possible_dataset_types)*length(methods)*10)
-df$dataset_type <- sapply(df$dataset_type, str_replace, "artificial_", "")
-
-# FACET GRID
-df <- mutate(df, dt_linebreak = str_wrap(str_replace_all(dataset_type, "_", " "), width = 20))
-df$dt_linebreak_new <- factor(df$dt_linebreak, levels=unique(df$dt_linebreak))
-p <- ggplot(df, aes(x=method, y=all_RMSE, color=method)) + geom_boxplot(width=0.75) +
-  ylab("Mean RMSE") + labs(color="Method") +
-  scale_color_discrete(labels=c("cell2location", "MuSiC", "RCTD", "SPOTlight", "stereoscope")) +
-  theme(legend.position="bottom", legend.direction = "horizontal",
-        axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank()) +
-  facet_grid(rows=vars(proper_dataset_names), cols=vars(dt_linebreak_new), scales="free_y")
-
-png(paste0("plots/all_", metric, "_facet.png"), width=297, height=190, units="mm", res=200)
-print(p)
-dev.off()
-
-# ANNOTATING MEDIAN VALUE
-png("plots/all_RMSE_facet_annote.png", width=297, height=190, units="mm", res=200)
-p + stat_summary(geom="text", fun=median,
-             aes(label=sprintf("%1.3f", ..y..), color=method),
-             position=position_nudge(x=0.33), size=2)
-dev.off()
-
-# PLOTTING DASHED LINE
-if (metric == RMSE){
-  RMSE_ref_list <- melt(readRDS("rds/ref_RMSE_all.rds")) %>% group_by(L2, L1) %>% summarise(ref_RMSE=mean(value), .groups="drop")
-  RMSE_dir_df2 <- RMSE_ref_list %>% `colnames<-`(c("dataset_type", "dataset", "value"))
-  RMSE_dir_df2$dataset_type <- sapply(RMSE_dir_df2$dataset_type, str_replace, "artificial_", "")
-  RMSE_dir_df2 <- mutate(RMSE_dir_df2, dt_linebreak = str_wrap(str_replace_all(dataset_type, "_", " "), width = 20))
-  RMSE_dir_df2$dt_linebreak_new <- factor(RMSE_dir_df2$dt_linebreak, levels=unique(RMSE_dir_df2$dt_linebreak))
-  RMSE_dir_df2$proper_dataset_names <- rep(proper_dataset_names, length(possible_dataset_types))
-  p <- p + geom_hline(data=RMSE_dir_df2, aes(yintercept=value), linetype="dashed", color="gray")
-} else {
-  ref_metric_list <- readRDS("rds/ref_all_metrics.rds")
-  ref_metric_df <- reshape2::melt(ref_metric_list) %>% mutate("metric"=rep(possible_metrics, 56)) %>%
-    `colnames<-`(c("value", "dataset_type", "dataset", "metric"))
-  ref_metric_df <- ref_metric_df[ref_metric_df$metric==metric,]
-  ref_metric_df$dataset_type <- sapply(ref_metric_df$dataset_type, str_replace, "artificial_", "")
-  ref_metric_df <- mutate(ref_metric_df, dt_linebreak = str_wrap(str_replace_all(dataset_type, "_", " "), width = 20))
-  ref_metric_df$dt_linebreak_new <- factor(ref_metric_df$dt_linebreak, levels=unique(ref_metric_df$dt_linebreak))
-  ref_metric_df$proper_dataset_names <- rep(proper_dataset_names, each=length(possible_dataset_types))
-  p <- p + geom_hline(data=ref_metric_df, aes(yintercept=value), linetype="dashed", color="gray")
-}
-
-png(paste0("plots/metrics_facet/all_", metric, "_facet_ref.png"), width=297, height=190, units="mm", res=200)
-print(p)
-dev.off()
 
 ## BEST VALUES ##
-possible_metrics <- c("corr", "RMSE", "accuracy", "sensitivity", "specificity", "precision", "F1")
+possible_metrics <- c("corr", "RMSE", "accuracy", "sensitivity", "specificity", "precision", "F1", "prc")
 
-for (metric in possible_metrics){
+for (metric in possible_metrics[8]){
   df <- data.frame()
   for (dataset in datasets[-1]){
     all_reps <- lapply(paste0('rep', 1:10), function(repl){
@@ -347,50 +153,20 @@ for (metric in possible_metrics){
   df$dataset_type <- factor(df$dataset_type, levels=possible_dataset_types)
   best <- df %>% group_by(dataset, dataset_type, method) %>% summarise(medi=median(all_RMSE)) %>%
     slice_max(order_by=medi, n=1)
-  write.table(best, paste0("Misc/best_values_", metric, ".tsv"), sep="\t", row.names=FALSE, quote=FALSE)
+  write.table(best, paste0("Misc/best_values/best_values_", metric, ".tsv"), sep="\t", row.names=FALSE, quote=FALSE)
 }
 
-
-# SD ?
-ggplot(df, aes(x=method, y=sd, shape=factor(str_replace(dataset_type, "artificial_", "")), color=str_replace(dataset, "_generation", ""))) +
-  geom_jitter(width=0.2, alpha=0.7) +
-  labs(title="SD of each method between reps", color="dataset", shape="dataset_type") + 
-  ylab("Deviation of RMSE between 10 reps") + scale_shape_manual(values=1:length(possible_dataset_types)) +
-  guides(color = guide_legend(order=1), shape=guide_legend(order=2)) + ylim(0, 0.1)
-
-# MEAN
-# by dataset type
-ggplot(df, aes(shape= proper_dataset_names,
-               y=mean, x=dataset_type_index, color=method, group=method)) +
-  geom_point(size=2, position=position_dodge(0.6)) +
-  labs(title="Mean of each method between reps", color="method", shape="dataset") + 
-  ylab("RMSE") + scale_shape_manual(values=1:length(datasets)) +
-  guides(color = guide_legend(order=1), shape=guide_legend(order=2)) + 
-  scale_x_discrete("dataset type", limits=factor(1:8))
-
-# by dataset
-png("plots/mean_between_reps_by_dataset.png", width=1200, height=500)
-ggplot(df, aes(shape=factor(dataset_type, levels=unique(dataset_type)),
-               y=mean, x=as.numeric(as.factor(dataset)), color=method, group=method)) +
-  geom_point(size=2, position=position_dodge(0.6)) +
-  labs(title="Mean RMSE of each method by dataset", color="method", shape="dataset type") + 
-  ylab("RMSE") + scale_shape_manual(values=1:length(possible_dataset_types)) +
-  guides(color = guide_legend(order=1), shape=guide_legend(order=2)) + ylim(0, 0.275) +
-  xlab("dataset") + scale_x_discrete("Dataset", limits=factor(1:7))
+## Read in file from python
+best_df <- read.csv("Misc/best_values/best_values_count.csv") %>% melt(id.var="X") %>% setNames(c("method", "metric", "count"))
+best_df$metric <- best_df$metric %>% str_replace("prc", "PRC") %>% R.utils::capitalize() %>%
+  factor(., levels=c("Accuracy", "Specificity", "Sensitivity", "Precision", "F1", "PRC"))
+p <- ggplot(best_df, aes(x=metric, y=count, fill=method)) + geom_bar(width=0.75, position="fill", stat="identity") +
+  ylab("% Best performing") + xlab("Metric") + labs(fill="Method") +
+  scale_fill_manual(values = c("#f8766d", "#a3a500", "#00bf7d", "#00b0f6", "#e76bf3", "#a1a1a1"), 
+                        labels=c("cell2location", "MuSiC", "RCTD", "SPOTlight", "stereoscope", "Tie"))
+png("plots/class_metrics_barplot.png", width=210, height=100, units="mm", res=200)
+print(p)
 dev.off()
-
-# by method
-png("plots/mean_between_10reps_groupbydataset.png", width=800, height=400)
-ggplot(df, aes(x=method, y=mean, color=proper_dataset_names,
-               shape=factor(dataset_type, levels=unique(dataset_type)),
-               group=proper_dataset_names)) +
-  geom_point(size=2, position=position_dodge(0.6)) +
-  labs(title="Mean RMSE between reps", color="Dataset", shape="Dataset type") +
-  ylab("RMSE") + xlab ("Method") + scale_shape_manual(values=1:length(possible_dataset_types)) +
-  ylim(0, 0.25) +
-  guides(color = guide_legend(order=1), shape=guide_legend(order=2))
-dev.off()
-
 
 #### WILCOXON TEST ####
 ### OLD - concatenate all values ###
