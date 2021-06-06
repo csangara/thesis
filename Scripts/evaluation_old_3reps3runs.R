@@ -288,9 +288,12 @@ ggplot(df, aes(x=method, y=RMSE, shape=run, color=rep)) + geom_point(alpha=0.8) 
                     ", ", str_replace(dataset, "_generation", "")))
 
 # Deviation between runs?
+proper_dataset_names <-c("Brain cortex", "Cerebellum (sc)", "Cerebellum (sn)", 
+                            "Hippocampus", "Kidney", "PBMC", "SCC (patient 5)")
+names(proper_dataset_names) <- str_replace(datasets[2:8], "_generation", "")
 df <- data.frame()
 for (dataset in datasets[-1]){
-  for (repl in c('rep1', 'rep2', 'rep3')){
+  for (repl in paste0("rep", 1)){
     all_results <- lapply(c("run1", "run2", "run3"), function(k) {
       readRDS(paste0(paste0("results/", dataset, "/", repl, "_", k, "/"),
                      "all_metrics_", dataset, ".rds"))
@@ -307,18 +310,27 @@ for (dataset in datasets[-1]){
     df <- rbind(df, temp_df)
   }
 }
-p1 <- ggplot(df, aes(x=method, y=sd, shape=factor(str_replace(dataset_type, "artificial_", "")),
-                     color=str_replace(dataset, "_generation", ""))) + 
-  geom_jitter(width=0.2, alpha=0.7) +  
-  labs(title="SD of each method between runs", color="dataset", shape="dataset_type") +
+df$method <- sapply(df$method, str_replace, "music", "MuSiC")
+df$method <- sapply(df$method, str_replace, "spotlight", "SPOTlight")
+df$dataset_type <- str_replace(df$dataset_type, "artificial_", "")
+df$dataset_type <- factor(df$dataset_type, levels=unique(df$dataset_type))
+df <- mutate(df, dt_linebreak = str_wrap(str_replace_all(dataset_type, "_", " "), width = 20))
+df$dt_linebreak_new <- factor(df$dt_linebreak, levels=unique(df$dt_linebreak))
+df$dataset <- str_replace(df$dataset, "_generation", "")
+p1 <- ggplot(df, aes(x=method, y=sd, shape=dt_linebreak_new, color=dataset,
+                     group=dataset)) + 
+  geom_point(alpha=0.7, position=position_dodge(0.6), stroke=1) +  
+  labs(title="Deviation between 3 runs", color="Dataset", shape="Dataset type") +
   scale_shape_manual(values=1:length(possible_dataset_types)) +
+  scale_color_discrete(labels=proper_dataset_names) +
   guides(color = guide_legend(order=1), shape=guide_legend(order=2)) + 
-  ylab("Deviation of RMSE between 3 runs") + ylim(0, 0.1)
+  ylab("Standard deviation of RMSE values") + ylim(0, 0.1) + xlab("Method")
+p1
 
 # Deviation between replicates
 df <- data.frame()
 for (dataset in datasets[-1]){
-  all_reps <- lapply(paste0('rep', 1:10), function(repl){
+  all_reps <- lapply(paste0('rep', 1:3), function(repl){
     all_results <- lapply(c("run1", "run2", "run3"), function(k) {
       readRDS(paste0(paste0("results/", dataset, "/", repl, "_", k, "/"),
                      "all_metrics_", dataset, ".rds"))
@@ -328,9 +340,9 @@ for (dataset in datasets[-1]){
     })
   })
   mean_reps <- sapply(possible_dataset_types, function(u) {
-    apply(sapply(1:10, function(k) all_reps[[k]][,u]), 1, mean)})
+    apply(sapply(1:3, function(k) all_reps[[k]][,u]), 1, mean)})
   sd_reps <- sapply(possible_dataset_types, function(u) {
-    apply(sapply(1:10, function(k) all_reps[[k]][,u]), 1, sd)})
+    apply(sapply(1:3, function(k) all_reps[[k]][,u]), 1, sd)})
   
   temp_df <- data.frame(mean=c(mean_reps),
                         sd=c(sd_reps),
@@ -339,15 +351,27 @@ for (dataset in datasets[-1]){
                         dataset=rep(dataset,length(possible_dataset_types)*length(methods)))
   df <- rbind(df, temp_df)
 }
+df$method <- sapply(df$method, str_replace, "music", "MuSiC")
+df$method <- sapply(df$method, str_replace, "spotlight", "SPOTlight")
+df$dataset_type <- str_replace(df$dataset_type, "artificial_", "")
+df$dataset_type <- factor(df$dataset_type, levels=unique(df$dataset_type))
+df <- mutate(df, dt_linebreak = str_wrap(str_replace_all(dataset_type, "_", " "), width = 20))
+df$dt_linebreak_new <- factor(df$dt_linebreak, levels=unique(df$dt_linebreak))
+df$dataset <- str_replace(df$dataset, "_generation", "")
 
-df$dataset_type_index <-as.numeric(as.factor(df$dataset_type))
-ggplot(df, aes(x=method, y=sd, shape=factor(str_replace(dataset_type, "artificial_", "")), color=str_replace(dataset, "_generation", ""))) +
-  geom_jitter(width=0.2, alpha=0.7) +
-  labs(title="SD of each method between reps", color="dataset", shape="dataset_type") + 
-  ylab("Deviation of RMSE between 3 reps") + scale_shape_manual(values=1:length(possible_dataset_types)) +
-  guides(color = guide_legend(order=1), shape=guide_legend(order=2)) + ylim(0, 0.1)
-
-p <- p1 + p2 + plot_layout(guides = "collect")
+p2 <- ggplot(df, aes(x=method, y=sd, shape=dt_linebreak_new, color=dataset, group=dataset)) + 
+  geom_point(alpha=0.7, position=position_dodge(0.6), stroke=1) + 
+  labs(title="Deviation between 3 replicates", color="Dataset", shape="Dataset type") + 
+  ylab("Standard deviation of RMSE values") + xlab("Method") +
+  scale_shape_manual(values=1:length(possible_dataset_types)) +
+  scale_color_discrete(labels=proper_dataset_names) +
+  guides(color = guide_legend(order=1), shape=guide_legend(order=2)) + ylim(0, 0.1) +
+  theme(axis.text.y=element_blank(), axis.title.y=element_blank(), axis.ticks.y=element_blank())
+p2
+p <- p1 + p2 & theme(legend.position="bottom", legend.direction = "horizontal", legend.box="vertical")
+png("plots/SD_between_reps_runs.png", width=210, height=150, units="mm", res=200)
+p + plot_layout(guides = "collect") + labs(color="Dataset")
+dev.off()
 
 # by dataset type
 ggplot(df, aes(shape=factor(str_replace(str_replace(dataset, "_generation", ""), "cerebellum", "cer")),
