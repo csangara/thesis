@@ -1,28 +1,33 @@
 ### CALCULATE REFERENCE RMSE USING DIRICHLET DISTRIBUTION ###
 source("D:/Work (Yr 2 Sem 1)/Thesis/Scripts/init.R")
-
+library(DirichletReg)
 dataset <- datasets[8]
 RMSE_avg_list = list()
 RMSE_dir_list = list()
-for (dataset_type in possible_dataset_types){
-  synthetic_visium_data <- readRDS(paste0(path, dataset, "/", repl, "/", dataset, "_",
-                                          dataset_type, "_synthvisium.rds"))
-  ncells <- ncol(synthetic_visium_data$spot_composition)-2
-  nspots <- nrow(synthetic_visium_data$spot_composition)
-  known_props <- synthetic_visium_data$relative_spot_composition[,1:ncells]
-  
-  all_dir_dist = c()
-  for (i in 1:1000){
-    dir_dist <- rdirichlet(nspots, rep(1.0, ncells))
-    RMSE_dir <- mean(sqrt(rowSums((known_props-dir_dist)**2)/ncells))
-    all_dir_dist[i] = RMSE_dir
-  }    
-  RMSE_dir_list[[dataset_type]] <- mean(all_dir_dist)
-  RMSE_avg_list[[dataset_type]] <- mean(sqrt(rowSums((known_props-(1/ncells))**2)/ncells))
+for (dataset in datasets[2:length(datasets)]){
+  for (dataset_type in possible_dataset_types){
+    synthetic_visium_data <- readRDS(paste0(path, dataset, "/", repl, "/", dataset, "_",
+                                            dataset_type, "_synthvisium.rds"))
+    ncells <- ncol(synthetic_visium_data$spot_composition)-2
+    nspots <- nrow(synthetic_visium_data$spot_composition)
+    known_props <- synthetic_visium_data$relative_spot_composition[,1:ncells]
+    
+    for (k in 1:10){
+      all_dir_dist = c()
+      for (i in 1:100){
+        dir_dist <- rdirichlet(nspots, rep(1.0, ncells))
+        RMSE_dir <- mean(sqrt(rowSums((known_props-dir_dist)**2)/ncells))
+        all_dir_dist[i] = RMSE_dir
+      }    
+      RMSE_dir_list[[dataset]][[dataset_type]][[k]] <- mean(all_dir_dist)
+    }
+    #RMSE_avg_list[[dataset_type]] <- mean(sqrt(rowSums((known_props-(1/ncells))**2)/ncells))
+  }
 }
 sapply(names(RMSE_dir_list), function(k) print(c(RMSE_dir_list[[k]], RMSE_avg_list[[k]])))
+RMSE_dir_df <- reshape2::melt(RMSE_dir_list)
 
-
+# saveRDS(RMSE_dir_list, "rds/ref_RMSE_all.rds")
 ### PLOTTING ###
 
 # REFERENCE RMSE
@@ -71,3 +76,14 @@ for (i in 1:7){
             panel.background = element_blank()))
   dev.off()
 }
+
+## EXPORTING TABLE
+RMSE_ref_list <- melt(readRDS("rds/ref_RMSE_all.rds")) %>% group_by(L2, L1) %>%
+  summarise(ref_RMSE=mean(value), .groups="drop")
+RMSE_ref_list$L2 <- factor(RMSE_ref_list$L2, levels=possible_dataset_types)
+RMSE_ref_list <- with(RMSE_ref_list, RMSE_ref_list[order(L2),])
+RMSE_print <- t(dcast(RMSE_ref_list, L2~L1, value.var="ref_RMSE"))
+colnames(RMSE_print) <- RMSE_print[1,]
+RMSE_print <- RMSE_print[-1,]
+write.table(RMSE_print, "Misc/ref_RMSE.tsv", quote=FALSE, sep="\t")
+
