@@ -222,6 +222,7 @@ ggplot(df, aes(x=factor(clusters), y=factor(deconv.ind, levels=rev(top_10_cv)),
                size=deconv.values)) + geom_point()
 
 ## Spatial map of cell types ##
+seurat_obj_visium2 <- seurat_obj_visium[,rownames(deconv_obj)]
 celltypes2 <- str_replace(celltypes, "Portain", "Portal")
 deconv_obj2 <- deconv_obj %>% `colnames<-`(celltypes2)
 
@@ -232,8 +233,8 @@ seurat_obj_visium2@meta.data <- seurat_obj_visium2@meta.data %>%
   tibble::column_to_rownames("barcodes")
 
 # Plot celltypes of interest
-coi <- celltypes2[grepl("Portal|Central|LSEC|Lymphatic|KC|Stellate|Cholang", celltypes2)]
-coi <- coi[c(6,2,5,1,4,3,7)]
+coi <- celltypes2[grepl("Portal|Central|LSEC|Lymphatic|KC|Stellate|Cholang|Fibro", celltypes2)]
+coi <- coi[c(3,2,6,7,1,5,4,8)]
 p <- SpatialFeaturePlot(seurat_obj_visium2, features=coi,
                    ncol=3,  pt.size.factor = 2)
 png("Data/Liver/plots/spatialmap_oi_big.png", width=250, height=297, units="mm", res=200)
@@ -255,14 +256,14 @@ for (i in 0:1){
 celltypes2 <- str_replace(celltypes, "Portain", "Portal")
 df <- data.frame(deconv=stack(deconv_obj),
                  cluster=cluster_assignments)
-df <- df[grepl("Portain|Central|LSEC|Lymphatic|KC|Stellate|Cholang", df$deconv.ind),]
+df <- df[grepl("Portain|Central|LSEC|Lymphatic|KC|Stellate|Cholang|Fibro", df$deconv.ind),]
 df_heatmap <- reshape2::dcast(df, deconv.ind~clusters, value.var="deconv.values", fun.aggregate=mean) %>%
   tibble::column_to_rownames("deconv.ind")
-df_heatmap <- df_heatmap[c(6,2,5,1,4,3,7),]
+df_heatmap <- df_heatmap[c(3,2,6,7,1,5,4,8),]
 
 png("Data/Liver/plots/heatmap.png", width=210, height=150, units="mm", res=200)
-# gplots::heatmap.2(as.matrix(df_heatmap), scale="row", Colv=FALSE, Rowv=FALSE, dendrogram="none")
-gplots::heatmap.2(as.matrix(df_heatmap), scale="row")
+gplots::heatmap.2(as.matrix(df_heatmap), scale="row", Colv=FALSE, Rowv=FALSE, dendrogram="none")
+#gplots::heatmap.2(as.matrix(df_heatmap), scale="row")
 dev.off()
 
 #### 4. OTHERS (CAN IGNORE) ####
