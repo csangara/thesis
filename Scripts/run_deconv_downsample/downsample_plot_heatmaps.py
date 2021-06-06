@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 ##### DOWNSAMPLING SYNTHVISIUM #####
 def plot_heatmap_synthvisium(model_text=False):
     methods = ['cell2location', 'music', 'RCTD', 'spotlight', 'stereoscope']
+    names = ['cell2location', 'MuSiC', 'RCTD', 'SPOTlight', 'stereoscope']
     path = r"D:\Work (Yr 2 Sem 1)\Thesis\downsampling\brain_cortex\rep1"
     
     fig, axs = plt.subplots(1, 5, figsize=(21,7))
@@ -72,22 +73,23 @@ def plot_heatmap_synthvisium(model_text=False):
         times_series = pd.Series(times).values.reshape((4,4))
         sns.heatmap(times_series, mask=mask, annot=True, square=True, linewidth=0.01,
                     xticklabels=[1000,5000,10000,15000], yticklabels=[100,1000,5000,10000],
+                    annot_kws={"size": 13},
                     fmt='.3g', ax=axs[k], cbar_kws={'label': 'Time (min)', 'orientation':'horizontal'},
-                    cmap='hot_r')
-        axs[k].set(xlabel="Genes", ylabel="Spots", title=methods[k])
+                    cmap='hot_r', vmin=0, vmax=130)
+        axs[k].set(xlabel="Genes", ylabel="Spots", title=names[k])
         
         if model_text:
             model_time_text = "Model: {:.2f} min".format(model_time) if model_time else ""
             axs[k].text(2, 6.5, model_time_text, ha="center")
     
     extra_text = "_model" if model_text else ""
-    plt.savefig(os.path.join(path, "plots\\all_times") + extra_text + ".png", bbox_inches='tight')
+    plt.savefig(os.path.join(path, "plots\\all_times_samescale") + extra_text + "_annot13.png", bbox_inches='tight')
 
-# plot_heatmap_synthvisium(True)
 
 ##### DOWNSAMPLING SCREF #####
 def plot_heatmap_scref(model_text=False):
     methods = ['cell2location', 'music', 'RCTD', 'spotlight', 'stereoscope']
+    names = ['cell2location', 'MuSiC', 'RCTD', 'SPOTlight', 'stereoscope']
     path = r"D:\Work (Yr 2 Sem 1)\Thesis\downsampling\brain_cortex\rep1"
     
     fig, axs = plt.subplots(1, 5, figsize=(21,7))
@@ -152,9 +154,10 @@ def plot_heatmap_scref(model_text=False):
         times_series = pd.Series(times).values.reshape((1,3))
         sns.heatmap(times_series, mask=mask, annot=True, square=True, linewidth=0.01,
                     xticklabels=[1000, 5000, 10000], yticklabels=['All'],
+                    annot_kws={"size": 13},
                     fmt='.3g', ax=axs[k], cbar_kws={'label': 'Time (min)', 'orientation':'horizontal'},
-                    cmap='hot_r')
-        axs[k].set(xlabel="Cells", ylabel="Genes", title=methods[k])
+                    cmap='hot_r', vmin=0, vmax=180)
+        axs[k].set(xlabel="Cells", ylabel="Genes", title=names[k])
         
         if model_text:
             fit_time_text = "Fitting time: {:.1f} ± {:.1f} min".format(\
@@ -162,6 +165,7 @@ def plot_heatmap_scref(model_text=False):
             axs[k].text(1.5, 2.8, fit_time_text, ha="center")
             
     extra_text = "_modelfitting" if model_text else ""
-    plt.savefig(os.path.join(path, "plots\\all_times_sc") + extra_text + ".png", bbox_inches='tight')
+    plt.savefig(os.path.join(path, "plots\\all_times_sc_samescale") + extra_text + "_annot13.png", bbox_inches='tight')
 
-plot_heatmap_scref(True)
+plot_heatmap_scref()
+plot_heatmap_synthvisium()
