@@ -63,7 +63,7 @@ spatialRNA_obj_visium <- RCTD:::SpatialRNA(counts=as(as(synthetic_visium_data,"m
 # spatialRNA_obj_visium <- RCTD:::SpatialRNA(counts=as(as(synthetic_visium_data$counts,"matrix"),"dgCMatrix"))
 
 start_time <- Sys.time()
-RCTD_deconv <- create.RCTD(spatialRNA_obj_visium, seurat_obj_scRNA, max_cores = 8, CELL_MIN_INSTANCE=5)
+RCTD_deconv <- create.RCTD(spatialRNA_obj_visium, seurat_obj_scRNA, max_cores = 8, CELL_MIN_INSTANCE=1)
 RCTD_deconv <- run.RCTD(RCTD_deconv, doublet_mode = FALSE)
 end_time <- Sys.time()
 res = as.matrix(sweep(RCTD_deconv@results$weights, 1, rowSums(RCTD_deconv@results$weights), '/'))
