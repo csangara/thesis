@@ -2,77 +2,7 @@
 source("D:/Work (Yr 2 Sem 1)/Thesis/Scripts/init.R")
 dataset <- datasets[3]
 
-#### SAMPLE CODE FOR LOADING DATA ####
-dataset_type <- possible_dataset_types[1]
-synthetic_visium_data <- readRDS(paste0(path, dataset, "/", repl, "/", dataset, "_",
-                                        dataset_type, "_synthvisium.rds"))
-seurat_obj_visium <- createAndPPSeuratFromCounts(synthetic_visium_data$counts, PP=FALSE)
-
-method <- methods[1]
-temp_deconv = readRDS(paste0(result_path, method, "/", dataset, "_", 
-                                  dataset_type, "_", method, ".rds"))
-
-# Correlation
-ncells <- length(colnames(synthetic_visium_data$spot_composition))-2
-res = cor(t(synthetic_visium_data$relative_spot_composition[,1:ncells]), t(temp_deconv[[2]][,1:ncells]))
-print(mean(diag(res), na.rm=TRUE))
-
-###### PLOT PREDICTIONS ON UMAP #######
-dataset <- datasets[3]
-
-for (repl in paste0('rep', 1:10)){
-  result_path <- paste0("results/", dataset, "_s1/", repl, "_", run, "/")
-  for (dataset_type in possible_dataset_types){
-    
-    # Load reference data
-    synthetic_visium_data <- readRDS(paste0(path, dataset, "/", repl, "/", dataset, "_",
-                                            dataset_type, "_synthvisium.rds"))
-    seurat_obj_visium <- createSeuratFromCounts(synthetic_visium_data$counts)
-    
-    # Initialization of column names
-    ncells <- length(colnames(synthetic_visium_data$spot_composition))-2
-    celltypes <- colnames(synthetic_visium_data$relative_spot_composition)[1:ncells]
-    celltypes <- str_replace(celltypes, "/", ".")
-    colnames(synthetic_visium_data$relative_spot_composition)[1:ncells] <- celltypes
-    known_props <- synthetic_visium_data$relative_spot_composition[,1:ncells]
-    
-    # Load deconvolution results
-    deconv_list <- createDeconvResultList(methods, celltypes, result_path, dataset)
-    
-    # Correlation by cell type
-    corr_list <- lapply(deconv_list, function(k) cor(known_props[,1:ncells],
-                                                     k[,1:ncells], use="complete.obs"))
-    
-    for (celltype in celltypes){
-      # Add deconv result to visium metadata
-      seurat_obj_visium@meta.data[celltype] = synthetic_visium_data$relative_spot_composition[,celltype]
-      
-      for (method in methods){
-        seurat_obj_visium@meta.data[paste0(celltype, "_", method)] = deconv_list[[method]][,celltype]
-      }
-      
-      plot_dir <- paste0(result_path, "plots/", dataset_type, "/")
-      if (!dir.exists(plot_dir)){ dir.create(plot_dir, recursive=TRUE) }
-      
-      # Plot proportion of each cell type for all methods
-      plots <- FeaturePlot(seurat_obj_visium, c(celltype, paste0(celltype, "_", methods)),
-                                                combine=FALSE)
-      # Add title for each method (first plot is the ground truth)
-      for (i in 1:length(methods)){
-        plots[[i+1]] <- plots[[i+1]] + ggtitle(methods[i], paste0("Corr=", round(corr_list[[methods[i]]][celltype, celltype], 3)))
-        
-      }
-  
-      plots <- plots[[1]] + plots[[2]] + plots[[3]] + plots[[4]] + plots[[5]] + plots[[6]]
-      png(paste0(plot_dir, celltype, ".png"), width=1600, height=800)
-      print(plots)
-      dev.off()
-    }
-  }
-}
-
 #### CALCULATE PERFORMANCE METRICS OF SCENARIO 4####
-
 for (dataset in datasets[3:4]){
   for (repl in paste0('rep', 1:10)){
       all_results <- list()
@@ -116,63 +46,6 @@ for (dataset in datasets[3:4]){
   }
 }
 
-
-#### PLOT EACH METRIC ####
-# corr, RMSE, accuracy, sensitivity, specificity, precision, F1
-for (dataset in datasets[3:4]){
-  for (repl in paste0("rep", 1:10)){
-    
-    result_path <- paste0("results/", dataset, "_s4/", repl, "_", run, "/")
-    ntypes <- length(possible_dataset_types)
-    all_results <- readRDS(paste0(result_path, "all_metrics_", dataset, ".rds"))
-    metrics <- c("corr", "RMSE", "accuracy", "sensitivity", "specificity", "precision", "F1")
-    if (!dir.exists(paste0(result_path, "plots/"))){ dir.create(paste0(result_path, "plots/"), recursive=TRUE) }
-    for (metric in metrics){
-      df <- data.frame(dataset_type = rep(names(all_results), length(methods)),
-                       index = rep(1:ntypes, length(methods)),
-                       methods = rep(methods, each=ntypes))
-      df$vals <- c(sapply(methods, function(u) sapply(possible_dataset_types, function(k) all_results[[k]][u,][metric])))
-      png(paste0(result_path, "plots/", metric, ".png"), width=769, height=442)
-      print(ggplot(data=df, aes(x=factor(index), y=as.numeric(vals), color=methods)) + geom_jitter(width=0.1) +
-        labs(title=paste0(metric, " of different methods on all ", ntypes, " dataset types; ", dataset)) + ylab(metric) + xlab("datasets"))
-      dev.off()
-    }
-  }
-}
-
-#### PLOT DISTRIBUTION OF CORRELATION ####
-for (dataset in datasets[3:4]){
-  for (repl in paste0("rep", 1:10)){
-    result_path <- paste0("results/", dataset, "_s4/", repl, "_", run, "/")
-    for (dataset_type in possible_dataset_types){
-      # Load reference data and deconvolution results
-      synthetic_visium_data <- readRDS(paste0(path, dataset, "/", repl, "/", dataset, "_",
-                                              dataset_type, "_synthvisium.rds"))
-      ncells <- length(colnames(synthetic_visium_data$spot_composition))-2
-      # Initialization of column names
-      celltypes <- colnames(synthetic_visium_data$relative_spot_composition)[1:ncells]
-      celltypes <- str_replace(celltypes, "/", ".")
-      colnames(synthetic_visium_data$relative_spot_composition)[1:ncells] <- celltypes
-      known_props <- synthetic_visium_data$relative_spot_composition[,1:ncells]
-      
-      # Load deconvolution results
-      deconv_list <- createDeconvResultList(methods, celltypes, result_path, dataset)
-      
-      # Correlation and RMSE
-      corr_spots <- lapply(deconv_list, function(k) diag(cor(t(known_props), t(k[,1:ncells]))))
-      plot_dir <- paste0(result_path, "plots/corr_distribution/")
-      dir.create(plot_dir, showWarnings = FALSE)
-      df = data.frame(x=unlist(corr_spots),
-                      method=rep(names(corr_spots), each=length(corr_spots[[1]])))
-      png(paste0(plot_dir, dataset_type, ".png"), width=769, height=442)
-      print(ggplot(df, aes(x=x, color=method)) + geom_density() +
-        labs(title=paste0("Correlation distribution of spots; ", dataset_type, ", ", dataset)))
-      dev.off()
-      
-    }
-  }
-}
-
 # Deviation between scenarios
 library(patchwork)
 for (dataset in datasets[3:4]){
@@ -210,7 +83,7 @@ for (dataset in datasets[3:4]){
   df$dataset_type <- factor(df$dataset_type, levels=unique(df$dataset_type))
   title <- ifelse(dataset == "cerebellum_cell_generation", "Cerebellum (sc)", "Cerebellum (sn)")
   # mean
-  # png("plots/mean_10reps_s2s4_cercell.png", width=680, height=400)
+  # png("plots/scenario3_cell.png", width=680, height=400) # or scenario3_nucleus.png
   p_temp <- ggplot(df, aes(x=method, y=mean, shape=dataset_type,
                  color=scenario, group=dataset_type)) +
     geom_point(size=2, stroke=1, position=position_dodge(0.6)) +
@@ -226,32 +99,6 @@ for (dataset in datasets[3:4]){
   }
 }
 p <- p + plot_layout(guides = "collect")
-png("plots/mean_10reps_s2s4_cerboth2.png", width=210, height=100, units="mm", res=200)
+png("plots/scenario3_both.png", width=210, height=100, units="mm", res=200)
 print(p)
 dev.off()
-
-# Difference
-dfs1 <- df[df$scenario=="Scenario 2",]
-dfs2 <- df[df$scenario=="Scenario 3",]
-diffs <- c()
-for (method in methods){
-  tempdfs1 <- dfs1[dfs1$method==method,]
-  tempdfs2 <- dfs2[dfs2$method==method,]
-  print(method)
-  meandiff <- mean(tempdfs2$mean - tempdfs1$mean)
-  percent_inc <- mean((tempdfs2$mean - tempdfs1$mean)/tempdfs1$mean)
-  #mean_percent_inc <- (mean(tempdfs2$mean) - mean(tempdfs1$mean))/mean(tempdfs1$mean)
-  scaled <- meandiff/mean(tempdfs1$mean)
-  print(meandiff)
-  diffs[method] <- meandiff
-  #print(scaled)
-  #print(percent_inc)
-  #print(mean_percent_inc)
-}
-
-# SD
-ggplot(df, aes(x=method, y=sd, shape=factor(str_replace(dataset_type, "artificial_", "")), color=str_replace(dataset, "_generation", ""))) +
-  geom_jitter(width=0.2, alpha=0.7) +
-  labs(title="SD of each method between reps", color="dataset", shape="dataset_type") + 
-  ylab("Deviation of RMSE between 10 reps") + scale_shape_manual(values=1:length(possible_dataset_types)) +
-  guides(color = guide_legend(order=1), shape=guide_legend(order=2)) + ylim(0, 0.1)

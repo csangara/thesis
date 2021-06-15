@@ -1,21 +1,6 @@
 #### EVALUATION OF RESULTS ####
 source("D:/Work (Yr 2 Sem 1)/Thesis/Scripts/init.R")
 
-#### SAMPLE CODE FOR LOADING DATA ####
-dataset_type <- possible_dataset_types[1]
-synthetic_visium_data <- readRDS(paste0(path, dataset, "/", repl, "/", dataset, "_",
-                                        dataset_type, "_synthvisium.rds"))
-seurat_obj_visium <- createAndPPSeuratFromCounts(synthetic_visium_data$counts, PP=FALSE)
-
-method <- methods[1]
-temp_deconv = readRDS(paste0(result_path, method, "/", dataset, "_", 
-                                  dataset_type, "_", method, ".rds"))
-
-# Correlation
-ncells <- length(colnames(synthetic_visium_data$spot_composition))-2
-res = cor(t(synthetic_visium_data$relative_spot_composition[,1:ncells]), t(temp_deconv[[2]][,1:ncells]))
-print(mean(diag(res), na.rm=TRUE))
-
 ###### PLOT PREDICTIONS ON UMAP #######
 dataset <- datasets[2]
 
@@ -90,11 +75,12 @@ for (repl in paste0('rep', 1:10)){
       
       # Load deconvolution results
       deconv_list <- createDeconvResultList(methods, celltypes, result_path, dataset)
-    
+      
       # Correlation and RMSE
       corr_spots <- sapply(deconv_list, function(k) mean(diag(cor(t(known_props), t(k[,1:ncells]))), na.rm=TRUE))
       RMSE <- sapply(deconv_list, function(k) mean(sqrt(rowSums((known_props-k[,1:ncells])**2, na.rm=TRUE)/ncells)))
       reference_RMSE <- mean(sqrt(rowSums((known_props-(1/ncells))**2)/ncells))
+      
       # Classification metrics
       conf_matrices <- lapply(deconv_list, function(k) getConfusionMatrix(known_props, k))
       accuracy <- sapply(conf_matrices, function(k) round((k$tp + k$tn) / (k$tp + k$tn + k$fp + k$fn), 2))
@@ -103,36 +89,23 @@ for (repl in paste0('rep', 1:10)){
       precision <- sapply(conf_matrices, function(k) round(k$tp / (k$tp + k$fp), 2))
       F1 <- sapply(methods, function(k) round(2 * ((precision[k] * sensitivity[k]) /
                                                      (precision[k] + sensitivity[k])), 2))
+      
+      # Area under precision-recall curve
+      known_binary_all <- ifelse(known_props > 0, "present", "absent") %>% melt() %>% select(value)
+      deconv_unlist <- lapply(deconv_list, function (k) c(as.matrix(k)))
+      scores <- join_scores(deconv_unlist)
+      model <- mmdata(scores, known_binary_all, modnames=methods) # make model
+      curve <- evalmod(model)
+      prcs <- subset(auc(curve), curvetypes == "PRC")
+      
       # Get them into dataframe
       metrics <- data.frame(row.names=methods, "corr"=corr_spots, "RMSE"=RMSE,
                             "accuracy"=accuracy, "sensitivity"=sensitivity,
-                            "specificity"=specificity, "precision"=precision, "F1"=F1)
+                            "specificity"=specificity, "precision"=precision, "F1"=F1,
+                            "prc"=prcs$aucs)
       
       all_results[[dataset_type]] <- metrics
     saveRDS(all_results, paste0(result_path, "all_metrics_", dataset, ".rds"))
-  }
-}
-
-
-#### PLOT EACH METRIC ####
-# corr, RMSE, accuracy, sensitivity, specificity, precision, F1
-dataset <- datasets[2]
-for (repl in paste0("rep", 1:10)){
-  
-  result_path <- paste0("results/", dataset, "_s1/", repl, "_", run, "/")
-  ntypes <- length(possible_dataset_types)
-  all_results <- readRDS(paste0(result_path, "all_metrics_", dataset, ".rds"))
-  metrics <- c("corr", "RMSE", "accuracy", "sensitivity", "specificity", "precision", "F1")
-  if (!dir.exists(paste0(result_path, "plots/"))){ dir.create(paste0(result_path, "plots/"), recursive=TRUE) }
-  for (metric in metrics){
-    df <- data.frame(dataset_type = rep(names(all_results), length(methods)),
-                     index = rep(1:ntypes, length(methods)),
-                     methods = rep(methods, each=ntypes))
-    df$vals <- c(sapply(methods, function(u) sapply(possible_dataset_types, function(k) all_results[[k]][u,][metric])))
-    png(paste0(result_path, "plots/", metric, ".png"), width=769, height=442)
-    print(ggplot(data=df, aes(x=factor(index), y=as.numeric(vals), color=methods)) + geom_jitter(width=0.1) +
-      labs(title=paste0(metric, " of different methods on all ", ntypes, " dataset types; ", dataset)) + ylab(metric) + xlab("datasets"))
-    dev.off()
   }
 }
 
@@ -168,6 +141,32 @@ for (repl in paste0("rep", 1:10)){
   }
 }
 
+
+#### PLOT EACH METRIC AS FACET  ####
+metrics <- c("RMSE", "accuracy", "sensitivity", "specificity", "precision", "F1", "prc")
+
+dataset <- datasets[2]
+for (repl in paste0("rep", 1:10)){
+  result_path <- paste0("results/", dataset, "_s1/", repl, "_", run, "/")
+  if (!dir.exists(paste0(result_path, "plots/"))){ dir.create(paste0(result_path, "plots/"), recursive=TRUE) }
+  
+  all_results <- readRDS(paste0(result_path, "all_metrics_", dataset, ".rds"))
+  all_results2 <- melt(all_results) %>% mutate("dataset_type"=str_replace(L1, "artificial_", "") %>%
+                                                 factor(., levels=unique(.))) %>%
+    filter(variable %in% metrics)
+  all_results2$methods <- methods
+  
+  p <- ggplot(all_results2, aes(x=methods, y=value, shape=dataset_type, color=methods)) +
+    scale_shape_manual(values=1:length(possible_dataset_types)) + geom_jitter(width=0.1) +
+    facet_wrap(vars(variable), scales="free_y")
+  
+  png(paste0(result_path, "plots/all_metrics.png"), width=800, height=450)
+  print(p)
+  dev.off()
+  
+}
+
+
 # Deviation between scenarios
 df <- data.frame()
 dataset <- datasets[2]
@@ -196,7 +195,7 @@ df$dataset_type <- sapply(df$dataset_type, str_replace, "artificial_", "")
 df$dataset_type <- factor(df$dataset_type, levels=unique(df$dataset_type))
 mean_df <- df %>% group_by(method, dataset_type, scenario) %>% summarise(value=mean(value))
 # mean
-png("plots/mean_10reps_s1s2_braincortex.png", width=210, height=100, units="mm", res=200)
+png("plots/scenario1.png", width=210, height=100, units="mm", res=200)
 ggplot(mean_df, aes(x=method, y=value, shape=dataset_type, color=scenario, group=dataset_type)) +
   geom_point(size=3, stroke=1, position=position_dodge(0.6)) +
   labs(color="Scenario", shape="Dataset type") + xlab("Method") +
@@ -206,7 +205,7 @@ ggplot(mean_df, aes(x=method, y=value, shape=dataset_type, color=scenario, group
   theme(title=element_blank())
 dev.off()
 
-# Difference (didn't fix this yet)
+# Difference
 dfs1 <- mean_df[mean_df$scenario=="Scenario1",]
 dfs2 <- mean_df[mean_df$scenario=="Scenario2",]
 for (method in methods){
@@ -218,10 +217,3 @@ for (method in methods){
   print(meandiff)
   #print(scaled)
 }
-
-# SD
-ggplot(df, aes(x=method, y=sd, shape=factor(str_replace(dataset_type, "artificial_", "")), color=str_replace(dataset, "_generation", ""))) +
-  geom_jitter(width=0.2, alpha=0.7) +
-  labs(title="SD of each method between reps", color="dataset", shape="dataset_type") + 
-  ylab("Deviation of RMSE between 10 reps") + scale_shape_manual(values=1:length(possible_dataset_types)) +
-  guides(color = guide_legend(order=1), shape=guide_legend(order=2)) + ylim(0, 0.1)
