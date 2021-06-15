@@ -1,10 +1,9 @@
 source("D:/Work (Yr 2 Sem 1)/Thesis/Scripts/init.R")
 library(caret)
-library(reshape2)
 library(patchwork)
 
 ## EVALUATING "DOMINANT CELL TYPE (5)" AND "DOMINANT RARE CELL TYPE (7)" ##
-dataset_type <- possible_dataset_types[7] # 5 or 7
+dataset_type <- possible_dataset_types[5] # 5 or 7
 
 all_results <- list()
 for (dataset in datasets[2:length(datasets)]){
@@ -116,7 +115,7 @@ for (dataset in datasets[2:length(datasets)]){
 df <- melt(all_results)
 colnames(df) <- c("method", "metrics", "value", "type", "rep", "dataset")
 df <- df[!grepl("Accuracy", df$metrics),]
-chosen <- c("dominant", "others","rare", "both")[4] # for dominant, choose 1,2,4, for rare, choose 1,3,4 
+chosen <- c("dominant", "others","rare", "both")[2] # for dominant, choose 1,2,4, for rare, choose 1,3,4 
 title <- c("dominant", "rare")[sum(grepl("dominant", dataset_type), grepl("rare", dataset_type))]
 
 # Note: NA values occur because there are no true negatives in some cases
@@ -129,17 +128,22 @@ if (chosen != "both"){
     theme(legend.position="bottom", legend.direction = "horizontal",
           axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank()) +
     facet_grid(cols=vars(metrics))
-  png(paste0("plots/rare_celltypes_evaluation/", title, "_cell_type_facet_", chosen, "_together.png"), width=210, height=80, units="mm", res=200)
+  #png(paste0("plots/rare_celltypes_evaluation/", title, "_cell_type_facet_", chosen, "_together.png"), width=210, height=80, units="mm", res=200)
   print(p)
-  dev.off()
+  #dev.off()
 } else {
   p <- ggplot(df[df$metrics!="RMSE",], aes(x=factor(method, levels=sort(methods)), color=type, y=value)) +
     geom_boxplot(width=0.5) + ylab("Score") + labs(color="Type") + xlab("Methods") +
     facet_grid(cols=vars(metrics))
-  png(paste0("plots/rare_celltypes_evaluation/", title, "_cell_type_facet_", chosen, "_together.png"), width=210, height=80, units="mm", res=200)
+  #png(paste0("plots/rare_celltypes_evaluation/", title, "_cell_type_facet_", chosen, "_together.png"), width=210, height=80, units="mm", res=200)
   print(p)
-  dev.off()
+  #dev.off()
 }
+
+png(paste0("plots/rare_celltypes_evaluation/both_cell_type_facet_together.png"), width=210, height=100, units="mm", res=200)
+p_comb <- p_dom_others + p & theme(legend.position="bottom")
+print(p_comb + plot_layout(nrow=2, guides="collect"))
+dev.off()
 
 ## Combine results for all datasets together (Appendix)
 chosen <- c("dominant", "others","rare", "both")[4] # for dominant, choose 1,2,4, for rare, choose 1,3,4 
@@ -160,7 +164,7 @@ if (chosen != "both"){
   p2 <- ggplot(temp_df[temp_df$metrics=="RMSE",], aes(x=method, color=method, y=value)) +
     geom_boxplot(width=0.5) + ylab("Score") + labs(color="Method") +
     scale_color_discrete(labels=proper_method_names) +
-    facet_grid(cols=vars(metrics), rows=vars(dataset), labeller =labeller(dataset=proper_dataset_names)) +
+    facet_grid(cols=vars(metrics), rows=vars(dataset), labeller=labeller(dataset=proper_dataset_names)) +
     theme(axis.title.y=element_blank())
   
   combined <- p1 + p2 & theme(legend.position = "bottom", legend.direction = "horizontal",
@@ -205,6 +209,7 @@ for (metric in unique(df$metrics)){
 
 
 ### PLOTTING PRECISION-RECALL CURVE ("micro") ###
+## THIS IS VERY SLOW - DO NOT USE ##
 library(MLeval)
 deconv_melt <- melt(lapply(deconv_list, data.frame))
 deconv_melt$absent <- 1-deconv_melt$value
@@ -213,6 +218,18 @@ deconv_melt <- cbind(deconv_melt, known_binary_all)
 colnames(deconv_melt) <- c("celltype", "present", "Group", "absent", "obs")
 deconv_melt <- deconv_melt[, c("absent", "present", "obs", "Group")]
 test <- evalm(deconv_melt)
+
+deconv_melt %>% group_by(L1) %>% summarise(minprop=min(value),
+                                           maxprop=max(value))
+  
+## MUCH FASTER AND EASIER ##
+library(precrec)
+unlisted_deconv <- lapply(deconv_list, function (k) c(as.matrix(k)) )
+known_binary_all <- ifelse(known_props > 0, "present", "absent") %>% melt() %>% select(value)
+scores <- join_scores(unlisted_deconv)
+msmdat1 <- mmdata(scores, known_binary_all)
+mscurve <- evalmod(msmdat1)
+prcs <- subset(auc(mscurve), curvetypes == "PRC")
 
 ### BARPLOTS ####
 library(RColorBrewer)
