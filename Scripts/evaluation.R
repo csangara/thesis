@@ -57,13 +57,14 @@ for (dataset in datasets[2:length(datasets)]){
   }
 }
 
-#### PLOTTING ####
+#### PLOTTING THE FACET GRIDS ####
 possible_metrics <- c("corr", "RMSE", "accuracy", "sensitivity", "specificity", "precision", "F1", "prc")
 proper_metric_names <- c("Correlation", "RMSE", "Accuracy", "Sensitivity", "Specificity", "Precision", "F1", "PRC AUC") %>%
   setNames(possible_metrics)
 metric <- "RMSE"
 
 for (metric in possible_metrics[8]){
+  # Compile results from all datasets
   df <- data.frame()
   for (dataset in datasets[-1]){
     all_reps <- lapply(paste0('rep', 1:10), function(repl){
@@ -96,7 +97,7 @@ for (metric in possible_metrics[8]){
     facet_grid(rows=vars(dataset), cols=vars(dt_linebreak), scales="free_y",
                labeller=labeller(dataset=proper_dataset_names))
   
-  png(paste0("plots/metrics_facet/all_", metric, "_facet.png"), width=297, height=190, units="mm", res=200)
+  png(paste0("plots/metrics_facet/", metric, ".png"), width=297, height=190, units="mm", res=200)
   print(p)
   dev.off()
   
@@ -126,15 +127,16 @@ for (metric in possible_metrics[8]){
     p <- p + geom_hline(data=ref_metric_df, aes(yintercept=value), linetype="dashed", color="gray")
   }
   
-  png(paste0("plots/metrics_facet/all_", metric, "_facet_ref.png"), width=297, height=190, units="mm", res=200)
+  png(paste0("plots/metrics_facet/", metric, "_withref.png"), width=297, height=190, units="mm", res=200)
   print(p)
   dev.off()
 }
 
-## BEST VALUES ##
+#### EXPORT BEST-PERFORMERS TO DRAW BORDERS ####
 possible_metrics <- c("corr", "RMSE", "accuracy", "sensitivity", "specificity", "precision", "F1", "prc")
 
 for (metric in possible_metrics[8]){
+  # Compile results from all datasets for each metric
   df <- data.frame()
   for (dataset in datasets[-1]){
     all_reps <- lapply(paste0('rep', 1:10), function(repl){
@@ -151,116 +153,31 @@ for (metric in possible_metrics[8]){
     df <- rbind(df, temp_df)
   }
   df$dataset_type <- factor(df$dataset_type, levels=possible_dataset_types)
+  
+  # Aggregate best values and write in tsv file
   best <- df %>% group_by(dataset, dataset_type, method) %>% summarise(medi=median(all_RMSE)) %>%
     slice_max(order_by=medi, n=1)
   write.table(best, paste0("Misc/best_values/best_values_", metric, ".tsv"), sep="\t", row.names=FALSE, quote=FALSE)
 }
+# Run Scripts/draw_facet_borders.py #
+# That script also returns file of the best value counts
 
-## Read in file from python
+#### CREATE BARPLOT ####
+# Read in file from python
 best_df <- read.csv("Misc/best_values/best_values_count.csv") %>% melt(id.var="X") %>% setNames(c("method", "metric", "count"))
 best_df$metric <- best_df$metric %>% str_replace("prc", "PRC AUC") %>% R.utils::capitalize() %>%
   factor(., levels=c("Accuracy", "Specificity", "Sensitivity", "Precision", "F1", "PRC AUC"))
+best_df$pct <- best_df %>% group_by(metric) %>% mutate(pct = count/sum(count)) %>% ungroup %>% select(pct)
+
 p <- ggplot(best_df, aes(x=metric, y=count, fill=method)) + geom_bar(width=0.75, position="fill", stat="identity") +
   ylab("% Best performing") + xlab("Metric") + labs(fill="Method") +
   scale_fill_manual(values = c("#f8766d", "#a3a500", "#00bf7d", "#00b0f6", "#e76bf3", "#a1a1a1"), 
                         labels=c("cell2location", "MuSiC", "RCTD", "SPOTlight", "stereoscope", "Tie"))
-best_df$pct <- best_df %>% group_by(metric) %>% mutate(pct = count/sum(count)) %>% ungroup %>% select(pct)
-png("plots/class_metrics_barplot.png", width=210, height=100, units="mm", res=200)
+png("plots/classification_barplot.png", width=210, height=100, units="mm", res=200)
 print(p)
 dev.off()
 
 #### WILCOXON TEST ####
-### OLD - concatenate all values ###
-pvalues <- list()
-mean_RMSEs <- list()
-median_RMSEs <- list()
-# 10 = n*(n-1)/2, where n is the number of methods
-n_comparisons <- 10*length(possible_dataset_types)*length(datasets)
-for (dataset in datasets[2:length(datasets)]){
-  for (dataset_type in possible_dataset_types){
-    stacked_RMSE <- data.frame()
-    for (repl in paste0('rep', 1:10)){
-      result_path <- paste0("results/", dataset, "/", repl, "_", run, "/")
-      
-      # Load reference data and deconvolution results
-      synthetic_visium_data <- readRDS(paste0(path, dataset, "/", repl, "/", dataset, "_",
-                                              dataset_type, "_synthvisium.rds"))
-      ncells <- length(colnames(synthetic_visium_data$spot_composition))-2
-      
-      # Initialization of column names
-      celltypes <- colnames(synthetic_visium_data$relative_spot_composition)[1:ncells]
-      celltypes <- str_replace(celltypes, "/", ".")
-      colnames(synthetic_visium_data$relative_spot_composition)[1:ncells] <- celltypes
-      known_props <- synthetic_visium_data$relative_spot_composition[,1:ncells]
-      
-      # Load deconvolution results
-      deconv_list <- createDeconvResultList(methods, celltypes, result_path, dataset)
-      
-      # RMSE_all spots
-      RMSE <- sapply(deconv_list, function(k) sqrt(rowSums((known_props-k[,1:ncells])**2, na.rm=TRUE)/ncells))
-      stacked_RMSE <- rbind(stacked_RMSE, stack(data.frame(RMSE)))
-    }
-    pval <- pairwise.wilcox.test(stacked_RMSE[,1], stacked_RMSE[,2],
-                                 p.adjust.method = "none",
-                                 paired=TRUE) 
-    pval <- apply(pval$p.value, 2, function(k)
-      p.adjust(k, method="bonferroni", n=n_comparisons))
-    # Adjust pvalue for all comparisons
-    pvalues[[dataset]][[dataset_type]] <- pval
-    mean_RMSEs[[dataset]][[dataset_type]] <- apply(RMSE, 2, mean)
-    median_RMSEs[[dataset]][[dataset_type]] <- apply(RMSE, 2, median)
-  }
-}
-
-library(xlsx)
-wb = createWorkbook()
-sheet = createSheet(wb, "sheet1")
-j = 1
-for (dataset in datasets[2:length(datasets)]){
-  addDataFrame(data.frame(x=dataset), sheet=sheet, startRow=1,
-               startColumn=j, row.names=FALSE, col.names=FALSE)
-  i = 2
-  for (dataset_type in possible_dataset_types){
-    addDataFrame(data.frame(x=dataset_type), sheet=sheet, startRow=i,
-                 startColumn=j, row.names=FALSE, col.names=FALSE)
-    temp_data = median_RMSEs[[dataset]][[dataset_type]]
-    temp_data = as.matrix(temp_data) # have this for the means
-    addDataFrame(temp_data, sheet=sheet, startRow=i+1, startColumn=j, col.names=FALSE)
-    i = i + nrow(temp_data) + 2
-  }
-  j = j+4
-}
-
-saveWorkbook(wb, paste0("results/summary files/all_pvalues_wilcoxpaired_pairwise.xlsx"))
-saveWorkbook(wb, paste0("results/summary files/all_meanRMSEs.xlsx"))
-saveWorkbook(wb, paste0("results/summary files/all_medianRMSEs.xlsx"))
-
-all_sums <- 0
-for (dataset in datasets[2:length(datasets)]){
-  print(paste0("Dataset: ", dataset))
-  for (dataset_type in possible_dataset_types){
-    pvalues[[dataset]][[dataset_type]]
-    all_sums <- all_sums + sum(pvalues[[dataset]][[dataset_type]] > 0.05, na.rm=TRUE)
-    nonsig <- which(pvalues[[dataset]][[dataset_type]] > 0.05, arr.ind=TRUE)
-    if (length(nonsig) > 0){
-      print(paste0("type: ", dataset_type))
-      print(paste0(methods[1:4][nonsig[,2]], "/", methods[2:5][nonsig[,1]], collapse="; "))
-      
-    }
-  }
-  print("")
-}
-
-### NEW - mean of 10 iterations ###
-
-all_reps <- lapply(paste0('rep', 1:10), function(repl){
-  all_results <- readRDS(paste0(paste0("results/", dataset, "/", repl, "_/"),
-                                "all_metrics_", dataset, ".rds"))
-  sapply(possible_dataset_types, function (u) all_results[[u]][["RMSE"]] )
-})
-melt_all_reps <- melt(all_reps)
-melt_all_reps$methods <- methods
-
 pvalues <- list()
 median_RMSEs <- list()
 ref_RMSE_list <- readRDS("rds/ref_RMSE_all.rds")
@@ -286,11 +203,12 @@ for (dataset in datasets[2:length(datasets)]){
       # Load deconvolution results
       deconv_list <- createDeconvResultList(methods, celltypes, result_path, dataset)
       
-      # Mean RMSE
+      # Calculate mean RMSE
       RMSE <- sapply(deconv_list, function(k) mean(sqrt(rowSums((known_props-k[,1:ncells])**2, na.rm=TRUE)/ncells)))
       ref_RMSE <- mean(unlist(ref_RMSE_list[[dataset]][[dataset_type]])) %>% setNames("ref")
       stacked_RMSE <- rbind(stacked_RMSE, stack(c(ref_RMSE, RMSE)))
     }
+    # Pairwise wilcoxon test
     pval <- pairwise.wilcox.test(stacked_RMSE[,1], stacked_RMSE[,2],
                                  p.adjust.method = "none",
                                  paired=TRUE) 
@@ -300,11 +218,12 @@ for (dataset in datasets[2:length(datasets)]){
       summarise(median_RMSE=median(values), .groups="drop")
   }
 }
+# Adjust p-values
 pvalues_melt <- melt(pvalues, value.name=c("pvals"), id.vars=c("Var1", "Var2"))
 pvalues_melt$padj <- p.adjust(pvalues_melt$pvals, method="BY")
 
-temp %>% dcast(Var1~Var2, value.var="padj")
-
+# Write results in excel workbook
+choice <- "median" # choose to write median or pvalue
 library(xlsx)
 wb = createWorkbook()
 sheet = createSheet(wb, "sheet1")
@@ -316,15 +235,17 @@ for (dataset in datasets[2:length(datasets)]){
   for (dataset_type in possible_dataset_types){
     addDataFrame(data.frame(x=dataset_type), sheet=sheet, startRow=i,
                  startColumn=j, row.names=FALSE, col.names=FALSE)
-    #temp_data <- pvalues_melt[pvalues_melt$L2==dataset_type & pvalues_melt$L1==dataset, c("Var1", "Var2", "padj")]
-    #temp_data <- temp_data %>% dcast(Var1~Var2, value.var="padj")
-    temp_data <- as.matrix(median_RMSEs[[dataset]][[dataset_type]])
+    if (choice == "median"){
+      temp_data <- as.matrix(median_RMSEs[[dataset]][[dataset_type]])
+    } else if (choice == "pvalue"){
+      temp_data <- pvalues_melt[pvalues_melt$L2==dataset_type & pvalues_melt$L1==dataset, c("Var1", "Var2", "padj")]
+      temp_data <- temp_data %>% dcast(Var1~Var2, value.var="padj")
+    }
     addDataFrame(temp_data, sheet=sheet, startRow=i+1, startColumn=j, row.names=FALSE, col.names=FALSE)
     i = i + nrow(temp_data) + 2
   }
   j = j+4
 }
 
-#saveWorkbook(wb, paste0("results/summary files/all_pvalues_wilcoxpaired_pairwise.xlsx"))
-#saveWorkbook(wb, paste0("results/summary files/all_meanRMSEs.xlsx"))
-saveWorkbook(wb, paste0("results/summary files/all_medianRMSEs.xlsx"))
+if (choice == "median") { saveWorkbook(wb, paste0("results/summary files/all_medianRMSEs.xlsx"))
+  } else { saveWorkbook(wb, paste0("results/summary files/all_pvalues_wilcoxpaired_pairwise.xlsx")) }
