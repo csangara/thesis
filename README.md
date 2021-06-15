@@ -23,6 +23,8 @@ I did not preprocess the scRNA-seq data myself so I cannot share the scripts her
 ### Synthetic data generation
 As an alternative to synthvisium, you can generate synthetic data using scripts from SPOTlight, stereoscope, or cell2location. Some sample code for running these functions can be found at `Scripts/synthetic_data_generation`, although the cell2location functions have to be cloned from [here](https://github.com/emdann/ST_simulation).
 
+The countsimQC reports between different synthetic data generation algorithms can be found in the folder `countsimQC/`.
+
 ### Running deconvolution methods
 Scripts for running the deconvolution methods can be found at `Scripts/run_deconv` along with a description for using those files. The deconvolution results are compiled in the folder `results/`.
 
