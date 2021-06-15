@@ -1,6 +1,10 @@
 # Cell Type Deconvolution in Spatial Transcriptomics
 
-In this repository, you can find scripts to run and evaluate five deconvolution methods: cell2location, MuSiC, stereoscope, RCTD, and SPOTlight. I used seven scRNA-seq datasets to generate synthetic spatial data using the package **synthvisium** (not yet publicly available). The raw datasets along with the download links are listed below.
+In this repository, you can find the analysis scripts and plots pertaining to the dissertation. There are scripts to run and evaluate the five deconvolution methods (cell2location, MuSiC, stereoscope, RCTD, and SPOTlight). Later, I also apply cell2location and RCTD on real data.
+
+## Benchmarking
+
+To perform benchmarking, synthetic data has to be created from a reference scRNA-seq dataset. Then, we run different deconvolution methods on the datasets and evaluate them. I made use of seven scRNA-seq datasets to generate synthetic spatial data using the package **synthvisium** (not yet publicly available). The raw datasets along with the download links are listed below.
 
 |      Dataset     |                                                                     Direct download link                                                                    |
 |:----------------:|:-----------------------------------------------------------------------------------------------------------------------------------------------------------:|
@@ -14,18 +18,21 @@ In this repository, you can find scripts to run and evaluate five deconvolution 
 
 (Both cerebellum datasets can be downloaded from the link.)
 
-You can also follow this [Seurat vignette](https://satijalab.org/seurat/articles/pbmc3k_tutorial.html) for a quick preprocessing pipeline of the PBMC data.
+I did not preprocess the scRNA-seq data myself so I cannot share the scripts here, but the procedure is described in section 5.1 of the text. You can also follow this [Seurat vignette](https://satijalab.org/seurat/articles/pbmc3k_tutorial.html) for a quick preprocessing of the PBMC data.
 
-## Synthetic data generation
-Instead of synthvisium you can generate synthetic data using scripts from SPOTlight, stereoscope, or cell2location as well. Some sample code for running these functions can be found at `Scripts/synthetic_data_generation`, although the cell2location functions have to be cloned from [here](https://github.com/emdann/ST_simulation).
+### Synthetic data generation
+As an alternative to synthvisium, you can generate synthetic data using scripts from SPOTlight, stereoscope, or cell2location. Some sample code for running these functions can be found at `Scripts/synthetic_data_generation`, although the cell2location functions have to be cloned from [here](https://github.com/emdann/ST_simulation).
 
-## Running deconvolution methods
+### Running deconvolution methods
 Scripts for running the deconvolution methods can be found at `Scripts/run_deconv` along with a description for using those files. The deconvolution results are compiled in the folder `results/`.
 
 For scripts to generate downsampled data and get the runtime of each method, check out `Scripts/run_deconv_downsample`.
 
-## Evaluation
+### Evaluation
 Evaluation scripts are found at `Scripts/` with the prefix `evaluation_`. These make use of the deconvolution results saved in `results/`.
 
-## Plots
-Along with a more high-resolution of the plots in the thesis, you can also find scripts that are used to generate the plots. The plots are in the directory `plots/` and there I try to make a link with the corresponding scripts.
+### Plots
+Along with high-resolution of the plots found in the thesis, you can also find scripts that are used to generate the plots. The plots are in the directory `plots/` and there I try to make a link with the corresponding scripts.
+
+## Application on real data
+You can find the scripts for  preprocessing, running deconvolution tools, and evaluating the liver dataset in the folder `Scripts/liver/`.
