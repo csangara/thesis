@@ -1,4 +1,5 @@
 #### EVALUATION OF RESULTS ####
+# This is an old file for when each method was still run 3 times per replicate #
 source("D:/Work (Yr 2 Sem 1)/Thesis/Scripts/init.R")
 
 #### SAMPLE CODE FOR LOADING DATA ####
