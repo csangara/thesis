@@ -56,26 +56,24 @@ for (dataset_type in dataset_types){
   synthetic_visium_data <- readRDS(paste0(data_path, dataset ,"/", repl, "/", dataset, "_", dataset_type, "_synthvisium.rds"))
   region_comp <- getregionComp(synthetic_visium_data)
   
-  #png(paste0("plots/UMAP_synthvisium_cer_cell/", dataset_type, "_no_comp.png"))
+  #png(paste0("plots/UMAP_synthvisium/", dataset_type, "_no_comp.png"))
   #print(p + ggtitle(dataset_type) + theme(legend.position="none"))
   #dev.off()
   # Get all celltypes
   # celltypes <- colnames(spot_comp)[1:(ncol(spot_comp)-2)]
   # FeaturePlot(seurat_obj_visium, celltypes)
-  
-  
+
   ds_list[[dataset_type]] <- region_comp
 }
 
 ds_df <- t(data.frame(ds_list))
-write.table(ds_df, "plots/UMAP_synthvisium_cer_cell/comp.tsv", quote=FALSE, sep="\t")
+write.table(ds_df, "plots/UMAP_synthvisium/comp.tsv", quote=FALSE, sep="\t")
 
 ### DOWNSAMPLING SPOTS FOR CIBERSORT ###
 input_path <- "D:/Work (Yr 2 Sem 1)/Thesis/Data/CIBERSORTx/cibersort_mixture_ArtUniDistinct.txt"
 reduceSpotsCS(input_path, 75)
 
 #### PLOT TIME OF CIBERSORT ####
-
 df <- data.frame(x = c(10, 25, 50, 75, 100),
                  y = c(9.15, 31.4, 49.9, 81.1, 108.3))
 ggplot(df, aes(x=x, y=y)) + geom_line() + geom_point() + xlab("Number of spots") + ylab("Time (min)") +

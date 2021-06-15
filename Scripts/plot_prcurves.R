@@ -70,7 +70,7 @@ for (i in 1:56){
   all_plots_mod[[i]] <- temp_p
 }
 
-# Arrnage in a grid
+# Arrange in a grid
 png(paste0("plots/metrics_facet/all_prcurves_colored.png"), width=267, height=170, units="mm", res=200)
 gridExtra::grid.arrange(grobs=all_plots_mod, nrow=7, ncol=8)
 dev.off()

@@ -198,8 +198,8 @@ getConfusionMatrix <- function(known_props, test_props){
   return(list(tp=tp, tn=tn, fn=fn, fp=fp))
 }
 
-
-getregionComp <- function (synthetic_visium_data, verbose=TRUE,
+# Get region composition from synthvisium dataset
+getregionComp <- function(synthetic_visium_data, verbose=TRUE,
                            plotUMAP=FALSE, labelUMAP=TRUE){
   # Create seurat obj and UMAP
   spot_comp <- synthetic_visium_data$relative_spot_composition

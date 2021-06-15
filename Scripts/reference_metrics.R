@@ -1,4 +1,4 @@
-### CALCULATE REFERENCE RMSE USING DIRICHLET DISTRIBUTION ###
+### CALCULATE REFERENCE METRICS USING DIRICHLET DISTRIBUTION ###
 source("D:/Work (Yr 2 Sem 1)/Thesis/Scripts/init.R")
 library(DirichletReg)
 
@@ -16,8 +16,10 @@ for (dataset in datasets[2:length(datasets)]){
     iters = 100
     all_metrics <- matrix(, nrow=iters, ncol=length(possible_metrics))
     for (i in 1:iters){
+      # Generate random proportion matrix
       dir_dist <- rdirichlet(nspots, rep(1.0, ncells))
       
+      # Calculate metrics between known and random matrix
       RMSE <- mean(sqrt(rowSums((known_props-dir_dist)**2)/ncells))
       corr <- mean(diag(cor(t(known_props), t(dir_dist[,1:ncells]))), na.rm=TRUE)
 
@@ -44,7 +46,7 @@ for (dataset in datasets[2:length(datasets)]){
 saveRDS(metric_dir_list, "rds/ref_all_metrics.rds")
 #metric_dir_list <- readRDS("rds/ref_all_metrics.rds")
 
-## EXPORTING TABLE
+## EXPORTING TABLE (TABLE A2)
 ref_metric_list <- readRDS("rds/ref_all_metrics.rds")
 ref_metric_df <- reshape2::melt(ref_metric_list) %>% mutate("metric"=rep(possible_metrics, 56)) %>%
   `colnames<-`(c("value", "dataset_type", "dataset", "metric"))
@@ -52,7 +54,6 @@ ref_metric_df$dataset_type <- factor(ref_metric_df$dataset_type, levels=possible
 
 for (metric in possible_metrics[8]){
   temp_metric_df <- ref_metric_df[ref_metric_df$metric==metric,]
-  
   temp_metric_print <- t(dcast(temp_metric_df, dataset_type~dataset, value.var="value"))
   colnames(temp_metric_print) <- temp_metric_print[1,]
   temp_metric_print <- temp_metric_print[-1,]

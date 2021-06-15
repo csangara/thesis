@@ -63,27 +63,27 @@ for (i in 1:4){
   section = sections[i]
   brain <- LoadData("stxBrain", type = section)
   brain <- colSums(as.matrix(GetAssayData(brain)))
-  png(file=paste0("plots/data_distribution/stxBrain_", section, "_hist.png"))
+  png(file=paste0("plots/data_distribution_fitdistr/stxBrain_", section, "_hist.png"))
   print(hist(brain, main=paste0("UMI distribution per spot of stxBrain, ", section)))
   mtext(paste0("Mean: ", round(mean(brain),2),
                "; SD: ", round(sd(brain), 2)), side=3)
   dev.off()
-  getDistributionInfo(brain, "plots/data_distribution/", paste0("stxBrain_", section), "continuous")
-  getDistributionInfo(brain, "plots/data_distribution/", paste0("stxBrain_", section), "discrete")
+  getDistributionInfo(brain, "plots/data_distribution_fitdistr/", paste0("stxBrain_", section), "continuous")
+  getDistributionInfo(brain, "plots/data_distribution_fitdistr/", paste0("stxBrain_", section), "discrete")
   stats[i,] = c(mean(brain), sd(brain))
 }
 
 # Histogram for "stxKidney"
 kidney <- LoadData("stxKidney")
 kidney <- colSums(as.matrix(GetAssayData(kidney)))
-png(file="plots/data_distribution/stxKidney_hist.png")
+png(file="plots/data_distribution_fitdistr/stxKidney_hist.png")
 print(hist(kidney, main="UMI distribution per spot of stxKidney"))
 mtext(paste0("Mean: ", round(mean(kidney),2),
              "; SD: ", round(sd(kidney), 2)), side=3)
 dev.off()
 print(c(mean(kidney), sd(kidney)))
-getDistributionInfo(kidney, "plots/data_distribution/", "stxKidney", "continuous")
-getDistributionInfo(kidney, "plots/data_distribution/", "stxKidney", "discrete")
+getDistributionInfo(kidney, "plots/data_distribution_fitdistr/", "stxKidney", "continuous")
+getDistributionInfo(kidney, "plots/data_distribution_fitdistr/", "stxKidney", "discrete")
 
 ###### CHECK DISTRIBUTION OF SCRNA-SEQ DATA ###### 
 # SMART-Seq mouse brain data
@@ -106,14 +106,14 @@ saveRDS(new_brain, "rds/seurat_obj_scrnaseq_cortex_filtered_rawcounts.rds")
 
 ###### SYNTHVISIUM ######
 synthetic_visium_data <- readRDS("Data/synthetic_datasets/for_comparing_dists/synthvisium_sc_10x_braincortex_robin_rawcounts_3224spots.rds")
-png(file="plots/data_distribution/synthvisium_mean30000,sd8000_hist.png")
+png(file="plots/data_distribution_fitdistr/synthvisium_mean30000,sd8000_hist.png")
 print(hist(colSums(synthetic_visium_data$counts), main="UMI distribution per spot of synthvisium synthetic data"))
 mtext(paste0("Mean: ", round(mean(colSums(synthetic_visium_data$counts)),2),
              "; SD: ", round(sd(colSums(synthetic_visium_data$counts)), 2)), side=3)
 dev.off()
-getDistributionInfo(colSums(synthetic_visium_data$counts), "plots/data_distribution/",
+getDistributionInfo(colSums(synthetic_visium_data$counts), "plots/data_distribution_fitdistr/",
                     "synthvisium_mean30000,sd8000", "continuous")
-getDistributionInfo(colSums(synthetic_visium_data$counts), "plots/data_distribution/",
+getDistributionInfo(colSums(synthetic_visium_data$counts), "plots/data_distribution_fitdistr/",
                     "synthvisium_mean30000,sd8000", "discrete")
 
 #### SPOTLIGHT ####
@@ -125,7 +125,7 @@ hist(colSums(spotlight_synth$topic_profiles), breaks = c(16000, 18000, 20000, 22
 # There are three result files
 expression_data <- read.table("Data/synthetic_datasets/for_comparing_dists/stereoscope_sc_10x_braincortex_robin_rawcounts_default/counts.st_synth.tsv",
                               header=TRUE, sep="\t", row.names=1)
-png(file="plots/data_distribution/stereoscope_default_hist.png")
+png(file="plots/data_distribution_fitdistr/stereoscope_default_hist.png")
 print(hist(rowSums(expression_data), main="UMI distribution per spot of stereoscope synthetic data"))
 mtext(paste0("Mean: ", round(mean(rowSums(expression_data)),2),
              "; SD: ", round(sd(rowSums(expression_data)), 2)), side=3)
@@ -133,9 +133,9 @@ dev.off()
 print(paste0("Mean: ", round(mean(rowSums(expression_data)),2),
              "; SD: ", round(sd(rowSums(expression_data)), 2)))
 getDistributionInfo(rowSums(expression_data),
-                    "plots/data_distribution/", "stereoscope_synthetic_data", "continuous")
+                    "plots/data_distribution_fitdistr/", "stereoscope_synthetic_data", "continuous")
 getDistributionInfo(rowSums(expression_data),
-                    "plots/data_distribution/", "stereoscope_synthetic_data", "discrete")
+                    "plots/data_distribution_fitdistr/", "stereoscope_synthetic_data", "discrete")
 
 ####### CELL2LOCATION ########
 # Read in results
@@ -148,7 +148,7 @@ seeds <- unique(seeds[!is.na(seeds)])
 for (seed in seeds){
   expression_data <- read.table(paste0("Data/synthetic_datasets/for_comparing_dists/cell2location_sc_10x_braincortex_robin_rawcounts/2000spots/synthetic_ST_seed",
                                        seed, "_1_counts.csv"), header=TRUE, sep=",", row.names=1)
-  png(file=paste0("plots/data_distribution/cell2location_seed", seed, "_2000spots_hist.png"))
+  png(file=paste0("plots/data_distribution_fitdistr/cell2location_seed", seed, "_2000spots_hist.png"))
   print(hist(rowSums(expression_data), main="UMI distribution per spot of cell2location synthetic data"))
   mtext(paste0("Mean: ", round(mean(rowSums(expression_data)),2),
                "; SD: ", round(sd(rowSums(expression_data)), 2)), side=3)
@@ -157,8 +157,8 @@ for (seed in seeds){
                "; SD: ", round(sd(rowSums(expression_data)), 2)))
   
   # had to remove lognormal distribution from the function
-  getDistributionInfo(rowSums(expression_data), "plots/data_distribution/",
+  getDistributionInfo(rowSums(expression_data), "plots/data_distribution_fitdistr/",
                       paste0("cell2location_synthetic_data_seed", seed), "continuous")
-  getDistributionInfo(rowSums(expression_data), "plots/data_distribution/",
+  getDistributionInfo(rowSums(expression_data), "plots/data_distribution_fitdistr/",
                       paste0("cell2location_synthetic_data_seed", seed), "discrete")
 }
