@@ -6,6 +6,10 @@ ppt/
 rds/
 Scripts/robin
 /cell2location/
+cell2location_paper/
+plots/countsimQC/
+plots/dump/
+downsampling/brain_cortex/rep1/plots/
 /Scripts/synthetic_data_generation/cell2location/
 .r2gridengine/
 
@@ -13,4 +17,8 @@ Scripts/robin
 *.pdf
 *.Rhistory
 *.mp4
+*.psd
 .Rproj.user
+*.h5ad
+downsampling/brain_cortex/rep1/brain_cortex_art_uni_distinct_18594spots_17538genes.rds
+plots/UMAP_synthvisium/comp.tsv
