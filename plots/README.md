@@ -2,7 +2,7 @@
 
 | Folder/File                     | Description                                                                              | Figure in text         | Script to create plot (`/Scripts/`)                |
 |---------------------------------|------------------------------------------------------------------------------------------|------------------------|----------------------------------------------------|
-| UMAP_generation/ and UMAP_test/ | UMAP plots of the seven reference datasets                                               | A2                     | N/A                                                |
+| UMAP_generation/ and UMAP_test/ | UMAP plots of the seven reference datasets                                               | A2                     | misc_processing.R                                                |
 | UMAP_synthvisium/               | UMAP plots of the synthetic dataset from the single-cell cerebellum dataset.             | 3-3                    | misc_processing.R                                  |
 | data_distribution_fitdistr/     | Distributions of synthetic datasets by `fitdistr` instead of `countsimQC`                | N/A                    | check_distributions_fitdistr.R                     |
 | downsampling/                   | Runtimes of scalability tests                                                            | 3-9                    | run_deconv_downsample/ downsample_plot_heatmaps.py |
