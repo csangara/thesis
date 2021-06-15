@@ -20,12 +20,12 @@ You can also follow this [Seurat vignette](https://satijalab.org/seurat/articles
 Instead of synthvisium you can generate synthetic data using scripts from SPOTlight, stereoscope, or cell2location as well. Some sample code for running these functions can be found at `Scripts/synthetic_data_generation`, although the cell2location functions have to be cloned from [here](https://github.com/emdann/ST_simulation).
 
 ## Running deconvolution methods
-Scripts for running the deconvolution methods can be found at `Scripts/run_deconv` along with a description for using those files.
+Scripts for running the deconvolution methods can be found at `Scripts/run_deconv` along with a description for using those files. The deconvolution results are compiled in the folder `results/`.
 
 For scripts to generate downsampled data and get the runtime of each method, check out `Scripts/run_deconv_downsample`.
 
 ## Evaluation
-Evaluation scripts are found at `Scripts/` with the prefix `evaluation_`.
+Evaluation scripts are found at `Scripts/` with the prefix `evaluation_`. These make use of the deconvolution results saved in `results/`.
 
 ## Plots
 Along with a more high-resolution of the plots in the thesis, you can also find scripts that are used to generate the plots. The plots are in the directory `plots/` and there I try to make a link with the corresponding scripts.
