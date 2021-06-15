@@ -158,12 +158,13 @@ for (metric in possible_metrics[8]){
 
 ## Read in file from python
 best_df <- read.csv("Misc/best_values/best_values_count.csv") %>% melt(id.var="X") %>% setNames(c("method", "metric", "count"))
-best_df$metric <- best_df$metric %>% str_replace("prc", "PRC") %>% R.utils::capitalize() %>%
-  factor(., levels=c("Accuracy", "Specificity", "Sensitivity", "Precision", "F1", "PRC"))
+best_df$metric <- best_df$metric %>% str_replace("prc", "PRC AUC") %>% R.utils::capitalize() %>%
+  factor(., levels=c("Accuracy", "Specificity", "Sensitivity", "Precision", "F1", "PRC AUC"))
 p <- ggplot(best_df, aes(x=metric, y=count, fill=method)) + geom_bar(width=0.75, position="fill", stat="identity") +
   ylab("% Best performing") + xlab("Metric") + labs(fill="Method") +
   scale_fill_manual(values = c("#f8766d", "#a3a500", "#00bf7d", "#00b0f6", "#e76bf3", "#a1a1a1"), 
                         labels=c("cell2location", "MuSiC", "RCTD", "SPOTlight", "stereoscope", "Tie"))
+best_df$pct <- best_df %>% group_by(metric) %>% mutate(pct = count/sum(count)) %>% ungroup %>% select(pct)
 png("plots/class_metrics_barplot.png", width=210, height=100, units="mm", res=200)
 print(p)
 dev.off()

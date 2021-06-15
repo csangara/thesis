@@ -133,17 +133,17 @@ createDeconvResultList <- function(methods, celltypes, result_path, dataset){
   results <- list()
   
   # Divide methods depending on their output file
-  rds_methods <- c("spotlight", "music", "RCTD")
+  rds_methods <- c("spotlight", "music", "RCTD", "spotlight_optim")
   csv_methods <- c("cell2location")
-  tsv_methods <- c("stereoscope", "cibersort")
+  tsv_methods <- c("stereoscope", "cibersort", "stereoscope_optim")
   
   for (method in methods){
-    file_name <- paste0(result_path, method, "/", dataset, "_", dataset_type, "_", method)
+    file_name <- paste0(result_path, method, "/", dataset, "_", dataset_type, "_", str_split(method, "_")[[1]][1])
     
     if (method %in% rds_methods){
       temp_deconv <- readRDS(paste0(file_name, ".rds"))
       
-      if (method == "spotlight"){temp_deconv <- temp_deconv[[2]]}
+      if (grepl("spotlight", method)){temp_deconv <- temp_deconv[[2]]}
       colnames(temp_deconv) <- str_replace_all(colnames(temp_deconv), "[/ ]", ".")
       temp_deconv <- temp_deconv[, match(celltypes, colnames(temp_deconv))]
       
@@ -161,7 +161,7 @@ createDeconvResultList <- function(methods, celltypes, result_path, dataset){
     } else if (method %in% tsv_methods){
       temp_deconv = read.table(paste0(paste0(file_name, ".tsv")), sep="\t", row.names=1, header=TRUE)
       
-      if (method == "stereoscope"){
+      if (grepl("stereoscope", method)){
         temp_deconv <- temp_deconv[, match(celltypes, colnames(temp_deconv))]
       } else {
         colnames(temp_deconv)[1:length(celltypes)] <- celltypes
