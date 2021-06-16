@@ -31,7 +31,7 @@ Scripts for running the deconvolution methods can be found at `Scripts/run_decon
 For scripts to generate downsampled data and get the runtime of each method, check out `Scripts/run_deconv_downsample`.
 
 ### Evaluation
-Evaluation scripts are found at `Scripts/` with the prefix `evaluation_`. These make use of the deconvolution results saved in `results/`.
+Evaluation scripts are found at `Scripts/` with the prefix `evaluation_`. These make use of the deconvolution results saved in `results/`. The folder structure of `results/` is dataset → replicate → method output. Within each replicate folder (`rep` prefix), you will find the `all_metrics*.rds` file which has the computed metrics (RMSE and six classification metrics) for all 8 dataset types. In addition the method outputs, there is also the `plots/` subfolder that contains plots of the predictions on a UMAP for each cell type. The `corr_distribution/` subfolder contains density plots of the correlation across all spots. These plots were not shown in the dissertation.
 
 ### Plots
 Along with high-resolution of the plots found in the thesis, you can also find scripts that are used to generate the plots. The plots are in the directory `plots/` and there I try to make a link with the corresponding scripts.
