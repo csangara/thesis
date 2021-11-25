@@ -159,3 +159,35 @@ ggplot(data, aes(x=Detection.efficiency, y=Genes, color=Approach, shape=Type)) +
   #theme(panel.background = element_blank(), axis.line = element_line(size = 1, linetype = "solid"))
   theme_bw() + scale_color_npg() +
   guides(color = guide_legend(order=1), shape=guide_legend(order=2))
+
+
+##########
+all_pct <- matrix(, nrow=560, ncol=2)
+i = 1
+for (dataset in datasets[2:length(datasets)]){
+  for (repl in paste0('rep', 1:10)){
+    result_path <- paste0("results/", dataset, "/", repl, "_", run, "/")
+    for (dataset_type in possible_dataset_types){
+      
+      # Load reference data and deconvolution results
+      synthetic_visium_data <- readRDS(paste0(path, dataset, "/", repl, "/", dataset, "_",
+                                              dataset_type, "_synthvisium.rds"))
+      ncells <- dim(synthetic_visium_data$spot_composition)[2]-2
+      nspots <- dim(synthetic_visium_data$spot_composition)[1]
+      pct <- table(synthetic_visium_data$spot_composition[,1:ncells] > 0)/(nspots*ncells)
+      all_pct[i,] <- pct
+      i = i + 1
+    }
+    
+  }
+}
+colnames(all_pct) <- c("Absent", "Present")
+all_pct_df <- melt(all_pct) %>% select(., Var2, value) %>% setNames(c("presence", "pct"))
+ggplot(all_pct_df, aes(color=presence, x=pct)) + geom_density() + labs(color=c("Cell type")) +
+  xlab("Percentage")
+
+for (m in c("Present", "Absent")){
+  test <- all_pct_df %>% filter(presence==m) %>% select("pct")
+  test <- density(test$pct)
+  print(test$x[which.max(test$y)])
+}
