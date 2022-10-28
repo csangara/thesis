@@ -1,5 +1,13 @@
 # Cell Type Deconvolution in Spatial Transcriptomics
 
+
+‼️ **NEW REPOSITORY:** https://github.com/saeyslab/spotless-benchmark 
+
+The new repo includes a Nextflow pipeline and 6 additional methods.
+
+----------------
+
+
 In this repository, you can find the analysis scripts and plots pertaining to the dissertation. There are scripts to run and evaluate the five deconvolution methods (cell2location, MuSiC, stereoscope, RCTD, and SPOTlight). Later, I also apply cell2location and RCTD on real data.
 
 ## Benchmarking
